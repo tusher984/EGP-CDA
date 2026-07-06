@@ -1,111 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CDA Procurement Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f7f6;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-        }
-        .chart-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-top: 30px;
-        }
-        .chart-card {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        @media (max-width: 768px) {
-            .chart-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        /* Simple loader styling */
-        #loader {
-            text-align: center;
-            font-size: 1.2rem;
-            color: #666;
-            margin-top: 50px;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <h1>Chittagong Development Authority (CDA) Procurement Dashboard</h1>
-        
-        <div id="loader">Fetching data...</div>
-
-        <div class="chart-grid" id="dashboard" style="display: none;">
-            <div class="chart-card" style="grid-column: 1 / -1;">
-                <h2>Top 10 Contracts by Value (Taka)</h2>
-                <canvas id="valueChart"></canvas>
-            </div>
-
-            <div class="chart-card">
-                <h2>Procurement Methods</h2>
-                <canvas id="methodChart"></canvas>
-            </div>
-            
-            <div class="chart-card">
-                <h2>Budget & Source of Funds</h2>
-                <canvas id="fundChart"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Use Fetch API to get the JSON file
-        fetch('eprocure_contracts_combined_CDA.json')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Network response was not ok " + response.statusText);
-                }
-                return response.json();
-            })
-            .then(cdaData => {
-                // Hide loader, show dashboard
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'grid';
-                
-                renderCharts(cdaData);
-            })
-            .catch(error => {
-                document.getElementById('loader').innerText = "Error loading data: " + error.message;
-                console.error("Error fetching the JSON data:", error);
-            });
-
-        function renderCharts(cdaData) {
-            // 1. Process Data for Top 10 Contracts by Value
-            // Filter out missing values and sort descending
+// 1. Process Data for Top 10 Contracts by Value
             const sortedData = cdaData
                 .filter(item => item["Contract Value (Taka)"] !== null && !isNaN(item["Contract Value (Taka)"]))
                 .sort((a, b) => b["Contract Value (Taka)"] - a["Contract Value (Taka)"])
                 .slice(0, 10);
 
-            // Fetch the tender ID safely handling the nested structure
+            // Use the Economic Operator (Contractor) name, or fallback to the Tender ID
             const projectLabels = sortedData.map(item => {
-                const id = item.tender_id || (item.Tender && item.Tender["Proposal ID"]) || "Unknown";
-                return "ID: " + id;
+                let name = "Unknown";
+                if (item["Name of the Economic Operator (Supplier"] && item["Name of the Economic Operator (Supplier"]["Contractor"]) {
+                     name = item["Name of the Economic Operator (Supplier"]["Contractor"]["Service Provider"]["Consultant)"] || "Unknown";
+                }
+                // Truncate long names so they don't break the chart layout
+                return name.length > 25 ? name.substring(0, 25) + '...' : name;
             });
+            
             const projectValues = sortedData.map(item => item["Contract Value (Taka)"]);
 
             // Render Bar Chart
@@ -123,56 +31,29 @@
                 },
                 options: {
                     responsive: true,
-                    scales: { y: { beginAtZero: true } }
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                // Format tooltip values with commas and a currency symbol
+                                label: function(context) {
+                                    let value = context.raw;
+                                    return '৳ ' + value.toLocaleString('en-IN');
+                                }
+                            }
+                        }
+                    },
+                    scales: { 
+                        y: { 
+                            beginAtZero: true,
+                            ticks: {
+                                // Format Y-axis labels to be more readable
+                                callback: function(value) {
+                                    if(value >= 10000000) return '৳ ' + (value / 10000000).toFixed(1) + ' Crore';
+                                    if(value >= 100000) return '৳ ' + (value / 100000).toFixed(1) + ' Lakh';
+                                    return '৳ ' + value.toLocaleString('en-IN');
+                                }
+                            }
+                        } 
+                    }
                 }
             });
-
-            // 2. Process Data for Procurement Methods
-            const methodCounts = {};
-            cdaData.forEach(item => {
-                const method = item["Procurement Method"];
-                if (method) {
-                    methodCounts[method] = (methodCounts[method] || 0) + 1;
-                }
-            });
-
-            // Render Pie Chart
-            new Chart(document.getElementById('methodChart'), {
-                type: 'pie',
-                data: {
-                    labels: Object.keys(methodCounts),
-                    datasets: [{
-                        data: Object.values(methodCounts),
-                        backgroundColor: ['#ff6384', '#ffce56', '#cc65fe', '#36a2eb']
-                    }]
-                }
-            });
-
-            // 3. Process Data for Source of Funds
-            const fundCounts = {};
-            cdaData.forEach(item => {
-                let fund = item["Budget and Source of Funds"] || "Unknown";
-                
-                // Clean up repetitive strings to group them properly
-                if(fund.includes("Own Fund")) fund = "Own Fund";
-                if(fund.includes("Development Aid")) fund = "Development Aid/Grant";
-                if(fund.includes("Development Government")) fund = "Development Government";
-                
-                fundCounts[fund] = (fundCounts[fund] || 0) + 1;
-            });
-
-            // Render Doughnut Chart
-            new Chart(document.getElementById('fundChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(fundCounts),
-                    datasets: [{
-                        data: Object.values(fundCounts),
-                        backgroundColor: ['#4bc0c0', '#ff9f40', '#9966ff', '#c9cbcf']
-                    }]
-                }
-            });
-        }
-    </script>
-</body>
-</html>

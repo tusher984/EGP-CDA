@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CDA Procurement Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .chart-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 768px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Chittagong Development Authority (CDA) Procurement Dashboard</h1>
+        
+        <div class="chart-grid">
+            <div class="chart-card" style="grid-column: 1 / -1;">
+                <h2>Top 10 Contracts by Value (Taka)</h2>
+                <canvas id="valueChart"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <h2>Procurement Methods</h2>
+                <canvas id="methodChart"></canvas>
+            </div>
+            
+            <div class="chart-card">
+                <h2>Budget & Source of Funds</h2>
+                <canvas id="fundChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    
+    <script>
+        // 1. Process Data for Top 10 Contracts by Value
+        // Filter out missing values, parse to floats, and sort descending
+        const sortedData = cdaData
+            .filter(item => item["Contract Value (Taka)"] && !isNaN(parseFloat(item["Contract Value (Taka)"])))
+            .sort((a, b) => parseFloat(b["Contract Value (Taka)"]) - parseFloat(a["Contract Value (Taka)"]))
+            .slice(0, 10);
+
+        const projectLabels = sortedData.map(item => item["Tender/Proposal ID"]); // Using ID for cleaner labels
+        const projectValues = sortedData.map(item => parseFloat(item["Contract Value (Taka)"]));
+
+        // Render Bar Chart
+        new Chart(document.getElementById('valueChart'), {
+            type: 'bar',
+            data: {
+                labels: projectLabels,
+                datasets: [{
+                    label: 'Contract Value (Taka)',
+                    data: projectValues,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        // 2. Process Data for Procurement Methods
+        const methodCounts = {};
+        cdaData.forEach(item => {
+            const method = item["Procurement Method"];
+            if (method) {
+                methodCounts[method] = (methodCounts[method] || 0) + 1;
+            }
+        });
+
+        // Render Pie Chart
+        new Chart(document.getElementById('methodChart'), {
+            type: 'pie',
+            data: {
+                labels: Object.keys(methodCounts),
+                datasets: [{
+                    data: Object.values(methodCounts),
+                    backgroundColor: ['#ff6384', '#ffce56', '#cc65fe', '#36a2eb']
+                }]
+            }
+        });
+
+        // 3. Process Data for Source of Funds
+        const fundCounts = {};
+        cdaData.forEach(item => {
+            let fund = item["Budget and Source of Funds"] || "Unknown";
+            // Clean up repetitive strings like "Own Fund Own Fund"
+            if(fund.includes("Own Fund")) fund = "Own Fund";
+            if(fund.includes("Development Aid")) fund = "Development Aid/Grant";
+            if(fund.includes("Development Government")) fund = "Development Government";
+            
+            fundCounts[fund] = (fundCounts[fund] || 0) + 1;
+        });
+
+        // Render Doughnut Chart
+        new Chart(document.getElementById('fundChart'), {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(fundCounts),
+                datasets: [{
+                    data: Object.values(fundCounts),
+                    backgroundColor: ['#4bc0c0', '#ff9f40', '#9966ff', '#c9cbcf']
+                }]
+            }
+        });
+    </script>
+</body>
+</html>

@@ -3,506 +3,267 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ডেটা জার্নালিজম: ই-জিপি টেন্ডার দুর্নীতি ইনভেস্টিগেশন</title>
+    <title>ই-জিপি টেন্ডার দুর্নীতি ইনভেস্টিগেশন</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root {
-            --bg-color: #f4f7f6;
-            --primary-dark: #1a252f;
-            --danger-red: #c0392b;
-            --warning-orange: #e67e22;
-            --accent-blue: #2980b9;
-            --success-green: #27ae60;
-            --text-dark: #2c3e50;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-dark);
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
-        }
-        header {
-            background-color: var(--primary-dark);
-            color: white;
-            padding: 40px 20px;
-            text-align: center;
-            border-bottom: 5px solid var(--danger-red);
-        }
-        header h1 { margin: 0; font-size: 2.5em; letter-spacing: 1px; }
-        header p { margin-top: 10px; font-size: 1.1em; color: #bdc3c7; }
+        /* Lightweight & Flat Design CSS */
+        body { font-family: system-ui, -apple-system, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 0; line-height: 1.5; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 15px; }
         
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-
-        /* Forensic Engine Rulebook Section with Tooltips */
-        .forensic-engine {
-            background-color: white;
-            border-left: 5px solid var(--danger-red);
-            padding: 25px;
-            margin-top: -30px;
-            margin-bottom: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        .forensic-engine h3 { margin: 0 0 15px 0; color: var(--primary-dark); font-size: 1.5em;}
-        .forensic-engine p { margin: 5px 0 15px 0; font-size: 1em; color: #555; }
-        .rule-list { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        
-        /* Tooltip CSS */
-        .tooltip {
-            position: relative;
-            display: inline-block;
-            cursor: pointer;
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 6px;
-            border: 1px dashed #ccc;
-            transition: 0.3s;
-        }
-        .tooltip:hover { background-color: #f1f8ff; border-color: var(--accent-blue); }
-        .tooltip h4 { margin: 0 0 5px 0; color: var(--danger-red); font-size: 1.1em; border-bottom: 1px dotted #ccc; display: inline-block;}
-        .tooltip p { margin: 0; font-size: 0.9em; color: #444; }
-        .tooltip .tooltiptext {
-            visibility: hidden;
-            width: 250px;
-            background-color: var(--primary-dark);
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 10px;
-            position: absolute;
-            z-index: 1;
-            bottom: 110%;
-            left: 50%;
-            margin-left: -125px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 12px;
-            line-height: 1.4;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        .tooltip .tooltiptext::after {
-            content: "";
-            position: absolute;
-            top: 100%; left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: var(--primary-dark) transparent transparent transparent;
-        }
-        .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
+        header { background: #1e293b; color: white; padding: 20px; text-align: center; border-bottom: 4px solid #e11d48; }
+        header h1 { margin: 0; font-size: 22px; }
+        header p { margin: 5px 0 0 0; font-size: 14px; color: #cbd5e1; }
 
         /* Summary Cards */
-        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px;}
-        .card {
-            background: white; padding: 25px 20px; border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center;
-            border-top: 4px solid var(--danger-red);
-        }
-        .card h2 { margin: 0; font-size: 2.2em; color: var(--danger-red); }
-        .card p { margin: 5px 0 0 0; color: var(--primary-dark); font-weight: bold; font-size: 1.1em;}
-        .card .sub-text { font-size: 0.85em; color: #7f8c8d; margin-top: 10px; display: block; }
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
+        .card { background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0; text-align: center; }
+        .card h2 { margin: 0; font-size: 24px; color: #e11d48; }
+        .card p { margin: 5px 0; font-size: 13px; font-weight: 600; color: #334155; }
+        .card small { font-size: 11px; color: #64748b; }
 
-        /* Charts */
-        .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; }
-        .chart-full { grid-column: 1 / -1; }
-        .chart-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .chart-box h3 { text-align: center; color: var(--text-dark); margin-top: 0; margin-bottom: 10px; }
-        .chart-desc { text-align: center; font-size: 13px; color: #7f8c8d; margin-bottom: 15px; }
+        /* Small Charts Grid */
+        .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .chart-box { background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0; height: 220px; display: flex; flex-direction: column; }
+        .chart-box h3 { margin: 0 0 5px 0; font-size: 14px; text-align: center; color: #0f172a; }
+        .chart-container { flex-grow: 1; position: relative; }
 
-        /* Filter Bar & Data Table */
-        .table-section {
-            margin-top: 30px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        .filter-bar {
-            display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; background: #f9f9f9; padding: 15px; border-radius: 6px; border: 1px solid #eee;
-        }
-        .filter-bar input, .filter-bar select {
-            padding: 10px; border: 1px solid #ccc; border-radius: 4px; flex: 1; min-width: 200px; outline: none;
-        }
-        .btn-download {
-            background-color: var(--success-green); color: white; border: none; padding: 10px 20px;
-            border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.3s;
-        }
-        .btn-download:hover { background-color: #1e8449; }
+        /* Tools (Search & Download) */
+        .tools-bar { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .tools-bar input, .tools-bar select { padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; flex: 1; min-width: 150px; font-size: 13px; }
+        .btn { padding: 8px 15px; border: none; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; color: white; background: #059669; }
+        .btn:hover { opacity: 0.9; }
 
-        .table-responsive { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 0.95em;}
-        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; vertical-align: top; }
-        th { background-color: var(--primary-dark); color: white; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        tr:hover { background-color: #f1f8ff; }
+        /* Simple Table */
+        .table-section { background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+        th { background: #f1f5f9; color: #0f172a; font-weight: 600; }
         
-        .badge { padding: 5px 10px; border-radius: 4px; color: white; font-size: 11px; font-weight: bold; display: inline-block;}
-        .badge-high { background-color: var(--danger-red); }
-        .badge-medium { background-color: var(--warning-orange); }
-        .badge-low { background-color: var(--success-green); }
+        .badge { padding: 3px 6px; border-radius: 3px; color: white; font-size: 10px; font-weight: bold; }
+        .bg-red { background: #e11d48; } .bg-orange { background: #ea580c; } .bg-green { background: #16a34a; }
         
-        .btn-pdf {
-            background-color: var(--accent-blue); color: white; padding: 6px 10px; text-decoration: none;
-            border-radius: 4px; font-size: 12px; display: block; margin-bottom: 5px; text-align: center;
-        }
-        .btn-pdf.contract { background-color: var(--danger-red); }
-        .btn-pdf:hover { opacity: 0.8; }
-        .error-message { color: red; font-weight: bold; text-align: center; padding: 20px; }
+        .link-btn { display: inline-block; padding: 4px 8px; background: #2563eb; color: white; text-decoration: none; border-radius: 3px; font-size: 11px; margin-bottom: 3px; }
+        .link-btn.alt { background: #e11d48; }
+        
+        .error { color: #e11d48; text-align: center; padding: 20px; font-size: 14px; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>ই-জিপি টেন্ডার দুর্নীতি: পূর্ণাঙ্গ ডেটা ইনভেস্টিগেশন</h1>
-        <p>উন্নয়ন কর্তৃপক্ষ এবং বিভিন্ন সরকারি সংস্থার টেন্ডার জালিয়াতির ডিজিটাল খতিয়ান</p>
+        <h1>ই-জিপি টেন্ডার দুর্নীতি: ডেটা ইনভেস্টিগেশন</h1>
+        <p>উন্নয়ন কর্তৃপক্ষ ও অন্যান্য সংস্থার টেন্ডার জালিয়াতির খতিয়ান</p>
     </header>
 
     <div class="container">
         
-        <!-- eGP Forensic Engine Rulebook Section with Tooltips -->
-        <div class="forensic-engine">
-            <h3>🚨 eGP Forensic Engine Rules ও মেথডলজি</h3>
-            <p>নিচের যেকোনো রুলের ওপর মাউস রাখলে (Hover) দুর্নীতির বিস্তারিত আইনি ব্যাখ্যা দেখতে পাবেন:</p>
-            
-            <div class="rule-list">
-                <div class="tooltip">
-                    <h4>মালিকানার তথ্য গোপন (ITT 5.14)</h4>
-                    <p>১,১৫৮টি টেন্ডারে 'Beneficial Owner' ফাঁকা।</p>
-                    <span class="tooltiptext">স্ট্যান্ডার্ড টেন্ডার ডকুমেন্ট (e-PG3A) এর ITT 5.14 ধারা অনুযায়ী দরদাতাকে অবশ্যই প্রকৃত মালিকানার তথ্য দিতে হবে। এটি ফাঁকা রাখা মানে সরকারি কাজের আড়ালে স্বার্থের সংঘাত এবং দুর্নীতির সুযোগ তৈরি করা।</span>
-                </div>
-                <div class="tooltip">
-                    <h4>একক দরদাতা (ITT 50.6 ও 56.2)</h4>
-                    <p>২০১টি টেন্ডারে মাত্র ১ জন দরদাতা টিকে ছিল।</p>
-                    <span class="tooltiptext">ITT 50.6 ও 56.2(b) ধারা অনুযায়ী প্রতিযোগিতার অভাব থাকলে দরপত্র পুনরায় আহ্বানের যোগ্য। কিন্তু সিন্ডিকেটকে কাজ পাইয়ে দিতে অন্যান্যদের অবৈধভাবে বাতিল করা হয়েছে।</span>
-                </div>
-                <div class="tooltip">
-                    <h4>কৃত্রিম চুক্তি বিভাজন (PPA 2006)</h4>
-                    <p>৮২৫টি টেন্ডারকে ছোট লটে ভাগ করা হয়েছে।</p>
-                    <span class="tooltiptext">পাবলিক প্রকিউরমেন্ট অ্যাক্ট ২০০৬ এবং রুল ELG_005 লঙ্ঘন। উচ্চতর কর্তৃপক্ষের অনুমোদন এড়াতে একটি বড় কাজকে উদ্দেশ্যপ্রণোদিতভাবে ছোট ছোট লটে ভাগ করে একই সময়ে টেন্ডার রিলিজ করা হয়েছে।</span>
-                </div>
-                <div class="tooltip">
-                    <h4>অস্বাভাবিক দর (Price Outlier)</h4>
-                    <p>১৪৬টি টেন্ডারে চুক্তিমূল্যে চরম অসঙ্গতি।</p>
-                    <span class="tooltiptext">ওয়ার্ল্ড ব্যাংকের গাইডলাইন (ALB) এবং রুল STAT_001 লঙ্ঘন। সরকারি প্রাক্কলনের চেয়ে অস্বাভাবিক কম বা বেশি দর দেওয়া হয়েছে, যা সরাসরি আর্থিক দুর্নীতির একটি বড় লক্ষণ।</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- ১. সামারি কার্ডস -->
+        <!-- ডাইনামিক সামারি কার্ডস -->
         <div class="summary-grid">
             <div class="card">
-                <h2>৯৬.৭%</h2>
-                <p>কাজ পেয়েছে শীর্ষ ১০ সিন্ডিকেট</p>
-                <span class="sub-text">CDA, KDA এর মতো সংস্থাগুলোর বেশিরভাগ কাজ গুটিকয়েক ঠিকাদারের পকেটে।</span>
+                <h2>১,১৫৮ টি</h2>
+                <p>মালিকানার তথ্য গোপন</p>
+                <small>স্বচ্ছতার অভাব (ITT 5.14)</small>
             </div>
             <div class="card">
-                <h2>৯১.৩%</h2>
-                <p>অর্থ অস্বাভাবিক দরে (Outlier)</p>
-                <span class="sub-text">মাত্র ১৪৬টি বড় বাজেটের টেন্ডারে নিয়ম ভেঙে সবচেয়ে বেশি টাকা পাশ করানো হয়েছে।</span>
+                <h2>৮২৫ টি</h2>
+                <p>কৃত্রিম চুক্তি বিভাজন</p>
+                <small>অনুমোদন এড়ানোর চেষ্টা</small>
             </div>
             <div class="card">
                 <h2 id="totalContracts">০</h2>
-                <p>মোট টেন্ডার রেকর্ড</p>
-                <span class="sub-text">সিস্টেমে থাকা যাচাইকৃত টেন্ডার প্রপোজালের সংখ্যা।</span>
+                <p>ফিল্টার করা টেন্ডার</p>
+                <small>টেবিলে প্রদর্শিত ডেটা</small>
             </div>
             <div class="card">
                 <h2 id="totalValue">৳০</h2>
-                <p>মোট চুক্তিমূল্য (High Risk)</p>
-                <span class="sub-text">শুধুমাত্র উচ্চ-ঝুঁকিপূর্ণ হিসেবে চিহ্নিত টেন্ডারগুলোর মোট আর্থিক মূল্য।</span>
+                <p>মোট চুক্তিমূল্য (ফিল্টারড)</p>
+                <small>বর্তমান ডেটার আর্থিক মূল্য</small>
             </div>
         </div>
 
-        <!-- ২. চার্ট ড্যাশবোর্ড -->
+        <!-- ছোট ও ক্লিন চার্ট (এক লাইনে) -->
         <div class="chart-grid">
-            <div class="chart-box chart-full">
-                <h3>শীর্ষ দুর্নীতিগ্রস্ত ঠিকাদার (Syndicate Leaderboard)</h3>
-                <p class="chart-desc">যেসকল ঠিকাদার সবচেয়ে বেশি মূল্যের 'HIGH' রিস্ক টেন্ডার পেয়েছে</p>
-                <canvas id="syndicateChart" height="80"></canvas>
-            </div>
-
             <div class="chart-box">
-                <h3>টেন্ডার প্রকাশের টাইমলাইন (Trend Analysis)</h3>
-                <p class="chart-desc">সময়ের সাথে সাথে জালিয়াতি বা রুল ভায়োলেশনের প্রবণতা</p>
-                <canvas id="timelineChart" height="200"></canvas>
+                <h3>দুর্নীতির ধরন (Macro-analysis)</h3>
+                <div class="chart-container"><canvas id="violationChart"></canvas></div>
             </div>
-            
             <div class="chart-box">
-                <h3>প্রতিযোগিতা বাতিল (Bid-Response Funnel)</h3>
-                <p class="chart-desc">মোট টেন্ডারের ৩৬.৩% অযোগ্য করা হয়েছে। ২০১টি টেন্ডারে মাত্র ১ জন টিকে ছিল।</p>
-                <canvas id="funnelChart" height="200"></canvas>
+                <h3>প্রতিযোগিতা বাতিল (Funnel)</h3>
+                <div class="chart-container"><canvas id="funnelChart"></canvas></div>
+            </div>
+            <div class="chart-box">
+                <h3>শীর্ষ ৫ চুক্তি (ডাইনামিক)</h3>
+                <div class="chart-container"><canvas id="valueChart"></canvas></div>
             </div>
         </div>
 
-        <!-- ৩. লাইভ সার্চ, ফিল্টার এবং ডেটা টেবিল -->
+        <!-- টুলস এবং টেবিল -->
         <div class="table-section">
-            <h3>📄 টেন্ডার আর্কাইভ ও লাইভ ফিল্টারিং</h3>
-            
-            <div class="filter-bar">
-                <input type="text" id="searchInput" placeholder="ঠিকাদার, সংস্থা বা টেন্ডার আইডি দিয়ে খুঁজুন..." onkeyup="filterData()">
+            <div class="tools-bar">
+                <input type="text" id="searchInput" placeholder="ঠিকাদার, সংস্থা বা আইডি খুঁজুন..." onkeyup="filterData()">
                 <select id="riskFilter" onchange="filterData()">
-                    <option value="ALL">সব ঝুঁকির মাত্রা (All Risks)</option>
+                    <option value="ALL">সব ঝুঁকি (All Risks)</option>
                     <option value="HIGH">উচ্চ ঝুঁকি (HIGH)</option>
                     <option value="MEDIUM">মাঝারি ঝুঁকি (MEDIUM)</option>
                     <option value="LOW">নিম্ন ঝুঁকি (LOW)</option>
                 </select>
-                <button class="btn-download" onclick="downloadCSV()">⬇ ডেটা ডাউনলোড (CSV)</button>
+                <button class="btn" onclick="downloadCSV()">⬇ CSV ডাউনলোড</button>
             </div>
 
-            <div class="table-responsive">
-                <table id="tenderTable">
-                    <thead>
-                        <tr>
-                            <th>টেন্ডার আইডি</th>
-                            <th>সংস্থা / মন্ত্রণালয়</th>
-                            <th>ঠিকাদার (Supplier)</th>
-                            <th>ঝুঁকি</th>
-                            <th>চুক্তি মূল্য (BDT)</th>
-                            <th>অনিয়মের কারণ</th>
-                            <th style="min-width: 120px;">ডকুমেন্ট (PDF)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <tr><td colspan="7" style="text-align: center;">ডেটা লোড হচ্ছে...</td></tr>
-                    </tbody>
-                </table>
-            </div>
+            <table id="tenderTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>সংস্থা</th>
+                        <th>ঠিকাদার (Supplier)</th>
+                        <th>ঝুঁকি</th>
+                        <th>চুক্তি মূল্য (BDT)</th>
+                        <th>অনিয়মের কারণ</th>
+                        <th style="min-width: 90px;">ডকুমেন্ট</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="7" style="text-align: center;">ডেটা লোড হচ্ছে...</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
     <script>
         const jsonFileName = 'Procurement_Database.json';
         let globalTenderData = []; 
+        let valueChartInstance = null; // To destroy and re-draw dynamic chart
 
-        async function loadAndVisualizeData() {
+        // Initialize Data
+        async function init() {
             try {
-                const response = await fetch(jsonFileName);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                
-                const data = await response.json();
+                const res = await fetch(jsonFileName);
+                if (!res.ok) throw new Error("File not found");
+                const data = await res.json();
                 globalTenderData = data.Merged_Database || data; 
-
-                updateDynamicSummaries();
-                buildCharts();
-                buildTable(globalTenderData);
-
-            } catch (error) {
-                console.error("Error loading JSON:", error);
-                document.getElementById('tableBody').innerHTML = `
-                    <tr>
-                        <td colspan="7" class="error-message">
-                            Failed to load data. <br>
-                            <span style="font-size: 14px; font-weight: normal; color: #555;">
-                                <b>সতর্কতা:</b> সিকিউরিটি পলিসির কারণে আপনি সরাসরি কম্পিউটার থেকে (ডাবল-ক্লিক করে) index.html ওপেন করলে ডেটা লোড হবে না। <br>
-                                দয়া করে গিটহাব (GitHub Desktop) ব্যবহার করে কোডটি 'Commit' এবং 'Push' করুন, তারপর গিটহাব পেজের লাইভ লিংক থেকে চেক করুন।
-                            </span>
-                        </td>
-                    </tr>`;
+                
+                drawStaticCharts();
+                filterData(); // This will render table, dynamic chart and summary
+            } catch (err) {
+                document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" class="error">Failed to load ${jsonFileName}. Please run via GitHub Pages or Local Server.</td></tr>`;
             }
         }
 
-        function updateDynamicSummaries() {
-            document.getElementById('totalContracts').innerText = globalTenderData.length + " টি";
-            
-            let highRiskTotal = 0;
-            globalTenderData.forEach(t => {
-                if(t.Risk_Level === 'HIGH' && t.Contract_Value_BDT) {
-                    highRiskTotal += parseFloat(t.Contract_Value_BDT);
-                }
-            });
-            // Convert to Billions for display
-            let billionTk = (highRiskTotal / 1000000000).toFixed(2);
-            document.getElementById('totalValue').innerText = "৳" + billionTk + " বিলিয়ন";
-        }
-
-        function buildCharts() {
-            // 1. Syndicate Leaderboard (Top Suppliers by Value in HIGH risk)
-            const suppliers = {};
-            globalTenderData.forEach(t => {
-                if (t.Risk_Level === 'HIGH' && t.Supplier_Name && t.Contract_Value_BDT) {
-                    let name = t.Supplier_Name.split('(')[0].trim(); // Clean up long JV names
-                    if(!suppliers[name]) suppliers[name] = 0;
-                    suppliers[name] += parseFloat(t.Contract_Value_BDT);
-                }
-            });
-            
-            // Sort suppliers
-            const sortedSuppliers = Object.entries(suppliers).sort((a, b) => b[1] - a[1]).slice(0, 5);
-            const supLabels = sortedSuppliers.map(s => s[0].length > 25 ? s[0].substring(0, 25) + "..." : s[0]);
-            const supValues = sortedSuppliers.map(s => s[1]);
-
-            new Chart(document.getElementById('syndicateChart').getContext('2d'), {
+        // Static Charts (Violations & Funnel from TIB/Macro report)
+        function drawStaticCharts() {
+            new Chart(document.getElementById('violationChart'), {
                 type: 'bar',
                 data: {
-                    labels: supLabels,
-                    datasets: [{
-                        label: 'মোট চুক্তিমূল্য (BDT)',
-                        data: supValues,
-                        backgroundColor: '#c0392b',
-                        borderRadius: 4
-                    }]
+                    labels: ['তথ্য গোপন', 'চুক্তি বিভাজন', 'অবান্তর CPV', 'একক দরদাতা', 'অস্বাভাবিক দর'],
+                    datasets: [{ data: [1158, 825, 332, 201, 146], backgroundColor: '#e11d48' }]
                 },
-                options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } } }
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
 
-            // 2. Timeline Trend Chart
-            const timeline = {};
-            globalTenderData.forEach(t => {
-                let dStr = t.Advertised_Date || t.Contract_Signing_Date;
-                if(dStr) {
-                    let date = new Date(dStr);
-                    if(!isNaN(date)) {
-                        let monthYear = `${date.getFullYear()}-${('0'+(date.getMonth()+1)).slice(-2)}`;
-                        timeline[monthYear] = (timeline[monthYear] || 0) + 1;
-                    }
-                }
-            });
-            
-            const sortedDates = Object.keys(timeline).sort();
-            const dateCounts = sortedDates.map(d => timeline[d]);
-
-            new Chart(document.getElementById('timelineChart').getContext('2d'), {
-                type: 'line',
-                data: {
-                    labels: sortedDates,
-                    datasets: [{
-                        label: 'প্রকাশিত টেন্ডার সংখ্যা',
-                        data: dateCounts,
-                        borderColor: '#2980b9',
-                        backgroundColor: 'rgba(41, 128, 185, 0.2)',
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-
-            // 3. Bid-Response Funnel
-            new Chart(document.getElementById('funnelChart').getContext('2d'), {
+            new Chart(document.getElementById('funnelChart'), {
                 type: 'doughnut',
                 data: {
-                    labels: ['যোগ্য দরদাতা (Responsive)', 'অযোগ্য/বাতিল (Non-responsive)'],
-                    datasets: [{
-                        data: [1752, 997],
-                        backgroundColor: ['#27ae60', '#f39c12'],
-                        borderWidth: 2
-                    }]
+                    labels: ['যোগ্য (1752)', 'অযোগ্য (997)'],
+                    datasets: [{ data: [1752, 997], backgroundColor: ['#2563eb', '#e11d48'] }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
             });
         }
 
-        function buildTable(data) {
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = ''; 
-            
-            if(data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center;">কোনো তথ্য পাওয়া যায়নি!</td></tr>`;
-                return;
-            }
-
-            // Custom Sorting: HIGH > MEDIUM > LOW
-            const riskOrder = { "HIGH": 1, "MEDIUM": 2, "LOW": 3 };
-            const sortedData = [...data].sort((a, b) => (riskOrder[a.Risk_Level] || 4) - (riskOrder[b.Risk_Level] || 4));
-            
-            sortedData.forEach(tender => {
-                const tr = document.createElement('tr');
-                
-                let badgeClass = 'badge-low';
-                if (tender.Risk_Level === 'HIGH') badgeClass = 'badge-high';
-                else if (tender.Risk_Level === 'MEDIUM') badgeClass = 'badge-medium';
-                
-                const formattedValue = tender.Contract_Value_BDT 
-                    ? parseFloat(tender.Contract_Value_BDT).toLocaleString('en-IN') + ' ৳' 
-                    : '<span style="color:#999">তথ্য নেই</span>';
-                
-                let agencyName = tender.Organization_Agency ? tender.Organization_Agency.split('Procuring')[0].trim() : "অজানা সংস্থা";
-                let supName = tender.Supplier_Name ? tender.Supplier_Name.split('(')[0].trim() : "অজানা";
-
-                // PDF Links
-                let pdfLinksHTML = '';
-                if (tender.Source_Files_Merged) {
-                    const pdfFiles = tender.Source_Files_Merged.split('|').map(f => f.trim()).filter(f => f.length > 0);
-                    pdfFiles.forEach((fileName, index) => {
-                        let btnClass = index === 0 ? "btn-pdf" : "btn-pdf contract";
-                        let btnText = index === 0 ? "টেন্ডার নোটিশ ↗" : "চুক্তিপত্র (NOA) ↗";
-                        pdfLinksHTML += `<a href="downloaded_pdfs/${fileName}" target="_blank" class="${btnClass}">${btnText}</a>`;
-                    });
-                } else if (tender.Source_File) {
-                    pdfLinksHTML = `<a href="downloaded_pdfs/${tender.Source_File.trim()}" target="_blank" class="btn-pdf">Document ↗</a>`;
-                } else {
-                    pdfLinksHTML = '<span style="color: #999; font-size: 12px;">ফাইল নেই</span>';
-                }
-
-                tr.innerHTML = `
-                    <td><strong>${tender.Tender_Proposal_ID}</strong></td>
-                    <td style="font-size: 12px;">${agencyName}</td>
-                    <td style="font-size: 13px; font-weight: 500;">${supName}</td>
-                    <td><span class="badge ${badgeClass}">${tender.Risk_Level || 'N/A'}</span></td>
-                    <td style="font-weight: 500;">${formattedValue}</td>
-                    <td style="font-size: 12px; color: #c0392b;">${tender.Red_Flag_Reason || 'No Issue'}</td>
-                    <td>${pdfLinksHTML}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // Live Filter Function
+        // Dynamic Updates (Triggered on load and on search/filter)
         function filterData() {
             const term = document.getElementById('searchInput').value.toLowerCase();
             const risk = document.getElementById('riskFilter').value;
             
             const filtered = globalTenderData.filter(t => {
                 const matchRisk = risk === 'ALL' || t.Risk_Level === risk;
-                // create a string of all values to search across all fields easily
-                const searchString = Object.values(t).join(' ').toLowerCase();
-                const matchTerm = searchString.includes(term);
-                return matchRisk && matchTerm;
-            });
-            
-            buildTable(filtered);
-        }
-
-        // CSV Export Function
-        function downloadCSV() {
-            // Get currently filtered data (or all data if no filter)
-            const term = document.getElementById('searchInput').value.toLowerCase();
-            const risk = document.getElementById('riskFilter').value;
-            const dataToExport = globalTenderData.filter(t => {
-                const matchRisk = risk === 'ALL' || t.Risk_Level === risk;
                 const matchTerm = Object.values(t).join(' ').toLowerCase().includes(term);
                 return matchRisk && matchTerm;
             });
-
-            if(dataToExport.length === 0) {
-                alert("ডাউনলোড করার মতো কোনো ডেটা নেই!");
-                return;
-            }
-
-            // Define columns for CSV
-            const headers = ['Tender_ID', 'Agency', 'Supplier_Name', 'Risk_Level', 'Contract_Value_BDT', 'Red_Flag_Reason'];
-            let csvContent = "data:text/csv;charset=utf-8,\uFEFF" + headers.join(",") + "\n"; // \uFEFF helps with Bengali fonts in Excel
-
-            dataToExport.forEach(row => {
-                let rowData = [
-                    row.Tender_Proposal_ID,
-                    `"${(row.Organization_Agency || "").replace(/"/g, '""')}"`,
-                    `"${(row.Supplier_Name || "").replace(/"/g, '""')}"`,
-                    row.Risk_Level,
-                    row.Contract_Value_BDT || 0,
-                    `"${(row.Red_Flag_Reason || "").replace(/"/g, '""')}"`
-                ];
-                csvContent += rowData.join(",") + "\n";
-            });
-
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "eGP_Tender_Investigation_Data.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            
+            updateTable(filtered);
+            updateDynamicChart(filtered);
+            updateSummaries(filtered);
         }
 
-        // Initialize Webpage
-        loadAndVisualizeData();
+        function updateSummaries(data) {
+            document.getElementById('totalContracts').innerText = data.length + " টি";
+            let sum = data.reduce((acc, t) => acc + (parseFloat(t.Contract_Value_BDT) || 0), 0);
+            let unit = sum >= 1000000000 ? (sum/1000000000).toFixed(2) + " বিলিয়ন" : (sum/10000000).toFixed(2) + " কোটি";
+            document.getElementById('totalValue').innerText = "৳" + unit;
+        }
+
+        function updateDynamicChart(data) {
+            const valid = data.filter(t => t.Contract_Value_BDT != null)
+                              .sort((a, b) => b.Contract_Value_BDT - a.Contract_Value_BDT)
+                              .slice(0, 5);
+            
+            if(valueChartInstance) valueChartInstance.destroy(); // Clear old chart
+            
+            valueChartInstance = new Chart(document.getElementById('valueChart'), {
+                type: 'bar',
+                data: {
+                    labels: valid.map(t => "ID:" + t.Tender_Proposal_ID),
+                    datasets: [{ label: 'মূল্য (BDT)', data: valid.map(t => t.Contract_Value_BDT), backgroundColor: '#16a34a' }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+        }
+
+        function updateTable(data) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = ''; 
+            if(!data.length) return tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">কোনো ডেটা নেই</td></tr>`;
+            
+            data.forEach(t => {
+                let badge = t.Risk_Level === 'HIGH' ? 'bg-red' : (t.Risk_Level === 'MEDIUM' ? 'bg-orange' : 'bg-green');
+                let val = t.Contract_Value_BDT ? parseFloat(t.Contract_Value_BDT).toLocaleString('en-IN') : '-';
+                let org = t.Organization_Agency ? t.Organization_Agency.split('Procuring')[0].trim() : "অজানা";
+                let sup = t.Supplier_Name ? t.Supplier_Name.split('(')[0].trim() : "-";
+                
+                // PDF links
+                let pdfHtml = '';
+                if (t.Source_Files_Merged) {
+                    t.Source_Files_Merged.split('|').filter(f => f.trim()).forEach((f, i) => {
+                        pdfHtml += `<a href="downloaded_pdfs/${f.trim()}" target="_blank" class="link-btn ${i>0?'alt':''}">${i===0?'Notice':'NOA'}</a> `;
+                    });
+                } else if(t.Source_File) {
+                    pdfHtml = `<a href="downloaded_pdfs/${t.Source_File.trim()}" target="_blank" class="link-btn">Notice</a>`;
+                }
+
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td><strong>${t.Tender_Proposal_ID}</strong></td>
+                        <td title="${org}">${org.substring(0,20)}...</td>
+                        <td>${sup}</td>
+                        <td><span class="badge ${badge}">${t.Risk_Level||'N/A'}</span></td>
+                        <td>${val}</td>
+                        <td style="color:#e11d48; font-size:11px;">${t.Red_Flag_Reason||'-'}</td>
+                        <td>${pdfHtml}</td>
+                    </tr>
+                `);
+            });
+        }
+
+        function downloadCSV() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const risk = document.getElementById('riskFilter').value;
+            const dataToExport = globalTenderData.filter(t => (risk === 'ALL' || t.Risk_Level === risk) && Object.values(t).join(' ').toLowerCase().includes(term));
+            
+            if(!dataToExport.length) return alert("ডেটা নেই!");
+
+            let csv = "\uFEFF" + "Tender_ID,Agency,Supplier,Risk,Value_BDT,Flag_Reason\n";
+            dataToExport.forEach(r => {
+                csv += `${r.Tender_Proposal_ID},"${(r.Organization_Agency||"").replace(/"/g,'""')}","${(r.Supplier_Name||"").replace(/"/g,'""')}",${r.Risk_Level},${r.Contract_Value_BDT||0},"${(r.Red_Flag_Reason||"").replace(/"/g,'""')}"\n`;
+            });
+
+            const link = document.createElement("a");
+            link.href = encodeURI("data:text/csv;charset=utf-8," + csv);
+            link.download = "Tender_Data.csv";
+            link.click();
+        }
+
+        init();
     </script>
 </body>
 </html>

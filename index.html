@@ -3,145 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ই-জিপি টেন্ডার দুর্নীতি ইনভেস্টিগেশন</title>
+    <title>e-GP Forensic Audit | Data Investigation</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Lightweight & Flat Design CSS */
-        body { font-family: system-ui, -apple-system, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 0; line-height: 1.5; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 15px; }
+        /* Minimalist, Investigative News Theme */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #ffffff; color: #111827; margin: 0; padding: 0; line-height: 1.6; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
         
-        header { background: #1e293b; color: white; padding: 20px; text-align: center; border-bottom: 4px solid #e11d48; }
-        header h1 { margin: 0; font-size: 22px; }
-        header p { margin: 5px 0 0 0; font-size: 14px; color: #cbd5e1; }
+        /* Header - Newspaper Style */
+        header { border-bottom: 4px solid #dc2626; padding: 30px 0 10px 0; margin-bottom: 30px; }
+        header h1 { margin: 0; font-size: 28px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.5px; color: #111827; }
+        header p { margin: 5px 0 0 0; font-size: 15px; color: #6b7280; font-weight: 500; }
+        .badge-live { display: inline-block; background: #dc2626; color: white; font-size: 11px; padding: 2px 6px; border-radius: 3px; vertical-align: middle; margin-right: 10px; animation: blink 2s infinite; }
+        @keyframes blink { 50% { opacity: 0.5; } }
 
-        /* Summary Cards */
-        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
-        .card { background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0; text-align: center; }
-        .card h2 { margin: 0; font-size: 24px; color: #e11d48; }
-        .card p { margin: 5px 0; font-size: 13px; font-weight: 600; color: #334155; }
-        .card small { font-size: 11px; color: #64748b; }
+        /* Summary Cards - Flat & Stark */
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .card { border: 1px solid #e5e7eb; padding: 20px; border-radius: 4px; background: #f9fafb; text-align: left; border-left: 4px solid #dc2626; }
+        .card h2 { margin: 0 0 5px 0; font-size: 28px; color: #dc2626; font-weight: 700; line-height: 1; }
+        .card p { margin: 0; font-size: 13px; font-weight: 600; color: #374151; text-transform: uppercase; }
+        .card small { font-size: 12px; color: #6b7280; display: block; margin-top: 5px; }
 
-        /* Charts Grid - Fixed Layout */
-        .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .chart-box { background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0; }
-        .chart-box h3 { margin: 0 0 5px 0; font-size: 14px; text-align: center; color: #0f172a; }
-        .chart-desc { text-align: center; font-size: 12px; color: #64748b; margin-bottom: 10px; }
-        
-        /* THIS FIXES THE STRETCHING ISSUE */
-        .chart-container { position: relative; height: 220px; width: 100%; } 
+        /* Methodology / Evidence Box */
+        .evidence-box { background: #fff1f2; border: 1px solid #fecdd3; padding: 20px; border-radius: 4px; margin-bottom: 30px; }
+        .evidence-box h3 { margin: 0 0 10px 0; font-size: 16px; color: #be123c; text-transform: uppercase; }
+        .evidence-box p { margin: 0 0 10px 0; font-size: 14px; color: #4c0519; }
+        .evidence-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+        .evidence-item { font-size: 13px; color: #881337; }
+        .evidence-item strong { display: block; font-size: 14px; color: #9f1239; margin-bottom: 2px; }
+
+        /* Charts - Clean and Boxless */
+        .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; margin-bottom: 40px; border-top: 1px solid #e5e7eb; padding-top: 30px; }
+        .chart-box { display: flex; flex-direction: column; }
+        .chart-box h3 { margin: 0 0 5px 0; font-size: 15px; color: #111827; text-transform: uppercase; }
+        .chart-desc { font-size: 12px; color: #6b7280; margin: 0 0 15px 0; }
+        .chart-container { position: relative; height: 200px; width: 100%; } 
 
         /* Tools (Search & Download) */
-        .tools-bar { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
-        .tools-bar input, .tools-bar select { padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; flex: 1; min-width: 150px; font-size: 13px; }
-        .btn { padding: 8px 15px; border: none; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; color: white; background: #059669; }
-        .btn:hover { opacity: 0.9; }
+        .ledger-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #111827; padding-bottom: 10px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        .ledger-header h3 { margin: 0; font-size: 18px; text-transform: uppercase; }
+        .tools-bar { display: flex; gap: 10px; flex-wrap: wrap; }
+        .tools-bar input, .tools-bar select { padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 3px; font-size: 13px; outline: none; min-width: 180px; background: #f9fafb; }
+        .tools-bar input:focus, .tools-bar select:focus { border-color: #111827; }
+        .btn-download { padding: 6px 12px; border: 1px solid #111827; border-radius: 3px; font-size: 12px; font-weight: 600; cursor: pointer; color: #111827; background: white; text-transform: uppercase; transition: 0.2s; }
+        .btn-download:hover { background: #111827; color: white; }
 
-        /* Simple Table */
-        .table-section { background: white; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; }
-        th { background: #f1f5f9; color: #0f172a; font-weight: 600; }
+        /* Raw Ledger Table */
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+        th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+        th { color: #6b7280; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+        tr:hover { background-color: #f9fafb; }
         
-        .badge { padding: 3px 6px; border-radius: 3px; color: white; font-size: 10px; font-weight: bold; }
-        .bg-red { background: #e11d48; } .bg-orange { background: #ea580c; } .bg-green { background: #16a34a; }
+        .risk-badge { font-weight: 700; font-size: 11px; padding: 2px 0; }
+        .risk-high { color: #dc2626; }
+        .risk-medium { color: #d97706; }
+        .risk-low { color: #059669; }
         
-        .link-btn { display: inline-block; padding: 4px 8px; background: #2563eb; color: white; text-decoration: none; border-radius: 3px; font-size: 11px; margin-bottom: 3px; }
-        .link-btn.alt { background: #e11d48; }
+        .doc-link { color: #2563eb; text-decoration: none; font-weight: 500; font-size: 12px; display: block; margin-bottom: 3px; }
+        .doc-link:hover { text-decoration: underline; color: #1d4ed8; }
+        .doc-link.noa { color: #dc2626; }
+        .doc-link.noa:hover { color: #991b1b; }
         
-        .error { color: #e11d48; text-align: center; padding: 20px; font-size: 14px; }
+        .error { color: #dc2626; text-align: center; padding: 20px; font-size: 14px; font-weight: 500; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>ই-জিপি টেন্ডার দুর্নীতি: ডেটা ইনভেস্টিগেশন</h1>
-        <p>উন্নয়ন কর্তৃপক্ষ ও অন্যান্য সংস্থার টেন্ডার জালিয়াতির খতিয়ান</p>
-    </header>
-
     <div class="container">
         
-        <!-- ডাইনামিক সামারি কার্ডস -->
-        <div class="summary-grid">
-            <div class="card">
-                <h2>১,১৫৮ টি</h2>
-                <p>মালিকানার তথ্য গোপন</p>
-                <small>স্বচ্ছতার অভাব (ITT 5.14)</small>
-            </div>
-            <div class="card">
-                <h2>৮২৫ টি</h2>
-                <p>কৃত্রিম চুক্তি বিভাজন</p>
-                <small>অনুমোদন এড়ানোর চেষ্টা</small>
-            </div>
-            <div class="card">
-                <h2 id="totalContracts">০</h2>
-                <p>ফিল্টার করা টেন্ডার</p>
-                <small>টেবিলে প্রদর্শিত ডেটা</small>
-            </div>
-            <div class="card">
-                <h2 id="totalValue">৳০</h2>
-                <p>মোট চুক্তিমূল্য (ফিল্টারড)</p>
-                <small>বর্তমান ডেটার আর্থিক মূল্য</small>
+        <header>
+            <h1><span class="badge-live">LIVE</span> ই-জিপি টেন্ডার ফরেসনিক অডিট</h1>
+            <p>সরকারি প্রকিউরমেন্টে সিন্ডিকেট, তথ্য গোপন ও আর্থিক অসঙ্গতির ডিজিটাল প্রমাণ (CDA, RAJUK, KDA)</p>
+        </header>
+
+        <!-- ফরেসনিক ফাইন্ডিংস (Investigation Highlight) -->
+        <div class="evidence-box">
+            <h3>ফরেসনিক মেথডলজি ও অ্যালগরিদম অ্যালার্ট</h3>
+            <p>PPR-2008, e-PG3A এবং World Bank গাইডলাইনের ভিত্তিতে সিস্টেম থেকে প্রাপ্ত সুনির্দিষ্ট অনিয়মসমূহ:</p>
+            <div class="evidence-grid">
+                <div class="evidence-item"><strong>১,১৫৮টি টেন্ডারে মালিকানা গোপন (ITT 5.14)</strong>স্বার্থের সংঘাত এড়াতে 'Beneficial Owner' ফিল্ড ফাঁকা রেখে অস্বচ্ছতার আশ্রয় নেওয়া হয়েছে।</div>
+                <div class="evidence-item"><strong>৮২৫টি টেন্ডারে কৃত্রিম চুক্তি বিভাজন (PPA 2006)</strong>উচ্চতর কর্তৃপক্ষের অনুমোদন এড়াতে বড় কাজকে উদ্দেশ্যপ্রণোদিতভাবে ছোট লটে ভাগ করা হয়েছে।</div>
+                <div class="evidence-item"><strong>১৪৬টি টেন্ডারে অস্বাভাবিক দর (STAT_001)</strong>সরকারি প্রাক্কলনের চেয়ে অস্বাভাবিক কম/বেশি (Price Outlier) দর পাশ করা হয়েছে।</div>
+                <div class="evidence-item"><strong>২০১টি টেন্ডারে একক দরদাতা (ITT 50.6)</strong>প্রতিযোগিতা ধ্বংস করে ফানেলিংয়ের মাধ্যমে মাত্র ১ জন দরদাতাকে কাজ দেওয়া হয়েছে।</div>
             </div>
         </div>
 
-        <!-- চার্ট গ্রিড (ফিক্সড সাইজ) -->
+        <!-- ডাইনামিক অডিট সামারি -->
+        <div class="summary-grid">
+            <div class="card">
+                <h2>৯৬.৭%</h2>
+                <p>শীর্ষ ১০ সিন্ডিকেটের দখল</p>
+                <small>বেশিরভাগ কাজ গুটিকয়েক ঠিকাদারের হাতে</small>
+            </div>
+            <div class="card">
+                <h2>৯১.৩%</h2>
+                <p>অর্থ অস্বাভাবিক দরে</p>
+                <small>মূল্য ম্যানিপুলেশন (Price Outliers)</small>
+            </div>
+            <div class="card">
+                <h2 id="totalContracts">০</h2>
+                <p>স্ক্যান করা টেন্ডার (লগ)</p>
+                <small>টেবিলে প্রদর্শিত বর্তমান ডেটা</small>
+            </div>
+            <div class="card">
+                <h2 id="totalValue">৳০</h2>
+                <p>উচ্চ-ঝুঁকিপূর্ণ আর্থিক মূল্য</p>
+                <small>ফিল্টারকৃত 'HIGH' রিস্ক চুক্তিমূল্য</small>
+            </div>
+        </div>
+
+        <!-- চার্ট (ক্লিন ডিজাইন) -->
         <div class="chart-grid">
             <div class="chart-box">
-                <h3>শীর্ষ দুর্নীতিগ্রস্ত ঠিকাদার (Syndicate Leaderboard)</h3>
-                <p class="chart-desc">যেসকল ঠিকাদার সবচেয়ে বেশি মূল্যের 'HIGH' রিস্ক টেন্ডার পেয়েছে</p>
+                <h3>সিন্ডিকেট ওয়াচ (Syndicate Watch)</h3>
+                <p class="chart-desc">সর্বোচ্চ মূল্যের 'HIGH' রিস্ক টেন্ডার প্রাপ্ত শীর্ষ ৫ ঠিকাদার</p>
                 <div class="chart-container"><canvas id="syndicateChart"></canvas></div>
             </div>
 
             <div class="chart-box">
-                <h3>টেন্ডার প্রকাশের টাইমলাইন (Trend Analysis)</h3>
-                <p class="chart-desc">সময়ের সাথে সাথে জালিয়াতি বা রুল ভায়োলেশনের প্রবণতা</p>
+                <h3>ম্যানিপুলেশন টাইমলাইন (Trend)</h3>
+                <p class="chart-desc">টেন্ডার প্রকাশের সময়কাল অনুযায়ী অনিয়মের প্রবণতা</p>
                 <div class="chart-container"><canvas id="timelineChart"></canvas></div>
             </div>
             
             <div class="chart-box">
-                <h3>প্রতিযোগিতা বাতিল (Bid-Response Funnel)</h3>
-                <p class="chart-desc">মোট টেন্ডারের ৩৬.৩% অযোগ্য করা হয়েছে। ২০১টিতে মাত্র ১ জন টিকে ছিল।</p>
+                <h3>প্রতিযোগিতা বাতিল (Funnel)</h3>
+                <p class="chart-desc">মোট টেন্ডারের ৩৬.৩% অযোগ্য। ২০১টিতে মাত্র ১ জন টিকে ছিল।</p>
                 <div class="chart-container"><canvas id="funnelChart"></canvas></div>
             </div>
         </div>
 
-        <!-- টুলস এবং টেবিল -->
+        <!-- এভিডেন্স লেজার (ডেটা টেবিল) -->
         <div class="table-section">
-            <div class="tools-bar">
-                <input type="text" id="searchInput" placeholder="ঠিকাদার, সংস্থা বা আইডি খুঁজুন..." onkeyup="filterData()">
-                <select id="riskFilter" onchange="filterData()">
-                    <option value="ALL">সব ঝুঁকি (All Risks)</option>
-                    <option value="HIGH">উচ্চ ঝুঁকি (HIGH)</option>
-                    <option value="MEDIUM">মাঝারি ঝুঁকি (MEDIUM)</option>
-                    <option value="LOW">নিম্ন ঝুঁকি (LOW)</option>
-                </select>
-                <button class="btn" onclick="downloadCSV()">⬇ CSV ডাউনলোড</button>
+            <div class="ledger-header">
+                <h3>এভিডেন্স লেজার (Evidence Ledger)</h3>
+                <div class="tools-bar">
+                    <input type="text" id="searchInput" placeholder="ঠিকাদার, সংস্থা বা ID খুঁজুন..." onkeyup="filterData()">
+                    <select id="riskFilter" onchange="filterData()">
+                        <option value="ALL">সব ঝুঁকি (All Risks)</option>
+                        <option value="HIGH">উচ্চ ঝুঁকি (HIGH)</option>
+                        <option value="MEDIUM">মাঝারি ঝুঁকি (MEDIUM)</option>
+                        <option value="LOW">নিম্ন ঝুঁকি (LOW)</option>
+                    </select>
+                    <button class="btn-download" onclick="downloadCSV()">CSV এক্সপোর্ট</button>
+                </div>
             </div>
 
-            <table id="tenderTable">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>সংস্থা</th>
-                        <th>ঠিকাদার (Supplier)</th>
-                        <th>ঝুঁকি</th>
-                        <th>চুক্তি মূল্য (BDT)</th>
-                        <th>অনিয়মের কারণ</th>
-                        <th style="min-width: 90px;">ডকুমেন্ট</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <tr><td colspan="7" style="text-align: center;">ডেটা লোড হচ্ছে...</td></tr>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table id="tenderTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">Tender ID</th>
+                            <th>Procuring Entity</th>
+                            <th>Contractor / Supplier</th>
+                            <th style="width: 80px;">Risk Level</th>
+                            <th style="text-align: right;">Contract Value (৳)</th>
+                            <th>Red Flag Reason</th>
+                            <th style="width: 90px;">Documents</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr><td colspan="7" style="text-align: center; color: #6b7280; padding: 30px;">Loading Audit Data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <script>
         const jsonFileName = 'Procurement_Database.json';
         let globalTenderData = []; 
-        
-        // Chart Instances
         let syndicateChartObj = null;
         let timelineChartObj = null;
         let funnelChartObj = null;
@@ -155,7 +187,7 @@
                 
                 filterData(); 
             } catch (err) {
-                document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" class="error">Failed to load ${jsonFileName}. Please run via GitHub Pages or Local Server.</td></tr>`;
+                document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" class="error">Data Load Failed. Please run this HTML file via a web server or GitHub Pages due to CORS security policies.</td></tr>`;
             }
         }
 
@@ -175,15 +207,29 @@
             updateSummaries(filtered);
         }
 
+        function formatCurrency(amount) {
+            if (!amount) return '-';
+            const value = parseFloat(amount);
+            if (value >= 10000000) {
+                return (value / 10000000).toFixed(2) + ' Cr';
+            } else if (value >= 100000) {
+                return (value / 100000).toFixed(2) + ' Lac';
+            }
+            return value.toLocaleString('en-IN');
+        }
+
         function updateSummaries(data) {
             document.getElementById('totalContracts').innerText = data.length + " টি";
-            let sum = data.reduce((acc, t) => acc + (parseFloat(t.Contract_Value_BDT) || 0), 0);
-            let unit = sum >= 1000000000 ? (sum/1000000000).toFixed(2) + " বিলিয়ন" : (sum/10000000).toFixed(2) + " কোটি";
+            let highRiskValue = data.reduce((acc, t) => {
+                return acc + ((t.Risk_Level === 'HIGH' && t.Contract_Value_BDT) ? parseFloat(t.Contract_Value_BDT) : 0);
+            }, 0);
+            
+            let unit = highRiskValue >= 1000000000 ? (highRiskValue/1000000000).toFixed(2) + " বিলিয়ন" : (highRiskValue/10000000).toFixed(2) + " কোটি";
             document.getElementById('totalValue').innerText = "৳" + unit;
         }
 
         function updateCharts(data) {
-            // 1. Syndicate Leaderboard (Filtered data)
+            // 1. Syndicate Leaderboard (Filtered data - HIGH risk only)
             const suppliers = {};
             data.forEach(t => {
                 if (t.Risk_Level === 'HIGH' && t.Supplier_Name && t.Contract_Value_BDT) {
@@ -193,7 +239,7 @@
                 }
             });
             const sortedSuppliers = Object.entries(suppliers).sort((a, b) => b[1] - a[1]).slice(0, 5);
-            const supLabels = sortedSuppliers.map(s => s[0].length > 20 ? s[0].substring(0, 20) + "..." : s[0]);
+            const supLabels = sortedSuppliers.map(s => s[0].length > 15 ? s[0].substring(0, 15) + ".." : s[0]);
             const supValues = sortedSuppliers.map(s => s[1]);
 
             if(syndicateChartObj) syndicateChartObj.destroy();
@@ -201,9 +247,9 @@
                 type: 'bar',
                 data: {
                     labels: supLabels,
-                    datasets: [{ label: 'মোট চুক্তিমূল্য (BDT)', data: supValues, backgroundColor: '#e11d48', borderRadius: 4 }]
+                    datasets: [{ label: 'Value (BDT)', data: supValues, backgroundColor: '#dc2626', barPercentage: 0.6 }]
                 },
-                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { grid: { display: false } } }, plugins: { legend: { display: false } } }
             });
 
             // 2. Timeline Chart (Filtered data)
@@ -226,20 +272,20 @@
                 type: 'line',
                 data: {
                     labels: sortedDates,
-                    datasets: [{ label: 'টেন্ডার সংখ্যা', data: dateCounts, borderColor: '#2563eb', backgroundColor: 'rgba(37, 99, 235, 0.1)', fill: true, tension: 0.3 }]
+                    datasets: [{ label: 'Tenders', data: dateCounts, borderColor: '#111827', borderWidth: 2, backgroundColor: 'rgba(17, 24, 39, 0.05)', fill: true, tension: 0.4, pointRadius: 2 }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { display: false } }, plugins: { legend: { display: false } } }
             });
 
-            // 3. Static Funnel/Doughnut Chart (TIB Macro Data)
+            // 3. Static Funnel (TIB Macro Data)
             if(!funnelChartObj) {
                 funnelChartObj = new Chart(document.getElementById('funnelChart'), {
                     type: 'doughnut',
                     data: {
-                        labels: ['যোগ্য (1752)', 'অযোগ্য (997)'],
-                        datasets: [{ data: [1752, 997], backgroundColor: ['#16a34a', '#e11d48'], borderWidth: 1 }]
+                        labels: ['Responsive', 'Non-responsive'],
+                        datasets: [{ data: [1752, 997], backgroundColor: ['#374151', '#dc2626'], borderWidth: 0, cutout: '70%' }]
                     },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 11 } } } } }
                 });
             }
         }
@@ -247,35 +293,39 @@
         function updateTable(data) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = ''; 
-            if(!data.length) return tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">কোনো ডেটা নেই</td></tr>`;
+            if(!data.length) return tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: #6b7280; padding: 20px;">No matching records found.</td></tr>`;
             
-            // Custom Sorting: HIGH > MEDIUM > LOW
+            // Sorting: HIGH > MEDIUM > LOW
             const riskOrder = { "HIGH": 1, "MEDIUM": 2, "LOW": 3 };
             const sortedData = [...data].sort((a, b) => (riskOrder[a.Risk_Level] || 4) - (riskOrder[b.Risk_Level] || 4));
 
             sortedData.forEach(t => {
-                let badge = t.Risk_Level === 'HIGH' ? 'bg-red' : (t.Risk_Level === 'MEDIUM' ? 'bg-orange' : 'bg-green');
-                let val = t.Contract_Value_BDT ? parseFloat(t.Contract_Value_BDT).toLocaleString('en-IN') : '-';
-                let org = t.Organization_Agency ? t.Organization_Agency.split('Procuring')[0].trim() : "অজানা";
-                let sup = t.Supplier_Name ? t.Supplier_Name.split('(')[0].trim() : "-";
+                let riskClass = t.Risk_Level === 'HIGH' ? 'risk-high' : (t.Risk_Level === 'MEDIUM' ? 'risk-medium' : 'risk-low');
+                let valStr = formatCurrency(t.Contract_Value_BDT);
                 
+                let org = t.Organization_Agency ? t.Organization_Agency.split('Procuring')[0].trim() : "Unknown";
+                let sup = t.Supplier_Name ? t.Supplier_Name.split('(')[0].trim() : "<span style='color:#9ca3af'>Not Awarded</span>";
+                let reason = t.Red_Flag_Reason === "No significant issue detected" ? "<span style='color:#9ca3af'>Clean</span>" : t.Red_Flag_Reason;
+                
+                // PDF links styling
                 let pdfHtml = '';
                 if (t.Source_Files_Merged) {
                     t.Source_Files_Merged.split('|').filter(f => f.trim()).forEach((f, i) => {
-                        pdfHtml += `<a href="downloaded_pdfs/${f.trim()}" target="_blank" class="link-btn ${i>0?'alt':''}">${i===0?'Notice':'NOA'}</a> `;
+                        let isNoa = i > 0;
+                        pdfHtml += `<a href="downloaded_pdfs/${f.trim()}" target="_blank" class="doc-link ${isNoa ? 'noa' : ''}">${isNoa ? 'NOA 📄' : 'Notice 📄'}</a>`;
                     });
                 } else if(t.Source_File) {
-                    pdfHtml = `<a href="downloaded_pdfs/${t.Source_File.trim()}" target="_blank" class="link-btn">Notice</a>`;
+                    pdfHtml = `<a href="downloaded_pdfs/${t.Source_File.trim()}" target="_blank" class="doc-link">Notice 📄</a>`;
                 }
 
                 tbody.insertAdjacentHTML('beforeend', `
                     <tr>
-                        <td><strong>${t.Tender_Proposal_ID}</strong></td>
-                        <td title="${org}">${org.substring(0,25)}...</td>
-                        <td>${sup}</td>
-                        <td><span class="badge ${badge}">${t.Risk_Level||'N/A'}</span></td>
-                        <td>${val}</td>
-                        <td style="color:#e11d48; font-size:11px;">${t.Red_Flag_Reason||'-'}</td>
+                        <td style="font-family: monospace; font-size: 14px; color: #374151;">${t.Tender_Proposal_ID}</td>
+                        <td>${org}</td>
+                        <td style="font-weight: 600; color: #111827;">${sup}</td>
+                        <td class="risk-badge ${riskClass}">${t.Risk_Level||'N/A'}</td>
+                        <td style="text-align: right; font-family: monospace; font-size: 14px;">${valStr}</td>
+                        <td style="color: #9f1239;">${reason}</td>
                         <td>${pdfHtml}</td>
                     </tr>
                 `);
@@ -285,23 +335,18 @@
         function downloadCSV() {
             const term = document.getElementById('searchInput').value.toLowerCase();
             const risk = document.getElementById('riskFilter').value;
-            const dataToExport = globalTenderData.filter(t => {
-                const matchRisk = risk === 'ALL' || t.Risk_Level === risk;
-                const searchString = Object.values(t).join(' ').toLowerCase();
-                const matchTerm = searchString.includes(term);
-                return matchRisk && matchTerm;
-            });
+            const dataToExport = globalTenderData.filter(t => (risk === 'ALL' || t.Risk_Level === risk) && Object.values(t).join(' ').toLowerCase().includes(term));
             
-            if(!dataToExport.length) return alert("ডেটা নেই!");
+            if(!dataToExport.length) return alert("No data available to export.");
 
-            let csv = "\uFEFFTender_ID,Agency,Supplier,Risk,Value_BDT,Flag_Reason\n";
+            let csv = "\uFEFF" + "Tender_ID,Agency,Supplier,Risk,Value_BDT,Flag_Reason\n";
             dataToExport.forEach(r => {
                 csv += `${r.Tender_Proposal_ID},"${(r.Organization_Agency||"").replace(/"/g,'""')}","${(r.Supplier_Name||"").replace(/"/g,'""')}",${r.Risk_Level},${r.Contract_Value_BDT||0},"${(r.Red_Flag_Reason||"").replace(/"/g,'""')}"\n`;
             });
 
             const link = document.createElement("a");
             link.href = encodeURI("data:text/csv;charset=utf-8," + csv);
-            link.download = "eGP_Tender_Data.csv";
+            link.download = "Forensic_Audit_Ledger.csv";
             link.click();
         }
 

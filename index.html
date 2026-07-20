@@ -10,6 +10,7 @@
             --bg-color: #f4f7f6;
             --primary-dark: #1a252f;
             --danger-red: #c0392b;
+            --warning-orange: #d35400;
             --accent-blue: #2980b9;
             --text-dark: #2c3e50;
         }
@@ -35,29 +36,29 @@
 
         /* Forensic Engine Rulebook Section */
         .forensic-engine {
-            background-color: #e8f4f8;
-            border-left: 5px solid var(--accent-blue);
-            padding: 15px 20px;
+            background-color: white;
+            border-left: 5px solid var(--danger-red);
+            padding: 25px;
             margin-top: -30px;
             margin-bottom: 30px;
             border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-        .forensic-engine h3 { margin: 0; color: var(--accent-blue); font-size: 1.2em;}
-        .forensic-engine p { margin: 5px 0 0 0; font-size: 0.9em; color: #555; }
-        .btn-rulebook {
-            background-color: var(--accent-blue);
-            color: white;
-            padding: 10px 15px;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: 0.3s;
+        .forensic-engine h3 { margin: 0 0 15px 0; color: var(--primary-dark); font-size: 1.5em;}
+        .forensic-engine p { margin: 5px 0 15px 0; font-size: 1em; color: #555; }
+        .rule-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
         }
-        .btn-rulebook:hover { background-color: #1f618d; }
+        .rule-item {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #eee;
+        }
+        .rule-item h4 { margin: 0 0 5px 0; color: var(--danger-red); font-size: 1.1em; }
+        .rule-item p { margin: 0; font-size: 0.9em; color: #444; }
         
         /* Summary Cards */
         .summary-grid {
@@ -84,9 +85,9 @@
             border-radius: 8px;
             margin-top: 30px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            border-left: 5px solid var(--danger-red);
+            border-left: 5px solid var(--accent-blue);
         }
-        .story-highlights h3 { color: var(--danger-red); margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px;}
+        .story-highlights h3 { color: var(--accent-blue); margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px;}
         .highlight-bold { font-weight: bold; color: var(--primary-dark); }
 
         /* Charts */
@@ -122,6 +123,7 @@
         
         .badge { padding: 5px 10px; border-radius: 4px; color: white; font-size: 11px; font-weight: bold; display: inline-block;}
         .badge-high { background-color: var(--danger-red); }
+        .badge-medium { background-color: var(--warning-orange); }
         .badge-low { background-color: #27ae60; }
         
         .btn-pdf {
@@ -152,12 +154,27 @@
         
         <!-- eGP Forensic Engine Rulebook Section -->
         <div class="forensic-engine">
-            <div>
-                <h3>eGP Forensic Engine Rules</h3>
-                <p>টেন্ডারের অনিয়মগুলো কোন রুল বা অ্যালগরিদম ব্যবহার করে বের করা হয়েছে, তার বিস্তারিত মেথডলজি দেখুন।</p>
+            <h3>eGP Forensic Engine Rules ও মেথডলজি</h3>
+            <p>PPR-2008, বাংলাদেশ ই-পিজি৩এ (e-PG3A) স্ট্যান্ডার্ড ডকুমেন্ট এবং আন্তর্জাতিক (World Bank/ADB) গাইডলাইন ব্যবহার করে টেন্ডারের অনিয়মগুলো চিহ্নিত করা হয়েছে:</p>
+            
+            <div class="rule-list">
+                <div class="rule-item">
+                    <h4>মালিকানার তথ্য গোপন (১,১৫৮টি)</h4>
+                    <p><strong>ITT 5.14 লঙ্ঘন:</strong> দরদাতাকে অবশ্যই 'Beneficial Ownership' বা প্রকৃত মালিকানার তথ্য দিতে হবে। এটি ফাঁকা রাখা স্বচ্ছতার অভাব এবং স্বার্থের সংঘাত (Conflict of Interest) নির্দেশ করে।</p>
+                </div>
+                <div class="rule-item">
+                    <h4>একক দরপত্র বা Single Bidder (২০১টি)</h4>
+                    <p><strong>ITT 50.6 ও 56.2(b) লঙ্ঘন:</strong> প্রতিযোগিতার অভাব থাকলে বা মাত্র একটি রেস্পন্সিভ টেন্ডার থাকলে দরপত্র বাতিলের নিয়ম রয়েছে। তবুও গুটিকয়েক সিন্ডিকেটকে কাজ দেওয়া হয়েছে।</p>
+                </div>
+                <div class="rule-item">
+                    <h4>কৃত্রিম চুক্তি বিভাজন (৮২৫টি)</h4>
+                    <p><strong>PPA 2006 ও রুল ELG_005 লঙ্ঘন:</strong> উচ্চতর কর্তৃপক্ষের অনুমোদন এড়াতে একটি বড় কাজকে ছোট ছোট লটে ভাগ করে একই সময়ে টেন্ডার রিলিজ করা হয়েছে।</p>
+                </div>
+                <div class="rule-item">
+                    <h4>চুক্তি মূল্যে চরম অসঙ্গতি (১৪৬টি)</h4>
+                    <p><strong>রুল STAT_001 ও World Bank ALB লঙ্ঘন:</strong> সরকারি প্রাক্কলনের চেয়ে অস্বাভাবিক বা অযৌক্তিক দর (Abnormally Low/High Bids) দেওয়া হয়েছে যা সরাসরি আর্থিক দুর্নীতির লক্ষণ।</p>
+                </div>
             </div>
-            <!-- Ensure your rulebook PDF is inside the eGP_Forensic_Engine folder -->
-            <a href="eGP_Forensic_Engine/Rule_Book.pdf" target="_blank" class="btn-rulebook">রুল বুক দেখুন (PDF) ↗</a>
         </div>
 
         <!-- ১. সামারি কার্ডস -->
@@ -180,7 +197,7 @@
             <div class="card">
                 <h2>৳৮.৮ বিলিয়ন</h2>
                 <p>সবচেয়ে বড় রেড ফ্ল্যাগ</p>
-                <span class="sub-text">"Rajib Das project" এ সর্বোচ্চ ঝুঁকিপূর্ণ চুক্তিমূল্য।</span>
+                <span class="sub-text">"Rajib Das project" এ সর্বোচ্চ ঝুঁকিপূর্ণ চুক্তিমূল্য (Largest value leads)।</span>
             </div>
         </div>
 
@@ -191,8 +208,6 @@
                 <li><span class="highlight-bold">অবান্তর CPV কোড স্টাফিং:</span> ৩৩২টি টেন্ডারে ৫টির বেশি (গড়ে ১৮-২৯টি) সম্পূর্ণ সম্পর্কহীন ক্যাটাগরি যোগ করা হয়েছে। যেমন- টেন্ডার আইডি 1111428 বা 1123107 তে আইটি বা সাধারণ কাজের মধ্যে <em>Iron ores, Metal ores</em> এর মতো কোড ঢুকিয়ে সাধারণ ঠিকাদারদের সার্চ রেজাল্ট থেকে টেন্ডার লুকিয়ে ফেলা হয়েছে।</li>
                 <li><span class="highlight-bold">সময়ের কারসাজি:</span> ওটিএম (OTM) পদ্ধতিতে অন্তত ১৪-২৮ দিন সময় দেওয়ার নিয়ম থাকলেও ৮৩টি টেন্ডারে তা মানা হয়নি। অনেক ক্ষেত্রে মাত্র ১০-১১ দিন সময় দিয়ে আগে থেকে প্রস্তুত থাকা সিন্ডিকেটকে কাজ পাইয়ে দেওয়া হয়েছে।</li>
                 <li><span class="highlight-bold">প্রি-টেন্ডার মিটিংয়ের প্রহসন:</span> ৯৮টি ওটিএম টেন্ডারে টেন্ডার প্রকাশের মাত্র ৫ থেকে ৩০ মিনিটের মধ্যে প্রি-টেন্ডার মিটিং ডাকা হয়েছে, যা একজন সাধারণ দরদাতার পক্ষে এটেন্ড করা অসম্ভব।</li>
-                <li><span class="highlight-bold">কৃত্রিম চুক্তি বিভাজন (Artificial Splitting):</span> পিপিআর ২০০৬ লঙ্ঘন করে উচ্চতর কর্তৃপক্ষের অনুমোদন এড়াতে ৩১২টি টেন্ডারকে ছোট ছোট লটে ভাগ করে একই দিন একই সময়ে প্রকাশ করা হয়েছে।</li>
-                <li><span class="highlight-bold">স্থানীয় অফিসের বৈষম্যমূলক শর্ত:</span> ৫৪টি টেন্ডারে (যেমন- আইডি: 1306342, 1305867) চট্টগ্রামে নিজস্ব সাব-অফিস থাকার শর্ত জুড়ে দিয়ে নতুন প্রতিযোগীদের আটকে দেওয়া হয়েছে।</li>
             </ul>
         </div>
 
@@ -204,21 +219,22 @@
             </div>
             
             <div class="chart-box">
-                <h3>প্রতিযোগিতা বাতিল (Bid-Response Funnel)</h3>
-                <p style="text-align: center; font-size: 13px; color: #7f8c8d; margin-top: -10px;">মোট টেন্ডারের ৩৬.৩% অযোগ্য করা হয়েছে। ২০১টি টেন্ডারে মাত্র ১ জন দরদাতা টিকে ছিল।</p>
+                <h3 style="color: #c0392b;">প্রতিযোগিতা বাতিল (Bid-Response Funnel)</h3>
+                <p style="text-align: center; font-size: 14px; font-weight: bold; color: #2c3e50; margin-top: -10px;">মোট টেন্ডারের ৩৬.৩% অযোগ্য করা হয়েছে। ২০১টি টেন্ডারে মাত্র ১ জন দরদাতা টিকে ছিল।</p>
                 <canvas id="funnelChart" height="200"></canvas>
             </div>
 
             <div class="chart-box">
-                <h3>শীর্ষ ৫ ঝুঁকিপূর্ণ চুক্তি (নমুনা ডেটাসেট থেকে)</h3>
-                <canvas id="valueChart" height="220"></canvas>
+                <h3 style="color: #c0392b;">শীর্ষ ৫ ঝুঁকিপূর্ণ চুক্তি (Highest Value Leads)</h3>
+                <p style="text-align: center; font-size: 13px; color: #7f8c8d; margin-top: -10px;">শুধুমাত্র 'HIGH' রিস্ক লেভেল থাকা সর্বোচ্চ মূল্যের টেন্ডারগুলো</p>
+                <canvas id="valueChart" height="200"></canvas>
             </div>
         </div>
 
         <!-- ৪. ডেটা টেবিল -->
         <div class="table-section">
             <h3>📄 টেন্ডারের বিস্তারিত এবং সোর্স ফাইল (PDF Archive)</h3>
-            <p style="font-size: 13px; color: #555;">সংশ্লিষ্ট টেন্ডারের নোটিশ এবং চুক্তিপত্র দেখতে ডানপাশের বাটনগুলোতে ক্লিক করুন।</p>
+            <p style="font-size: 13px; color: #555;">সংশ্লিষ্ট টেন্ডারের নোটিশ এবং চুক্তিপত্র দেখতে ডানপাশের বাটনগুলোতে ক্লিক করুন। (উচ্চ ঝুঁকিপূর্ণ টেন্ডারগুলো উপরে দেওয়া হয়েছে)</p>
             <table id="tenderTable">
                 <thead>
                     <tr>
@@ -238,7 +254,6 @@
     </div>
 
     <script>
-        // এখানে ফাইলের নাম আপনার দেওয়া Procurement_Database.json অনুযায়ী আপডেট করা হয়েছে
         const jsonFileName = 'Procurement_Database.json';
 
         async function loadAndVisualizeData() {
@@ -267,14 +282,14 @@
             }
         }
 
-        function buildCharts() {
-            // Violation Chart
+        function buildCharts(tenderData) {
+            // Chart 1: Violation Chart
             const ctxViolation = document.getElementById('violationChart').getContext('2d');
             new Chart(ctxViolation, {
                 type: 'bar',
                 data: {
                     labels: [
-                        'মালিকানার তথ্য গোপন (১১৫৮টি)', 
+                        'মালিকানার তথ্য গোপন (১,১৫৮টি)', 
                         'কৃত্রিম চুক্তি বিভাজন (৮২৫টি)', 
                         'অবান্তর CPV কোড (৩৩২টি)',
                         'একই সময়ে টেন্ডার প্রকাশ (৩১২টি)',
@@ -286,7 +301,7 @@
                     datasets: [{
                         label: 'ফ্ল্যাগড টেন্ডারের সংখ্যা',
                         data: [1158, 825, 332, 312, 201, 146, 98, 83],
-                        backgroundColor: '#e74c3c',
+                        backgroundColor: '#c0392b',
                         borderRadius: 4
                     }]
                 },
@@ -296,15 +311,67 @@
                     plugins: { legend: { display: false } }
                 }
             });
+
+            // Chart 2: Funnel Chart
+            const ctxFunnel = document.getElementById('funnelChart').getContext('2d');
+            new Chart(ctxFunnel, {
+                type: 'doughnut',
+                data: {
+                    labels: ['যোগ্য দরদাতা (Responsive)', 'অযোগ্য/বাতিল (Non-responsive)'],
+                    datasets: [{
+                        data: [1752, 997],
+                        backgroundColor: ['#2980b9', '#e74c3c'],
+                        borderWidth: 2
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+
+            // Chart 3: Top 5 Risky Contracts (Filtered for HIGH risk only)
+            const highRiskContracts = tenderData.filter(tender => tender.Risk_Level === 'HIGH' && tender.Contract_Value_BDT != null);
+            highRiskContracts.sort((a, b) => parseFloat(b.Contract_Value_BDT) - parseFloat(a.Contract_Value_BDT));
+            const top5RiskyContracts = highRiskContracts.slice(0, 5);
+            
+            const top5Labels = top5RiskyContracts.map(tender => "ID: " + tender.Tender_Proposal_ID);
+            const top5Values = top5RiskyContracts.map(tender => parseFloat(tender.Contract_Value_BDT));
+
+            const ctxValue = document.getElementById('valueChart').getContext('2d');
+            new Chart(ctxValue, {
+                type: 'bar',
+                data: {
+                    labels: top5Labels,
+                    datasets: [{
+                        label: 'চুক্তি মূল্য (BDT)',
+                        data: top5Values,
+                        backgroundColor: '#d35400',
+                        borderRadius: 4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
         }
 
         function buildTable(tenderData) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = ''; 
             
-            tenderData.forEach(tender => {
+            // Custom Sorting: HIGH > MEDIUM > LOW
+            const riskOrder = { "HIGH": 1, "MEDIUM": 2, "LOW": 3 };
+            
+            // Clone data to avoid mutating original array, then sort
+            const sortedData = [...tenderData].sort((a, b) => {
+                const riskA = riskOrder[a.Risk_Level] || 4; // default to 4 if undefined
+                const riskB = riskOrder[b.Risk_Level] || 4;
+                return riskA - riskB;
+            });
+            
+            sortedData.forEach(tender => {
                 const tr = document.createElement('tr');
-                const badgeClass = tender.Risk_Level === 'HIGH' ? 'badge badge-high' : 'badge badge-low';
+                
+                // Badge styling
+                let badgeClass = 'badge-low';
+                if (tender.Risk_Level === 'HIGH') badgeClass = 'badge-high';
+                else if (tender.Risk_Level === 'MEDIUM') badgeClass = 'badge-medium';
                 
                 const formattedValue = tender.Contract_Value_BDT 
                     ? parseFloat(tender.Contract_Value_BDT).toLocaleString('en-IN') + ' ৳' 
@@ -316,16 +383,13 @@
                 // PDF Links Generation (Notice and Contract)
                 let pdfLinksHTML = '';
                 if (tender.Source_Files_Merged) {
-                    // Split by '|', clean whitespace, and filter out empty items
                     const pdfFiles = tender.Source_Files_Merged.split('|')
                                         .map(file => file.trim())
                                         .filter(file => file.length > 0);
                     
                     pdfFiles.forEach((fileName, index) => {
-                        // Usually the first file is the Notice, the second is the Contract/NOA
                         let btnClass = index === 0 ? "btn-pdf" : "btn-pdf contract";
-                        let btnText = index === 0 ? "Tender Notice ↗" : "Contract / NOA ↗";
-                        
+                        let btnText = index === 0 ? "টেন্ডার নোটিশ ↗" : "চুক্তিপত্র (NOA) ↗";
                         pdfLinksHTML += `<a href="downloaded_pdfs/${fileName}" target="_blank" class="${btnClass}">${btnText}</a>`;
                     });
                 } else if (tender.Source_File) {
@@ -337,7 +401,7 @@
                 tr.innerHTML = `
                     <td><strong>${tender.Tender_Proposal_ID}</strong></td>
                     <td style="font-size: 13px;">${agencyName}</td>
-                    <td><span class="${badgeClass}">${tender.Risk_Level || 'N/A'}</span></td>
+                    <td><span class="badge ${badgeClass}">${tender.Risk_Level || 'N/A'}</span></td>
                     <td style="font-weight: 500;">${formattedValue}</td>
                     <td style="font-size: 13px; color: #c0392b;">${tender.Red_Flag_Reason || 'No Issue'}</td>
                     <td>${pdfLinksHTML}</td>

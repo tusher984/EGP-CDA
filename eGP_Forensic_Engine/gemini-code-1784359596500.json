@@ -1,0 +1,47 @@
+[
+  {
+    "Rule_ID": "OWN_001",
+    "Source": "e-PG3A / BPPA",
+    "Clause": "ITT Clause 5.14",
+    "Category": "Ownership",
+    "Rule_Name": "Beneficial Ownership Missing",
+    "Condition_Type": "string_missing",
+    "Target_Column": "Beneficial_Owner",
+    "Risk_Score": 30,
+    "Severity": "High",
+    "Explanation": "No beneficial owner data disclosed in award documentation.",
+    "Rule_Text": "A Tenderer shall provide its/their Beneficial Ownership related information... if it/they will be awarded the contract.",
+    "Recommendation": "Verify bidder registry and trade license via manual review to trace corporate shielding."
+  },
+  {
+    "Rule_ID": "ELG_001",
+    "Source": "e-PG3A / PPR 2008",
+    "Clause": "ITT Clause 50.6 / 56.2(b)",
+    "Category": "Competition",
+    "Rule_Name": "Single Responsive Bid",
+    "Condition_Type": "numeric_equals",
+    "Target_Column": "Responsive_Tenders",
+    "Threshold_Value": 1,
+    "Risk_Score": 20,
+    "Severity": "High",
+    "Explanation": "Only one responsive tender was submitted, indicating high cartel or tailored spec risk.",
+    "Rule_Text": "In the case of only one technically responsive tender, the above methodology shall not be applied... All Tenders can be rejected if there is a lack of effective competition.",
+    "Recommendation": "Inspect technical specifications to check if requirements were deliberately tailored for a single vendor."
+  },
+  {
+    "Rule_ID": "FIN_001",
+    "Source": "World Bank / e-PG3A",
+    "Clause": "ITT Clause 50.3 / WB ALB Guidance",
+    "Category": "Financial",
+    "Rule_Name": "Abnormally Low Bid / Significantly Low Tender",
+    "Condition_Type": "ratio_below",
+    "Target_Column": "Award_Price",
+    "Compare_Column": "Estimated_Cost",
+    "Threshold_Value": 0.80,
+    "Risk_Score": 25,
+    "Severity": "High",
+    "Explanation": "Award price is significantly below the official engineer's estimate, threatening project execution quality.",
+    "Rule_Text": "An ALB is one in which the Bid price, in combination with other elements, appears so low that it raises material concerns.",
+    "Recommendation": "Conduct a strict price-loading or rate analysis to ensure the contractor is not underbidding to dump the project later."
+  }
+]

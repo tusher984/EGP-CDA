@@ -3,100 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ডেটা জার্নালিজম: CDA টেন্ডার রিপোর্ট</title>
-    <!-- Chart.js লাইব্রেরি যুক্ত করা হলো -->
+    <title>CDA টেন্ডার ডেটা ভিজ্যুয়ালাইজেশন</title>
+    <!-- Chart.js লাইব্রেরি -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
             color: #333;
             text-align: center;
             padding: 20px;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        h1 {
+            color: #2c3e50;
         }
-        canvas {
-            margin-top: 20px;
+        .dashboard {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .chart-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 45%;
+            min-width: 400px;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>CDA টেন্ডার ঝুঁকি বিশ্লেষণ</h1>
-        <p>এই চার্টটি গিটহাবের JSON ফাইল থেকে সরাসরি ডেটা নিয়ে তৈরি করা হয়েছে।</p>
-        
-        <!-- চার্ট দেখানোর জায়গা -->
-        <canvas id="riskChart"></canvas>
+    <h1>📊 CDA টেন্ডার ডেটা ড্যাশবোর্ড</h1>
+    <p>আপনার দেওয়া JSON ডেটা থেকে সরাসরি তৈরি করা রিপোর্ট</p>
+
+    <div class="dashboard">
+        <!-- প্রথম চার্ট: রিস্ক লেভেল -->
+        <div class="chart-card">
+            <h3>টেন্ডারের ঝুঁকি বিশ্লেষণ (Risk Level)</h3>
+            <canvas id="riskChart"></canvas>
+        </div>
+
+        <!-- দ্বিতীয় চার্ট: সর্বোচ্চ চুক্তি মূল্য -->
+        <div class="chart-card">
+            <h3>শীর্ষ ৫ সর্বোচ্চ চুক্তি মূল্য (Contract Value)</h3>
+            <canvas id="valueChart"></canvas>
+        </div>
     </div>
 
     <script>
-        // এখানে আপনার গিটহাবের Raw JSON লিংকটি বসান
-        const jsonUrl = 'YOUR_GITHUB_RAW_JSON_LINK_HERE';
+        // আপনার দেওয়া JSON ডেটা এখানে রাখা হলো (টেস্ট করার জন্য)
+        // আপনি চাইলে আপনার সম্পূর্ণ ফাইল থেকে ডেটা এনে এখানে বসাতে পারেন
+        const tenderData = [
+            { "Tender_Proposal_ID": 1306342, "Risk_Level": "LOW", "Contract_Value_BDT": null },
+            { "Tender_Proposal_ID": 1305867, "Risk_Level": "LOW", "Contract_Value_BDT": null },
+            { "Tender_Proposal_ID": 1267626, "Risk_Level": "LOW", "Contract_Value_BDT": 579500 },
+            { "Tender_Proposal_ID": 1231413, "Risk_Level": "LOW", "Contract_Value_BDT": 2054979.681 },
+            { "Tender_Proposal_ID": 1128572, "Risk_Level": "HIGH", "Contract_Value_BDT": 1875002.607 },
+            { "Tender_Proposal_ID": 1028832, "Risk_Level": "LOW", "Contract_Value_BDT": 8988920.1 },
+            { "Tender_Proposal_ID": 1023333, "Risk_Level": "HIGH", "Contract_Value_BDT": 11731574.38 },
+            { "Tender_Proposal_ID": 1001843, "Risk_Level": "LOW", "Contract_Value_BDT": 24247478.31 },
+            { "Tender_Proposal_ID": 1001782, "Risk_Level": "HIGH", "Contract_Value_BDT": 52490000.53 },
+            { "Tender_Proposal_ID": 971997, "Risk_Level": "LOW", "Contract_Value_BDT": 8741984.554 },
+            { "Tender_Proposal_ID": 959962, "Risk_Level": "LOW", "Contract_Value_BDT": 100790743.2 },
+            { "Tender_Proposal_ID": 918775, "Risk_Level": "HIGH", "Contract_Value_BDT": 74713501.27 },
+            { "Tender_Proposal_ID": 917088, "Risk_Level": "HIGH", "Contract_Value_BDT": 161596296.8 },
+            { "Tender_Proposal_ID": 848555, "Risk_Level": "HIGH", "Contract_Value_BDT": 51133146.95 }
+        ];
 
-        async function fetchDataAndDrawChart() {
-            try {
-                // JSON ডেটা কল করা হচ্ছে
-                const response = await fetch(jsonUrl);
-                const data = await response.json();
+        // --- ডেটা প্রসেসিং: Risk Level ---
+        let highRiskCount = 0;
+        let lowRiskCount = 0;
 
-                // ডেটা প্রসেসিং (উদাহরণস্বরূপ: Risk Level গোনা হচ্ছে)
-                let highRiskCount = 0;
-                let lowRiskCount = 0;
+        tenderData.forEach(tender => {
+            if (tender.Risk_Level === "HIGH") highRiskCount++;
+            else if (tender.Risk_Level === "LOW") lowRiskCount++;
+        });
 
-                data.forEach(tender => {
-                    if (tender.Risk_Level === "HIGH") {
-                        highRiskCount++;
-                    } else if (tender.Risk_Level === "LOW") {
-                        lowRiskCount++;
-                    }
-                });
+        // --- ডেটা প্রসেসিং: Contract Value ---
+        // যেসব টেন্ডারে Contract Value দেওয়া আছে সেগুলো ফিল্টার করা
+        const validContracts = tenderData.filter(tender => tender.Contract_Value_BDT !== null);
+        // বড় থেকে ছোট হিসেবে সাজানো (Sort)
+        validContracts.sort((a, b) => b.Contract_Value_BDT - a.Contract_Value_BDT);
+        // শীর্ষ ৫টি ডেটা নেওয়া
+        const top5Contracts = validContracts.slice(0, 5);
+        
+        const top5Labels = top5Contracts.map(tender => "ID: " + tender.Tender_Proposal_ID);
+        const top5Values = top5Contracts.map(tender => tender.Contract_Value_BDT);
 
-                // Chart.js দিয়ে চার্ট তৈরি করা
-                const ctx = document.getElementById('riskChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'bar', // চার্টের ধরন (bar, pie, line ইত্যাদি)
-                    data: {
-                        labels: ['উচ্চ ঝুঁকি (HIGH)', 'নিম্ন ঝুঁকি (LOW)'],
-                        datasets: [{
-                            label: 'টেন্ডারের সংখ্যা',
-                            data: [highRiskCount, lowRiskCount],
-                            backgroundColor: [
-                                'rgba(255, 99, 132, 0.7)', // লাল রঙ
-                                'rgba(75, 192, 192, 0.7)'  // সবুজ রঙ
-                            ],
-                            borderColor: [
-                                'rgba(255, 99, 132, 1)',
-                                'rgba(75, 192, 192, 1)'
-                            ],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        }
-                    }
-                });
-
-            } catch (error) {
-                console.error('ডেটা লোড করতে সমস্যা হয়েছে:', error);
+        // --- চার্ট ১ আঁকা (Risk Chart - Pie) ---
+        const ctxRisk = document.getElementById('riskChart').getContext('2d');
+        new Chart(ctxRisk, {
+            type: 'doughnut',
+            data: {
+                labels: ['উচ্চ ঝুঁকি (HIGH)', 'নিম্ন ঝুঁকি (LOW)'],
+                datasets: [{
+                    data: [highRiskCount, lowRiskCount],
+                    backgroundColor: ['#e74c3c', '#2ecc71'], // লাল এবং সবুজ
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
             }
-        }
+        });
 
-        // ফাংশনটি কল করা হলো
-        fetchDataAndDrawChart();
+        // --- চার্ট ২ আঁকা (Value Chart - Bar) ---
+        const ctxValue = document.getElementById('valueChart').getContext('2d');
+        new Chart(ctxValue, {
+            type: 'bar',
+            data: {
+                labels: top5Labels,
+                datasets: [{
+                    label: 'চুক্তি মূল্য (BDT)',
+                    data: top5Values,
+                    backgroundColor: '#3498db', // নীল রঙ
+                    borderColor: '#2980b9',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'BDT (টাকা)' }
+                    }
+                }
+            }
+        });
     </script>
-
 </body>
 </html>

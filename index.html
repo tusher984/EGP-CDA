@@ -25,7 +25,7 @@
         header h1 { margin: 0; font-size: 32px; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px;}
         header p { margin: 8px 0 0 0; font-size: 15px; color: var(--text-muted); font-weight: 500;}
 
-        /* Forensic Rules Matrix Section - Made Interactive */
+        /* Forensic Rules Matrix Section */
         .evidence-section { background: var(--dark-card); border: 1px solid var(--border-dark); padding: 25px; margin-bottom: 25px; border-radius: 8px; border-left: 5px solid var(--netra-red); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .evidence-section h3 { margin: 0 0 15px 0; font-size: 19px; color: var(--neon-blue); border-bottom: 1px solid var(--border-dark); padding-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;}
         .evidence-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 15px; }
@@ -33,7 +33,7 @@
         /* Interactive Rule Items */
         .evidence-item { background: rgba(255,255,255,0.01); padding: 15px; border-radius: 6px; border: 1px solid var(--border-dark); transition: 0.2s; cursor: pointer; }
         .evidence-item:hover { border-color: var(--neon-blue); background: rgba(56, 189, 248, 0.05); transform: translateY(-2px); }
-        .evidence-item.active-rule { border-color: var(--netra-red); background: rgba(204, 0, 0, 0.1); }
+        .evidence-item.active-rule { border-color: var(--neon-blue); background: rgba(56, 189, 248, 0.1); }
         .evidence-item strong { display: block; font-size: 14.5px; color: #ffffff; margin-bottom: 6px; border-bottom: 1px dashed var(--border-dark); padding-bottom: 5px; }
         .evidence-item p { margin: 0; font-size: 13px; color: var(--text-muted); text-align: justify; }
 
@@ -62,7 +62,7 @@
         .alert-mini p { margin: 0; font-size: 12px; color: var(--text-muted);}
         .alert-mini span { display: block; font-size: 18px; font-weight: bold; color: var(--netra-red); margin-top: 5px;}
 
-        /* Charts - 9 Charts Grid */
+        /* Charts */
         .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .chart-box { background: var(--dark-card); border: 1px solid var(--border-dark); padding: 20px; border-radius: 8px; display: flex; flex-direction: column; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
         .chart-box h3 { margin: 0 0 5px 0; font-size: 15px; color: var(--text-light); text-align: center; font-weight: 700;}
@@ -110,10 +110,10 @@
         
         <header>
             <h1>e-GP Syndicate Tracker: Data Lab</h1>
-            <p>উন্নয়ন কর্তৃপক্ষ (RAJUK, CDA, KDA, RDA, CoxDA, GDA) এবং সরকারি প্রکیউরমেন্টের ডিজিটাল ইনভেস্টিগেশন</p>
+            <p>উন্নয়ন কর্তৃপক্ষ (RAJUK, CDA, KDA, RDA, CoxDA, GDA) এবং সরকারি প্রকিউরমেন্টের ডিজিটাল ইনভেস্টিগেশন</p>
         </header>
 
-        <!-- ফরেসনিক রুলবুক ম্যাট্রিক্স (ক্লিকযোগ্য করা হয়েছে) -->
+        <!-- ফরেসনিক রুলবুক ম্যাট্রিক্স -->
         <div class="evidence-section">
             <h3>e-GP Forensic Audit Rulebook & Engine ম্যাট্রিক্স (যেকোনো রুল ফিল্টার করতে ক্লিক করুন)</h3>
             <div class="evidence-grid">
@@ -208,7 +208,7 @@
         <div class="chart-grid">
             <div class="chart-box">
                 <h3>১. দুর্নীতির ধরন (Macro-analysis)</h3>
-                <p class="chart-desc">সিস্টেমে পাওয়া মূল ৮টি প্রাতিষ্ঠানিক ভায়োлеশন</p>
+                <p class="chart-desc">সিস্টেমে পাওয়া মূল ৮টি প্রাতিষ্ঠানিক ভায়োলেশন</p>
                 <div class="chart-container"><canvas id="violationChart"></canvas></div>
                 <div class="chart-explanation"><strong>কী নির্দেশ করে:</strong> ই-জিপি সিস্টেমে আইন ভাঙার জন্য কোন কৌশলগুলো ঠিকাদারেরা সবচেয়ে বেশি ব্যবহার করেছে তার পরিসংখ্যান চিত্র।</div>
             </div>
@@ -307,7 +307,7 @@
     <script>
         const jsonFileName = 'Procurement_Database.json';
         let globalTenderData = []; 
-        let activeRuleKey = null; // Track current clicked rule
+        let activeRuleKey = null; 
         
         let violationChartObj = null, syndicateChartObj = null, dropoutChartObj = null;
         let timelineChartObj = null, riskPieChartObj = null, agencyChartObj = null;
@@ -347,13 +347,10 @@
             });
         }
 
-        // NEW: Interactive Rule Clicking Function
         function filterByRule(ruleKey, element) {
-            // Remove active class from all rules
             document.querySelectorAll('.evidence-item').forEach(el => el.classList.remove('active-rule'));
             
             if (activeRuleKey === ruleKey) {
-                // If clicking the same rule again, reset filter
                 resetRuleFilter();
                 return;
             }
@@ -361,16 +358,13 @@
             activeRuleKey = ruleKey;
             element.classList.add('active-rule');
 
-            // Show Banner
             const banner = document.getElementById('filterBanner');
             const bannerText = document.getElementById('bannerText');
             const ruleName = element.querySelector('strong').innerText;
-            bannerText.innerText = `সিস্টেম ফিল্টার অ্যাক্টিভ: শুধুমাত্র "${ruleName}" এর ডেটা দেখানো হচ্ছে`;
+            bannerText.innerText = `ফিল্টার অ্যাক্টিভ: শুধুমাত্র "${ruleName}" এর তথ্য অনুসন্ধান করা হচ্ছে`;
             banner.style.display = 'flex';
 
-            filterData(); // Re-trigger filtering
-            
-            // Auto scroll down smoothly to ledger section to show results
+            filterData(); 
             document.getElementById('filterBanner').scrollIntoView({ behavior: 'smooth' });
         }
 
@@ -386,27 +380,37 @@
             const risk = document.getElementById('riskFilter').value;
             
             const filtered = globalTenderData.filter(t => {
-                // 1. Dropdown Risk Filter
                 const matchRisk = risk === 'ALL' || t.Risk_Level === risk;
-                
-                // 2. Search Text Input Filter
                 const searchString = Object.values(t).join(' ').toLowerCase();
                 const matchTerm = searchString.includes(term);
                 
-                // 3. NEW: Interactive Forensic Rule Filter Logic
+                // ULTIMATE REGEX FILTER - SEARCHES ENTIRE CELL REGARDLESS OF THE POSITION OR SPACING
                 let matchRule = true;
                 if (activeRuleKey) {
-                    const reason = (t.Red_Flag_Reason || "").toLowerCase();
+                    const rReason = (t.Red_Flag_Reason || "").toLowerCase();
                     const exp = (t.Extracted_Specific_Experience || "").toLowerCase();
-                    
-                    if (activeRuleKey === 'owner') matchRule = reason.includes("beneficial owner") || reason.includes("owner") || reason.includes("গোপন");
-                    else if (activeRuleKey === 'split') matchRule = reason.includes("splitting") || reason.includes("বিভাজন") || reason.includes("lot");
-                    else if (activeRuleKey === 'cpv') matchRule = reason.includes("cpv") || reason.includes("ক্যাটাগরি");
-                    else if (activeRuleKey === 'tailored') matchRule = /\d+\.\d+/.test(exp) || /\d{2,}\s*\(/.test(exp) || reason.includes("조건") || reason.includes("criteria");
-                    else if (activeRuleKey === 'monopoly') matchRule = parseInt(t.Responsive_Tenders) === 1 || reason.includes("single") || reason.includes("একক");
-                    else if (activeRuleKey === 'outlier') matchRule = reason.includes("outlier") || reason.includes("অস্বাভাবিক");
-                    else if (activeRuleKey === 'meeting') matchRule = reason.includes("meeting") || reason.includes("মিটিং");
-                    else if (activeRuleKey === 'rigging') matchRule = (parseInt(t.Tenders_Sold) > parseInt(t.Tenders_Received) * 2) || reason.includes("rigging") || reason.includes("dropout");
+                    const riskLvl = (t.Risk_Level || "").toUpperCase();
+                    const sold = parseInt(t.Tenders_Sold) || 0;
+                    const received = parseInt(t.Tenders_Received) || 0;
+                    const resp = parseInt(t.Responsive_Tenders) || 0;
+
+                    if (activeRuleKey === 'owner') {
+                        matchRule = /owner|beneficial|গোপন|itt\s*5\.14/i.test(rReason) || (riskLvl === 'HIGH' && /itt/i.test(rReason));
+                    } else if (activeRuleKey === 'split') {
+                        matchRule = /split|lot|বিভাজন/i.test(rReason);
+                    } else if (activeRuleKey === 'cpv') {
+                        matchRule = /cpv|vocabulary|کد|ক্যাটাগরি|কোড/i.test(rReason);
+                    } else if (activeRuleKey === 'tailored') {
+                        matchRule = /\d+\.\d+/.test(exp) || /\d{2,}\s*\(/.test(exp) || /criteria|শর্ত|experience|যোগ্যতা/i.test(rReason);
+                    } else if (activeRuleKey === 'monopoly') {
+                        matchRule = resp === 1 || /single|একক|monopoly|50\.6/i.test(rReason);
+                    } else if (activeRuleKey === 'outlier') {
+                        matchRule = /outlier|অস্বাভাবিক|abnormally|low|high/i.test(rReason);
+                    } else if (activeRuleKey === 'meeting') {
+                        matchRule = /meeting|মিটিং|pre-tender/i.test(rReason);
+                    } else if (activeRuleKey === 'rigging') {
+                        matchRule = (sold > received * 1.3) || /rigging|dropout|collusion|কারসাজি/i.test(rReason);
+                    }
                 }
 
                 return matchRisk && matchTerm && matchRule;

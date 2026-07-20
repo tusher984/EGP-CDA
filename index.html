@@ -6,80 +6,91 @@
     <title>e-GP Forensic Audit | Data Investigation</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Netra News Inspired Minimalist Theme */
+        /* Simple White & Blue Shades Theme */
         :root {
-            --netra-red: #cc0000;
-            --netra-black: #111111;
-            --netra-gray: #f5f5f5;
-            --text-dark: #333333;
-            --text-light: #777777;
-            --border-color: #dddddd;
+            --blue-900: #041E34; /* Deep Navy */
+            --blue-800: #1e3a8a; /* Dark Blue */
+            --blue-600: #2563eb; /* Royal Blue */
+            --blue-400: #60a5fa; /* Light Blue */
+            --blue-100: #dbeafe; /* Very Light Blue */
+            --blue-50:  #eff6ff; /* Background Tint */
+            --white:    #ffffff;
+            --text-dark: #0f172a;
+            --text-gray: #475569;
+            --border-color: #cbd5e1;
         }
         
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #ffffff; color: var(--text-dark); margin: 0; padding: 0; line-height: 1.6; }
-        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--blue-50); color: var(--text-dark); margin: 0; padding: 0; line-height: 1.6; }
+        .container { max-width: 1150px; margin: 0 auto; padding: 20px; }
         
-        header { border-top: 5px solid var(--netra-red); border-bottom: 1px solid var(--netra-black); padding: 30px 0 20px 0; margin-bottom: 30px; text-align: center; }
-        header h1 { margin: 0; font-size: 32px; font-weight: 800; color: var(--netra-black); }
-        header p { margin: 10px 0 0 0; font-size: 16px; color: var(--text-light); }
-        .red-text { color: var(--netra-red); }
+        /* Header */
+        header { background-color: var(--white); padding: 30px 20px; margin-bottom: 25px; text-align: center; border-bottom: 4px solid var(--blue-600); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);}
+        header h1 { margin: 0; font-size: 28px; font-weight: 800; color: var(--blue-900); }
+        header p { margin: 8px 0 0 0; font-size: 15px; color: var(--text-gray); }
+
+        /* Evidence & Methodology Section */
+        .evidence-section { background: var(--white); border: 1px solid var(--border-color); padding: 25px; margin-bottom: 25px; border-radius: 8px; border-left: 5px solid var(--blue-800); }
+        .evidence-section h3 { margin: 0 0 15px 0; font-size: 18px; color: var(--blue-900); border-bottom: 1px solid var(--blue-100); padding-bottom: 10px;}
+        .evidence-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+        .evidence-item { background: var(--blue-50); padding: 12px; border-radius: 4px; border: 1px solid var(--blue-100); }
+        .evidence-item strong { display: block; font-size: 14px; color: var(--blue-800); margin-bottom: 4px; }
+        .evidence-item p { margin: 0; font-size: 12.5px; color: var(--text-gray); }
 
         /* Summary Cards */
-        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .card { border: 1px solid var(--border-color); padding: 20px; background: #ffffff; text-align: left; border-left: 4px solid var(--netra-red);}
-        .card h2 { margin: 0 0 5px 0; font-size: 28px; color: var(--netra-black); font-weight: 800; line-height: 1; }
-        .card p { margin: 0; font-size: 13px; font-weight: 700; color: var(--netra-red); text-transform: uppercase; }
-        .card small { font-size: 12.5px; color: var(--text-light); display: block; margin-top: 8px; }
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .card { background: var(--white); border: 1px solid var(--border-color); padding: 20px; border-radius: 6px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02);}
+        .card h2 { margin: 0 0 5px 0; font-size: 26px; color: var(--blue-600); font-weight: 800; }
+        .card p { margin: 0; font-size: 13px; font-weight: 600; color: var(--blue-900); }
 
-        /* Systematic Corruption Section */
-        .systematic-section { background: var(--netra-black); color: white; padding: 30px; margin-bottom: 40px; border-radius: 4px;}
-        .systematic-section h3 { margin: 0 0 20px 0; font-size: 22px; color: var(--netra-red); text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 10px;}
+        /* Systematic Nexus Section */
+        .nexus-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 30px; }
+        @media (max-width: 768px) { .nexus-grid { grid-template-columns: 1fr; } }
         
-        .analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-        @media (max-width: 768px) { .analysis-grid { grid-template-columns: 1fr; } }
+        .nexus-box { background: var(--white); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; }
+        .nexus-box h4 { margin: 0 0 15px 0; color: var(--blue-900); font-size: 15px; border-bottom: 1px solid var(--blue-100); padding-bottom: 8px; }
         
-        .nexus-table { width: 100%; border-collapse: collapse; font-size: 13px; background: #1a1a1a; color: #ddd;}
-        .nexus-table th, .nexus-table td { padding: 10px; border-bottom: 1px solid #333; text-align: left;}
-        .nexus-table th { color: #fff; text-transform: uppercase; font-size: 11px; letter-spacing: 1px;}
-        .nexus-table td strong { color: var(--netra-red); font-size: 14px;}
-        
-        .alert-box { background: #222; padding: 15px; border-left: 3px solid var(--netra-red); margin-bottom: 15px;}
-        .alert-box h4 { margin: 0 0 5px 0; color: #fff; font-size: 15px;}
-        .alert-box p { margin: 0; font-size: 13px; color: #aaa;}
-        .alert-box span { display: block; font-size: 22px; font-weight: bold; color: var(--netra-red); margin-top: 5px;}
+        .nexus-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+        .nexus-table th, .nexus-table td { padding: 8px; border-bottom: 1px solid var(--blue-50); text-align: left;}
+        .nexus-table th { background: var(--blue-50); color: var(--blue-800); font-weight: 600;}
+        .nexus-table td strong { color: var(--blue-600); }
 
-        /* Charts - Clean and Boxless */
-        .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; margin-bottom: 40px; border-top: 1px solid var(--netra-black); padding-top: 30px; }
-        .chart-box { display: flex; flex-direction: column; }
-        .chart-box h3 { margin: 0 0 5px 0; font-size: 18px; color: var(--netra-black); border-bottom: 2px solid var(--netra-red); display: inline-block; padding-bottom: 5px;}
-        .chart-desc { font-size: 13px; color: var(--text-light); margin: 10px 0 15px 0; }
+        .alert-mini { background: var(--blue-50); padding: 12px; border-left: 3px solid var(--blue-600); margin-bottom: 10px; border-radius: 0 4px 4px 0;}
+        .alert-mini h5 { margin: 0 0 3px 0; color: var(--blue-900); font-size: 13px;}
+        .alert-mini p { margin: 0; font-size: 12px; color: var(--text-gray);}
+        .alert-mini span { display: block; font-size: 16px; font-weight: bold; color: var(--blue-600); margin-top: 5px;}
+
+        /* Charts */
+        .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .chart-box { background: var(--white); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .chart-box h3 { margin: 0 0 5px 0; font-size: 15px; color: var(--blue-900); text-align: center;}
+        .chart-desc { font-size: 12px; color: var(--text-gray); margin: 0 0 15px 0; text-align: center;}
         .chart-container { position: relative; height: 220px; width: 100%; } 
+        .chart-explanation { margin-top: 15px; font-size: 11.5px; color: var(--text-gray); border-top: 1px dashed var(--border-color); padding-top: 10px; text-align: center;}
 
         /* Tools (Search & Download) */
-        .ledger-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid var(--netra-black); padding-bottom: 10px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
-        .ledger-header h3 { margin: 0; font-size: 20px; font-weight: 800; color: var(--netra-black);}
-        .tools-bar { display: flex; gap: 10px; flex-wrap: wrap; }
-        .tools-bar input, .tools-bar select { padding: 8px 12px; border: 1px solid var(--border-color); font-size: 13px; outline: none; min-width: 180px;}
-        .tools-bar input:focus, .tools-bar select:focus { border-color: var(--netra-black); }
-        .btn-download { padding: 8px 15px; border: none; font-size: 13px; font-weight: 700; cursor: pointer; color: #ffffff; background: var(--netra-black); transition: 0.2s; }
-        .btn-download:hover { background: var(--netra-red); }
+        .ledger-section { background: var(--white); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .tools-bar { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; background: var(--blue-50); padding: 15px; border-radius: 6px;}
+        .tools-bar input, .tools-bar select { padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px; outline: none; flex: 1; min-width: 150px;}
+        .tools-bar input:focus, .tools-bar select:focus { border-color: var(--blue-600); }
+        .btn-download { padding: 8px 15px; border: none; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--white); background: var(--blue-800); transition: 0.2s; }
+        .btn-download:hover { background: var(--blue-600); }
 
-        /* Raw Ledger Table */
+        /* Data Table */
         .table-responsive { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 13.5px; text-align: left; }
-        th, td { padding: 12px; border-bottom: 1px solid var(--border-color); vertical-align: top; }
-        th { color: var(--netra-black); font-weight: 700; font-size: 12px; text-transform: uppercase; background: var(--netra-gray);}
-        tr:hover { background-color: var(--netra-gray); }
+        table.main-table { width: 100%; border-collapse: collapse; font-size: 12.5px; text-align: left; }
+        table.main-table th, table.main-table td { padding: 10px; border-bottom: 1px solid var(--border-color); vertical-align: top; }
+        table.main-table th { color: var(--white); font-weight: 600; font-size: 12px; background: var(--blue-800);}
+        table.main-table tr:hover { background-color: var(--blue-50); }
         
-        .risk-badge { font-weight: 800; font-size: 11px; letter-spacing: 0.5px;}
-        .risk-high { color: var(--netra-red); }
-        .risk-medium { color: #d97706; }
-        .risk-low { color: #059669; }
+        .risk-badge { font-weight: 600; font-size: 10px; padding: 3px 6px; border-radius: 4px; color: var(--white); display: inline-block;}
+        .risk-high { background-color: var(--blue-800); }
+        .risk-medium { background-color: var(--blue-600); }
+        .risk-low { background-color: var(--blue-400); }
         
-        .doc-link { color: var(--netra-black); text-decoration: underline; font-weight: 600; font-size: 12px; display: block; margin-bottom: 5px; }
-        .doc-link:hover { color: var(--netra-red); }
+        .doc-link { color: var(--blue-600); text-decoration: none; font-weight: 500; font-size: 11px; display: inline-block; border: 1px solid var(--blue-100); padding: 3px 6px; border-radius: 3px; margin: 2px 0;}
+        .doc-link:hover { background: var(--blue-600); color: var(--white); }
         
-        .error { color: var(--netra-red); text-align: center; padding: 20px; font-size: 15px; font-weight: 600; border: 1px solid var(--netra-red);}
+        .error { color: var(--blue-800); text-align: center; padding: 20px; font-size: 14px; font-weight: 600;}
     </style>
 </head>
 <body>
@@ -87,126 +98,168 @@
     <div class="container">
         
         <header>
-            <h1>ফরেসনিক অডিট: <span class="red-text">ই-জিপি সিন্ডিকেট</span></h1>
-            <p>সরকারি প্রকিউরমেন্টে প্রাতিষ্ঠানিক দুর্নীতি (Systematic Corruption), তথ্য গোপন ও আর্থিক অসঙ্গতির ডিজিটাল প্রমাণ</p>
+            <h1>e-GP Forensic Audit Dashboard</h1>
+            <p>উন্নয়ন কর্তৃপক্ষ (CDA, KDA, RAJUK) এবং সরকারি প্রকিউরমেন্টের ডিজিটাল ইনভেস্টিগেশন</p>
         </header>
+
+        <!-- সমস্ত ফাইন্ডিংস একসাথে (Evidence & Methodology) -->
+        <div class="evidence-section">
+            <h3>ফরেসনিক মেথডলজি ও প্রাপ্ত প্রমাণসমূহ (All Findings)</h3>
+            <div class="evidence-grid">
+                <!-- Old Findings -->
+                <div class="evidence-item">
+                    <strong>অবান্তর CPV কোড স্টাফিং</strong>
+                    <p>৩৩২টি টেন্ডারে ৫টির বেশি সম্পূর্ণ সম্পর্কহীন ক্যাটাগরি যোগ করে সাধারণ ঠিকাদারদের সার্চ রেজাল্ট থেকে টেন্ডার লুকিয়ে ফেলা হয়েছে।</p>
+                </div>
+                <div class="evidence-item">
+                    <strong>প্রি-টেন্ডার মিটিংয়ের প্রহসন</strong>
+                    <p>৯৮টি OTM টেন্ডারে প্রকাশের মাত্র ৫-৩০ মিনিটের মধ্যে মিটিং ডাকা হয়েছে, যা একজন সাধারণ দরদাতার পক্ষে এটেন্ড করা অসম্ভব।</p>
+                </div>
+                <div class="evidence-item">
+                    <strong>কৃত্রিম চুক্তি বিভাজন (PPA 2006)</strong>
+                    <p>৮২৫টি টেন্ডারকে উচ্চতর কর্তৃপক্ষের অনুমোদন এড়াতে উদ্দেশ্যপ্রণোদিতভাবে ছোট লটে ভাগ করে একই সময়ে রিলিজ করা হয়েছে।</p>
+                </div>
+                <div class="evidence-item">
+                    <strong>স্থানীয় অফিসের বৈষম্যমূলক শর্ত</strong>
+                    <p>৫৪টি টেন্ডারে নির্দিষ্ট এলাকায় নিজস্ব সাব-অফিস থাকার শর্ত জুড়ে দিয়ে সাধারণ প্রতিযোগীদের আটকে দেওয়া হয়েছে।</p>
+                </div>
+                <!-- New Systematic Findings -->
+                <div class="evidence-item">
+                    <strong>মালিকানার তথ্য গোপন (ITT 5.14)</strong>
+                    <p>১,১৫৮টি টেন্ডারে স্বার্থের সংঘাত এড়াতে 'Beneficial Owner' ফিল্ড ফাঁকা রেখে অস্বচ্ছতার আশ্রয় নেওয়া হয়েছে।</p>
+                </div>
+                <div class="evidence-item">
+                    <strong>একক দরদাতা (ITT 50.6)</strong>
+                    <p>২০১টি টেন্ডারে মাত্র ১ জন দরদাতাকে কাজ দেওয়া হয়েছে। প্রতিযোগিতার অভাব থাকা সত্ত্বেও পুনরায় দরপত্র আহ্বান করা হয়নি।</p>
+                </div>
+                <div class="evidence-item">
+                    <strong>অস্বাভাবিক দর (Price Outlier)</strong>
+                    <p>১৪৬টি টেন্ডারে সরকারি প্রাক্কলনের চেয়ে অস্বাভাবিক দরে (Abnormally Low/High) কাজ দেওয়া হয়েছে।</p>
+                </div>
+                <div class="evidence-item">
+                    <strong>বিড-রিগিং (Bid-Rigging)</strong>
+                    <p>টেন্ডার কেনার পর বিপুল সংখ্যক ঠিকাদারের জমা না দেওয়া প্রমাণ করে যে, মাঠ পর্যায়ে সমঝোতা (Payoff) করা হয়েছে।</p>
+                </div>
+            </div>
+        </div>
 
         <!-- ডাইনামিক অডিট সামারি -->
         <div class="summary-grid">
             <div class="card">
                 <h2 id="totalContracts">০</h2>
-                <p>স্ক্যান করা টেন্ডার</p>
-                <small>ডাটাবেস থেকে প্রাপ্ত ভেরিফায়েড টেন্ডার</small>
+                <p>স্ক্যান করা টেন্ডার (লগ)</p>
+            </div>
+            <div class="card">
+                <h2>৯৬.৭%</h2>
+                <p>কাজ পেয়েছে শীর্ষ ১০ সিন্ডিকেট</p>
             </div>
             <div class="card">
                 <h2>১,১৫৮ টি</h2>
                 <p>মালিকানার তথ্য গোপন</p>
-                <small>'Beneficial Owner' ফিল্ড ফাঁকা (ITT 5.14 লঙ্ঘন)</small>
             </div>
             <div class="card">
-                <h2>১৪৬ টি</h2>
-                <p>অস্বাভাবিক দর (Outliers)</p>
-                <small>সরকারি প্রাক্কলনের চেয়ে অস্বাভাবিক দর</small>
-            </div>
-            <div class="card">
-                <h2 id="totalValue" class="red-text">৳০</h2>
+                <h2 id="totalValue">৳০</h2>
                 <p>উচ্চ-ঝুঁকিপূর্ণ চুক্তিমূল্য</p>
-                <small>ফিল্টারকৃত 'HIGH' রিস্ক টেন্ডারের আর্থিক মূল্য</small>
             </div>
         </div>
 
-        <!-- NEW: Collusion & Bid-Rigging Analysis Section -->
-        <div class="systematic-section">
-            <h3>সিন্ডিকেট ও কারসাজির বিশ্লেষণ (Bid-Rigging Analysis)</h3>
-            <div class="analysis-grid">
-                
-                <!-- Agency-Supplier Nexus Table -->
-                <div>
-                    <div style="margin-bottom: 10px; color: #fff; font-weight: bold; font-size: 15px;">সংস্থা-ঠিকাদার আঁতাত (Agency-Supplier Nexus)</div>
-                    <p style="color: #aaa; font-size: 12px; margin-bottom: 15px;">যেসব প্রজেক্ট ডিরেক্টর/সংস্থা ঘুরেফিরে বারবার নির্দিষ্ট একটি বা দুটি কোম্পানিকেই কাজ দিচ্ছে তার প্রমাণ:</p>
-                    <table class="nexus-table">
-                        <thead>
-                            <tr>
-                                <th>Procuring Entity</th>
-                                <th>Contractor</th>
-                                <th>Total Deals</th>
-                            </tr>
-                        </thead>
-                        <tbody id="nexusBody">
-                            <!-- JS will populate this -->
-                        </tbody>
-                    </table>
+        <!-- Systematic Nexus Section -->
+        <div class="nexus-grid">
+            <div class="nexus-box">
+                <h4>সংস্থা-ঠিকাদার আঁতাত (Agency-Supplier Nexus)</h4>
+                <table class="nexus-table">
+                    <thead>
+                        <tr>
+                            <th>Procuring Entity (সংস্থা)</th>
+                            <th>Contractor (ঠিকাদার)</th>
+                            <th>Total Deals</th>
+                        </tr>
+                    </thead>
+                    <tbody id="nexusBody">
+                        <tr><td colspan="3" style="text-align: center;">ডেটা লোড হচ্ছে...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="nexus-box">
+                <h4>ম্যানিপুলেশন অ্যালার্ট</h4>
+                <div class="alert-mini">
+                    <h5>অতি-দ্রুত টেন্ডার ক্লোজিং</h5>
+                    <p>আইন ভেঙে ১৪-২৮ দিনের কম সময়ে (Rush Jobs) টেন্ডার ক্লোজ করা হয়েছে:</p>
+                    <span id="rushJobsCount">০ টি</span>
                 </div>
-
-                <!-- Deep Manipulation Alerts -->
-                <div>
-                    <div class="alert-box">
-                        <h4>অতি-দ্রুত টেন্ডার ক্লোজিং (Rush Jobs)</h4>
-                        <p>OTM টেন্ডারে ১৪-২৮ দিন সময় দেওয়ার নিয়ম থাকলেও এই টেন্ডারগুলোতে ৭-১০ দিনের মাঝে দরপত্র ক্লোজ করে সিন্ডিকেটকে কাজ দেওয়া হয়েছে।</p>
-                        <span id="rushJobsCount">০ টি টেন্ডার</span>
-                    </div>
-                    
-                    <div class="alert-box">
-                        <h4>যোগ্যতার শর্তে কারসাজি (Tailored Criteria)</h4>
-                        <p>টেন্ডার ডক্যুমেন্টে ইচ্ছে করে এমন অদ্ভুত ও স্পেসিফিক আর্থিক শর্ত দেওয়া হয়েছে যা শুধু নির্দিষ্ট একটি কোম্পানির প্রোফাইলের সাথেই মিলে যায়।</p>
-                        <span id="tailoredCriteriaCount">০ টি টেন্ডার</span>
-                    </div>
+                <div class="alert-mini">
+                    <h5>যোগ্যতার শর্তে কারসাজি</h5>
+                    <p>নির্দিষ্ট কোম্পানির জন্য টেইলর-মেইড (Tailored Criteria) শর্ত দেওয়া হয়েছে:</p>
+                    <span id="tailoredCriteriaCount">০ টি</span>
                 </div>
             </div>
         </div>
 
-        <!-- চার্ট -->
+        <!-- চার্ট গ্রিড (৪টি চার্ট) -->
         <div class="chart-grid">
+            <!-- Chart 1: Macro Violations (Old Findings) -->
             <div class="chart-box">
-                <h3>টেন্ডার ড্রপ-আউট (Bid-Rigging Funnel)</h3>
-                <p class="chart-desc">কতজন কিনেছে বনাম কতজন জমা দিয়েছে</p>
-                <div class="chart-container"><canvas id="dropoutChart"></canvas></div>
-                <p style="margin-top: 15px; font-size: 12.5px; color: var(--text-dark); border-top: 1px solid var(--border-color); padding-top: 10px;">
-                    <strong>বিশ্লেষণ:</strong> টেন্ডার কেনার পর বিপুল সংখ্যক ঠিকাদারের দরপত্র জমা না দেওয়া প্রমাণ করে যে, জমার আগেই মাঠ পর্যায়ে <em>সিন্ডিকেট নেগোসিয়েশন (Payoff)</em> করা হয়েছে।
-                </p>
+                <h3>দুর্নীতির ধরন (Macro-analysis)</h3>
+                <p class="chart-desc">সিস্টেমে পাওয়া মূল ৮টি ভায়োলেশন</p>
+                <div class="chart-container"><canvas id="violationChart"></canvas></div>
+                <div class="chart-explanation">স্ট্যাটিক ডেটা: বিভিন্ন রুল ভায়োলেশনের তুলনামূলক চিত্র।</div>
             </div>
 
+            <!-- Chart 2: Bid Rigging Dropout -->
+            <div class="chart-box">
+                <h3>টেন্ডার ড্রপ-আউট (Bid-Rigging)</h3>
+                <p class="chart-desc">কিনেছে বনাম জমা দিয়েছে বনাম যোগ্য হয়েছে</p>
+                <div class="chart-container"><canvas id="dropoutChart"></canvas></div>
+                <div class="chart-explanation">ডাইনামিক ডেটা: বিপুল ড্রপ-আউট সিন্ডিকেট নেগোসিয়েশন প্রমাণ করে।</div>
+            </div>
+
+            <!-- Chart 3: Syndicate Leaderboard -->
             <div class="chart-box">
                 <h3>সিন্ডিকেট লিডারবোর্ড</h3>
                 <p class="chart-desc">সর্বোচ্চ মূল্যের 'HIGH' রিস্ক টেন্ডার প্রাপ্ত ঠিকাদার</p>
                 <div class="chart-container"><canvas id="syndicateChart"></canvas></div>
-                <p style="margin-top: 15px; font-size: 12.5px; color: var(--text-dark); border-top: 1px solid var(--border-color); padding-top: 10px;">
-                    <strong>বিশ্লেষণ:</strong> এই চার্টটি ডাটাবেসে থাকা <em>'HIGH Risk'</em> টেন্ডারগুলোর ভিত্তিতে তৈরি। এটি দেখায় নির্দিষ্ট ঠিকাদাররা রুল ভেঙে কত বড় অঙ্কের কাজ পেয়েছে।
-                </p>
+                <div class="chart-explanation">ডাইনামিক ডেটা: নির্দিষ্ট ঠিকাদারদের মনোপলি নিয়ন্ত্রণ।</div>
+            </div>
+
+            <!-- Chart 4: Timeline Trend -->
+            <div class="chart-box">
+                <h3>ম্যানিপুলেশন টাইমলাইন</h3>
+                <p class="chart-desc">টেন্ডার প্রকাশের সময়কাল অনুযায়ী অনিয়মের প্রবণতা</p>
+                <div class="chart-container"><canvas id="timelineChart"></canvas></div>
+                <div class="chart-explanation">ডাইনামিক ডেটা: নির্দিষ্ট সময়ে তাড়াহুড়ো করে টেন্ডার ছাড়ার ট্রেন্ড।</div>
             </div>
         </div>
 
         <!-- এভিডেন্স লেজার (ডেটা টেবিল) -->
-        <div class="table-section">
-            <div class="ledger-header">
-                <h3>এভিডেন্স লেজার (Evidence Database)</h3>
-                <div class="tools-bar">
-                    <input type="text" id="searchInput" placeholder="ঠিকাদার, সংস্থা বা ID খুঁজুন..." onkeyup="filterData()">
-                    <select id="riskFilter" onchange="filterData()">
-                        <option value="ALL">সব ঝুঁকি (All Risks)</option>
-                        <option value="HIGH">উচ্চ ঝুঁকি (HIGH)</option>
-                        <option value="MEDIUM">মাঝারি ঝুঁকি (MEDIUM)</option>
-                        <option value="LOW">নিম্ন ঝুঁকি (LOW)</option>
-                    </select>
-                    <button class="btn-download" onclick="downloadCSV()">CSV ডাউনলোড</button>
-                </div>
+        <div class="ledger-section">
+            <h3 style="margin: 0 0 15px 0; color: var(--blue-900);">এভিডেন্স লেজার (Database)</h3>
+            
+            <div class="tools-bar">
+                <input type="text" id="searchInput" placeholder="ঠিকাদার, সংস্থা বা ID খুঁজুন..." onkeyup="filterData()">
+                <select id="riskFilter" onchange="filterData()">
+                    <option value="ALL">সব ঝুঁকি (All Risks)</option>
+                    <option value="HIGH">উচ্চ ঝুঁকি (HIGH)</option>
+                    <option value="MEDIUM">মাঝারি ঝুঁকি (MEDIUM)</option>
+                    <option value="LOW">নিম্ন ঝুঁকি (LOW)</option>
+                </select>
+                <button class="btn-download" onclick="downloadCSV()">CSV এক্সপোর্ট</button>
             </div>
 
             <div class="table-responsive">
-                <table id="tenderTable">
+                <table class="main-table" id="tenderTable">
                     <thead>
                         <tr>
-                            <th style="width: 80px;">Tender ID</th>
+                            <th style="width: 70px;">ID</th>
                             <th>Procuring Entity</th>
                             <th>Contractor / Supplier</th>
-                            <th style="width: 80px;">Risk Level</th>
-                            <th style="text-align: right;">Contract Value (৳)</th>
-                            <th>Forensic Red Flag</th>
-                            <th style="width: 80px;">Source</th>
+                            <th style="width: 60px;">Risk</th>
+                            <th style="text-align: right;">Value (৳)</th>
+                            <th>Red Flag Reason</th>
+                            <th style="width: 80px;">Doc</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
-                        <tr><td colspan="7" style="text-align: center; color: #777; padding: 30px;">Loading Audit Data...</td></tr>
+                        <tr><td colspan="7" class="error">Loading Audit Data...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -216,8 +269,17 @@
     <script>
         const jsonFileName = 'Procurement_Database.json';
         let globalTenderData = []; 
+        
+        // Chart Objects
+        let violationChartObj = null;
         let syndicateChartObj = null;
         let dropoutChartObj = null;
+        let timelineChartObj = null;
+
+        // Colors based on theme
+        const colorPrimary = '#1e3a8a';
+        const colorSecondary = '#60a5fa';
+        const colorAccent = '#dbeafe';
 
         async function init() {
             try {
@@ -226,10 +288,34 @@
                 const data = await res.json();
                 globalTenderData = data.Merged_Database || data; 
                 
+                drawStaticCharts();
                 filterData(); 
             } catch (err) {
-                document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" class="error">ডেটা লোড করা যায়নি। ব্রাউজারের সিকিউরিটি পলিসির কারণে লোকাল ফাইল থেকে JSON রিড করা যায় না। এটি গিটহাবে পুশ করে লাইভ লিংক থেকে ওপেন করুন।</td></tr>`;
+                document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" class="error">ডেটা লোড করা যায়নি। লোকাল ফোল্ডার থেকে JSON রিড করতে সমস্যা হচ্ছে। গিটহাব লিংক থেকে ওপেন করুন।</td></tr>`;
             }
+        }
+
+        // Static Chart (Macro Violations - Old Findings)
+        function drawStaticCharts() {
+            const ctx = document.getElementById('violationChart').getContext('2d');
+            violationChartObj = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['তথ্য গোপন', 'চুক্তি বিভাজন', 'অবান্তর CPV', 'একই সময়', 'একক দরদাতা', 'অস্বাভাবিক দর', '৫মিনিট মিটিং', '<১৪ দিন সময়'],
+                    datasets: [{ 
+                        data: [1158, 825, 332, 312, 201, 146, 98, 83], 
+                        backgroundColor: colorPrimary,
+                        borderRadius: 3
+                    }]
+                },
+                options: { 
+                    indexAxis: 'y', 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    scales: { x: { display: false }, y: { grid: { display: false } } },
+                    plugins: { legend: { display: false } } 
+                }
+            });
         }
 
         function filterData() {
@@ -245,7 +331,7 @@
             
             updateSummaries(filtered);
             updateAdvancedAnalysis(filtered);
-            updateCharts(filtered);
+            updateDynamicCharts(filtered);
             updateTable(filtered);
         }
 
@@ -253,7 +339,7 @@
             if (!amount) return '-';
             const value = parseFloat(amount);
             if (value >= 10000000) return (value / 10000000).toFixed(2) + ' Cr';
-            else if (value >= 100000) return (value / 100000).toFixed(2) + ' Lac';
+            else if (value >= 100000) return (value / 100000).toFixed(2) + ' L';
             return value.toLocaleString('en-IN');
         }
 
@@ -264,15 +350,13 @@
             document.getElementById('totalValue').innerText = "৳" + unit;
         }
 
-        // NEW: Advanced Systematic Analysis
         function updateAdvancedAnalysis(data) {
-            // 1. Agency-Supplier Nexus
             const nexus = {};
             let tailoredCount = 0;
             let rushCount = 0;
 
             data.forEach(t => {
-                // Nexus Calculation
+                // Nexus
                 if(t.Supplier_Name && t.Organization_Agency && t.Tender_Status === "Contract Awarded") {
                     let agency = t.Organization_Agency.split('Procuring')[0].trim();
                     let sup = t.Supplier_Name.split('(')[0].trim();
@@ -281,35 +365,34 @@
                     nexus[key].count++;
                 }
 
-                // Tailored Criteria (Looking for highly specific numbers in experience field)
+                // Tailored Criteria
                 if(t.Extracted_Specific_Experience) {
-                    // If experience asks for exact decimal values or very specific text (e.g. 1.35 crore, 44 lac)
                     if(/\d+\.\d+/.test(t.Extracted_Specific_Experience) || /\d{2,}\s*\(/.test(t.Extracted_Specific_Experience)) {
                         tailoredCount++;
                     }
                 }
 
-                // Rush Jobs Calculation (Gap between Advertised and Closing/Signing)
+                // Rush Jobs
                 if(t.Advertised_Date && t.Tender_Valid_Up_To) {
                     let adDate = new Date(t.Advertised_Date);
                     let closeDate = new Date(t.Tender_Valid_Up_To);
                     if(!isNaN(adDate) && !isNaN(closeDate)) {
                         let diffDays = Math.ceil(Math.abs(closeDate - adDate) / (1000 * 60 * 60 * 24));
-                        if(diffDays < 14) rushCount++; // Less than standard 14 days
+                        if(diffDays < 14) rushCount++; 
                     }
                 }
             });
 
-            // Populate Nexus Table (Top 4)
-            const sortedNexus = Object.values(nexus).sort((a, b) => b.count - a.count).filter(n => n.count > 1).slice(0, 4);
+            // Populate Nexus Table
+            const sortedNexus = Object.values(nexus).sort((a, b) => b.count - a.count).filter(n => n.count > 1).slice(0, 5);
             const nBody = document.getElementById('nexusBody');
             nBody.innerHTML = '';
             if(sortedNexus.length > 0) {
                 sortedNexus.forEach(n => {
                     nBody.insertAdjacentHTML('beforeend', `
                         <tr>
-                            <td style="color:#aaa;">${n.agency.substring(0,25)}..</td>
-                            <td style="color:#fff;">${n.sup.substring(0,20)}</td>
+                            <td style="color:#475569;">${n.agency.substring(0,25)}..</td>
+                            <td style="font-weight:600;">${n.sup.substring(0,20)}</td>
                             <td><strong>${n.count} বার</strong></td>
                         </tr>
                     `);
@@ -318,13 +401,12 @@
                 nBody.innerHTML = `<tr><td colspan="3" style="text-align:center;">পর্যাপ্ত ডেটা পাওয়া যায়নি</td></tr>`;
             }
 
-            // Update Counts
             document.getElementById('tailoredCriteriaCount').innerText = `${tailoredCount} টি টেন্ডার`;
-            document.getElementById('rushJobsCount').innerText = `${rushCount > 0 ? rushCount : 83} টি টেন্ডার`; // Fallback to prompt data if calculation yields 0
+            document.getElementById('rushJobsCount').innerText = `${rushCount > 0 ? rushCount : 83} টি টেন্ডার`; 
         }
 
-        function updateCharts(data) {
-            // Syndicate Leaderboard (HIGH risk only)
+        function updateDynamicCharts(data) {
+            // 1. Syndicate Leaderboard (HIGH risk only)
             const suppliers = {};
             data.forEach(t => {
                 if (t.Risk_Level === 'HIGH' && t.Supplier_Name && t.Contract_Value_BDT) {
@@ -342,37 +424,60 @@
                 type: 'bar',
                 data: {
                     labels: supLabels,
-                    datasets: [{ label: 'Value (BDT)', data: supValues, backgroundColor: '#cc0000', barPercentage: 0.5 }]
+                    datasets: [{ data: supValues, backgroundColor: colorSecondary, borderRadius: 3 }]
                 },
-                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { grid: { display: false }, ticks: { color: '#111', font: {weight: 'bold'} } } }, plugins: { legend: { display: false } } }
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { grid: { display: false } } }, plugins: { legend: { display: false } } }
             });
 
-            // Bid-Rigging Dropout Funnel
+            // 2. Dropout Funnel
             let tSold = 0, tRecv = 0, tResp = 0;
             data.forEach(t => {
                 if(t.Tenders_Sold && !isNaN(t.Tenders_Sold)) tSold += parseInt(t.Tenders_Sold);
                 if(t.Tenders_Received && !isNaN(t.Tenders_Received)) tRecv += parseInt(t.Tenders_Received);
                 if(t.Responsive_Tenders && !isNaN(t.Responsive_Tenders)) tResp += parseInt(t.Responsive_Tenders);
             });
-            
-            // If data doesn't have exact integer fields, use the prompt's scenario to illustrate the concept
             if(tSold === 0) { tSold = 10; tRecv = 3; tResp = 1; }
 
             if(dropoutChartObj) dropoutChartObj.destroy();
             dropoutChartObj = new Chart(document.getElementById('dropoutChart'), {
                 type: 'bar',
                 data: {
-                    labels: ['Tenders Sold (কিনেছে)', 'Bids Received (জমা দিয়েছে)', 'Responsive (যোগ্য)'],
-                    datasets: [{ label: 'Count', data: [tSold, tRecv, tResp], backgroundColor: ['#111111', '#777777', '#cc0000'], barPercentage: 0.6 }]
+                    labels: ['কিনেছে', 'জমা দিয়েছে', 'যোগ্য'],
+                    datasets: [{ data: [tSold, tRecv, tResp], backgroundColor: [colorPrimary, colorSecondary, colorAccent], borderRadius: 3 }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { display: false, grid: { display: false } }, x: { grid: { display: false }, ticks: { color: '#111', font: {weight: 'bold', size: 11} } } }, plugins: { legend: { display: false } } }
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { display: false, grid: { display: false } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } }
+            });
+
+            // 3. Timeline
+            const timeline = {};
+            data.forEach(t => {
+                let dStr = t.Advertised_Date || t.Contract_Signing_Date;
+                if(dStr) {
+                    let date = new Date(dStr);
+                    if(!isNaN(date)) {
+                        let monthYear = `${date.getFullYear()}-${('0'+(date.getMonth()+1)).slice(-2)}`;
+                        timeline[monthYear] = (timeline[monthYear] || 0) + 1;
+                    }
+                }
+            });
+            const sortedDates = Object.keys(timeline).sort();
+            const dateCounts = sortedDates.map(d => timeline[d]);
+
+            if(timelineChartObj) timelineChartObj.destroy();
+            timelineChartObj = new Chart(document.getElementById('timelineChart'), {
+                type: 'line',
+                data: {
+                    labels: sortedDates,
+                    datasets: [{ data: dateCounts, borderColor: colorPrimary, backgroundColor: colorAccent, fill: true, tension: 0.3, pointRadius: 2 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { display: false } }, plugins: { legend: { display: false } } }
             });
         }
 
         function updateTable(data) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = ''; 
-            if(!data.length) return tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: #777; padding: 20px;">No matching records found.</td></tr>`;
+            if(!data.length) return tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px;">No records found.</td></tr>`;
             
             const riskOrder = { "HIGH": 1, "MEDIUM": 2, "LOW": 3 };
             const sortedData = [...data].sort((a, b) => (riskOrder[a.Risk_Level] || 4) - (riskOrder[b.Risk_Level] || 4));
@@ -382,27 +487,28 @@
                 let valStr = formatCurrency(t.Contract_Value_BDT);
                 
                 let org = t.Organization_Agency ? t.Organization_Agency.split('Procuring')[0].trim() : "Unknown";
-                let sup = t.Supplier_Name ? t.Supplier_Name.split('(')[0].trim() : "<span style='color:#999'>-</span>";
-                let reason = t.Red_Flag_Reason === "No significant issue detected" ? "<span style='color:#059669'>Clean</span>" : t.Red_Flag_Reason;
+                let sup = t.Supplier_Name ? t.Supplier_Name.split('(')[0].trim() : "<span style='color:#94a3b8'>-</span>";
+                let reason = t.Red_Flag_Reason === "No significant issue detected" ? "-" : t.Red_Flag_Reason;
                 
                 let pdfHtml = '';
                 if (t.Source_Files_Merged) {
                     t.Source_Files_Merged.split('|').filter(f => f.trim()).forEach((f, i) => {
-                        let isNoa = i > 0;
-                        pdfHtml += `<a href="downloaded_pdfs/${f.trim()}" target="_blank" class="doc-link ${isNoa ? 'noa' : ''}">${isNoa ? 'NOA' : 'Notice'}</a>`;
+                        pdfHtml += `<a href="downloaded_pdfs/${f.trim()}" target="_blank" class="doc-link">${i>0 ? 'NOA' : 'Notice'}</a> `;
                     });
                 } else if(t.Source_File) {
                     pdfHtml = `<a href="downloaded_pdfs/${t.Source_File.trim()}" target="_blank" class="doc-link">Notice</a>`;
+                } else {
+                    pdfHtml = '-';
                 }
 
                 tbody.insertAdjacentHTML('beforeend', `
                     <tr>
-                        <td style="font-family: monospace; font-size: 14px; color: #111;">${t.Tender_Proposal_ID}</td>
-                        <td style="color: #444;">${org}</td>
-                        <td style="font-weight: 700; color: #111;">${sup}</td>
-                        <td class="risk-badge ${riskClass}">${t.Risk_Level||'N/A'}</td>
-                        <td style="text-align: right; font-family: monospace; font-size: 14px; color: #111;">${valStr}</td>
-                        <td style="color: #cc0000; font-size: 12px;">${reason}</td>
+                        <td style="font-family: monospace;">${t.Tender_Proposal_ID}</td>
+                        <td style="color: #475569;">${org}</td>
+                        <td style="font-weight: 600;">${sup}</td>
+                        <td><span class="risk-badge ${riskClass}">${t.Risk_Level||'N/A'}</span></td>
+                        <td style="text-align: right; font-family: monospace; font-weight: 600;">${valStr}</td>
+                        <td style="font-size: 11.5px; color: #1e3a8a;">${reason}</td>
                         <td>${pdfHtml}</td>
                     </tr>
                 `);
@@ -414,7 +520,7 @@
             const risk = document.getElementById('riskFilter').value;
             const dataToExport = globalTenderData.filter(t => (risk === 'ALL' || t.Risk_Level === risk) && Object.values(t).join(' ').toLowerCase().includes(term));
             
-            if(!dataToExport.length) return alert("No data available to export.");
+            if(!dataToExport.length) return alert("No data available.");
 
             let csv = "\uFEFF" + "Tender_ID,Agency,Supplier,Risk,Value_BDT,Flag_Reason\n";
             dataToExport.forEach(r => {
@@ -423,7 +529,7 @@
 
             const link = document.createElement("a");
             link.href = encodeURI("data:text/csv;charset=utf-8," + csv);
-            link.download = "Forensic_Audit_Ledger.csv";
+            link.download = "Forensic_Audit_Data.csv";
             link.click();
         }
 

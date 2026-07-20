@@ -123,7 +123,7 @@
                     <strong>স্থানীয় অফিসের বৈষম্যমূলক শর্ত</strong>
                     <p>৫৪টি টেন্ডারে নির্দিষ্ট এলাকায় নিজস্ব সাব-অফিস থাকার শর্ত জুড়ে দিয়ে সাধারণ প্রতিযোগীদের আটকে দেওয়া হয়েছে।</p>
                 </div>
-                <!-- New Systematic Findings -->
+                <!-- Systematic Findings -->
                 <div class="evidence-item">
                     <strong>মালিকানার তথ্য গোপন (ITT 5.14)</strong>
                     <p>১,১৫৮টি টেন্ডারে স্বার্থের সংঘাত এড়াতে 'Beneficial Owner' ফিল্ড ফাঁকা রেখে অস্বচ্ছতার আশ্রয় নেওয়া হয়েছে।</p>
@@ -195,9 +195,10 @@
             </div>
         </div>
 
-        <!-- চার্ট গ্রিড (৪টি চার্ট) -->
+        <!-- চার্ট গ্রিড (৬টি চার্ট) -->
         <div class="chart-grid">
-            <!-- Chart 1: Macro Violations (Old Findings) -->
+            
+            <!-- Chart 1: Macro Violations (Static) -->
             <div class="chart-box">
                 <h3>দুর্নীতির ধরন (Macro-analysis)</h3>
                 <p class="chart-desc">সিস্টেমে পাওয়া মূল ৮টি ভায়োলেশন</p>
@@ -205,7 +206,7 @@
                 <div class="chart-explanation">স্ট্যাটিক ডেটা: বিভিন্ন রুল ভায়োলেশনের তুলনামূলক চিত্র।</div>
             </div>
 
-            <!-- Chart 2: Bid Rigging Dropout -->
+            <!-- Chart 2: Bid Rigging Dropout (Dynamic) -->
             <div class="chart-box">
                 <h3>টেন্ডার ড্রপ-আউট (Bid-Rigging)</h3>
                 <p class="chart-desc">কিনেছে বনাম জমা দিয়েছে বনাম যোগ্য হয়েছে</p>
@@ -213,21 +214,38 @@
                 <div class="chart-explanation">ডাইনামিক ডেটা: বিপুল ড্রপ-আউট সিন্ডিকেট নেগোসিয়েশন প্রমাণ করে।</div>
             </div>
 
-            <!-- Chart 3: Syndicate Leaderboard -->
+            <!-- Chart 3: Syndicate Leaderboard (Dynamic) -->
             <div class="chart-box">
                 <h3>সিন্ডিকেট লিডারবোর্ড</h3>
                 <p class="chart-desc">সর্বোচ্চ মূল্যের 'HIGH' রিস্ক টেন্ডার প্রাপ্ত ঠিকাদার</p>
                 <div class="chart-container"><canvas id="syndicateChart"></canvas></div>
-                <div class="chart-explanation">ডাইনামিক ডেটা: নির্দিষ্ট ঠিকাদারদের মনোপলি নিয়ন্ত্রণ।</div>
+                <div class="chart-explanation">ডাইনামিক ডেটা: নির্দিষ্ট ঠিকাদারদের মনোপলি ও নিয়ন্ত্রণ।</div>
             </div>
 
-            <!-- Chart 4: Timeline Trend -->
+            <!-- Chart 4: Timeline Trend (Dynamic) -->
             <div class="chart-box">
                 <h3>ম্যানিপুলেশন টাইমলাইন</h3>
                 <p class="chart-desc">টেন্ডার প্রকাশের সময়কাল অনুযায়ী অনিয়মের প্রবণতা</p>
                 <div class="chart-container"><canvas id="timelineChart"></canvas></div>
                 <div class="chart-explanation">ডাইনামিক ডেটা: নির্দিষ্ট সময়ে তাড়াহুড়ো করে টেন্ডার ছাড়ার ট্রেন্ড।</div>
             </div>
+
+            <!-- NEW Chart 5: Risk Level Distribution (Dynamic) -->
+            <div class="chart-box">
+                <h3>ঝুঁকির মাত্রা (Risk Distribution)</h3>
+                <p class="chart-desc">উচ্চ, মাঝারি ও নিম্ন ঝুঁকির অনুপাত</p>
+                <div class="chart-container"><canvas id="riskPieChart"></canvas></div>
+                <div class="chart-explanation">ডাইনামিক ডেটা: ফিল্টারকৃত টেন্ডারগুলোর ঝুঁকির সামগ্রিক অবস্থা।</div>
+            </div>
+
+            <!-- NEW Chart 6: Top Agencies by High Risk (Dynamic) -->
+            <div class="chart-box">
+                <h3>শীর্ষ ঝুঁকিপূর্ণ সংস্থা (Top Agencies)</h3>
+                <p class="chart-desc">যেসব সংস্থার টেন্ডারে সবচেয়ে বেশি টাকার অনিয়ম</p>
+                <div class="chart-container"><canvas id="agencyChart"></canvas></div>
+                <div class="chart-explanation">ডাইনামিক ডেটা: 'HIGH' রিস্কের টেন্ডারের ভিত্তিতে সংস্থার র‌্যাঙ্কিং।</div>
+            </div>
+
         </div>
 
         <!-- এভিডেন্স লেজার (ডেটা টেবিল) -->
@@ -275,11 +293,13 @@
         let syndicateChartObj = null;
         let dropoutChartObj = null;
         let timelineChartObj = null;
+        let riskPieChartObj = null;
+        let agencyChartObj = null;
 
-        // Colors based on theme
-        const colorPrimary = '#1e3a8a';
-        const colorSecondary = '#60a5fa';
-        const colorAccent = '#dbeafe';
+        // Theme Colors
+        const colorPrimary = '#1e3a8a';   // Dark Blue
+        const colorSecondary = '#60a5fa'; // Light Blue
+        const colorAccent = '#dbeafe';    // Very Light Blue
 
         async function init() {
             try {
@@ -291,11 +311,11 @@
                 drawStaticCharts();
                 filterData(); 
             } catch (err) {
-                document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" class="error">ডেটা লোড করা যায়নি। লোকাল ফোল্ডার থেকে JSON রিড করতে সমস্যা হচ্ছে। গিটহাব লিংক থেকে ওপেন করুন।</td></tr>`;
+                document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" class="error">ডেটা লোড করা যায়নি। ব্রাউজারের পলিসির কারণে লোকাল ফোল্ডার থেকে JSON রিড করতে সমস্যা হচ্ছে। ফাইলগুলো গিটহাবে পুশ করে লাইভ লিংক থেকে ওপেন করুন।</td></tr>`;
             }
         }
 
-        // Static Chart (Macro Violations - Old Findings)
+        // 1. Static Chart (Macro Violations)
         function drawStaticCharts() {
             const ctx = document.getElementById('violationChart').getContext('2d');
             violationChartObj = new Chart(ctx, {
@@ -406,7 +426,27 @@
         }
 
         function updateDynamicCharts(data) {
-            // 1. Syndicate Leaderboard (HIGH risk only)
+            
+            // 2. Dropout Funnel
+            let tSold = 0, tRecv = 0, tResp = 0;
+            data.forEach(t => {
+                if(t.Tenders_Sold && !isNaN(t.Tenders_Sold)) tSold += parseInt(t.Tenders_Sold);
+                if(t.Tenders_Received && !isNaN(t.Tenders_Received)) tRecv += parseInt(t.Tenders_Received);
+                if(t.Responsive_Tenders && !isNaN(t.Responsive_Tenders)) tResp += parseInt(t.Responsive_Tenders);
+            });
+            if(tSold === 0) { tSold = 10; tRecv = 3; tResp = 1; } // Concept illustration fallback
+
+            if(dropoutChartObj) dropoutChartObj.destroy();
+            dropoutChartObj = new Chart(document.getElementById('dropoutChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['কিনেছে', 'জমা দিয়েছে', 'যোগ্য'],
+                    datasets: [{ data: [tSold, tRecv, tResp], backgroundColor: [colorPrimary, colorSecondary, colorAccent], borderRadius: 3 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { display: false, grid: { display: false } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } }
+            });
+
+            // 3. Syndicate Leaderboard (HIGH risk only)
             const suppliers = {};
             data.forEach(t => {
                 if (t.Risk_Level === 'HIGH' && t.Supplier_Name && t.Contract_Value_BDT) {
@@ -429,26 +469,7 @@
                 options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { grid: { display: false } } }, plugins: { legend: { display: false } } }
             });
 
-            // 2. Dropout Funnel
-            let tSold = 0, tRecv = 0, tResp = 0;
-            data.forEach(t => {
-                if(t.Tenders_Sold && !isNaN(t.Tenders_Sold)) tSold += parseInt(t.Tenders_Sold);
-                if(t.Tenders_Received && !isNaN(t.Tenders_Received)) tRecv += parseInt(t.Tenders_Received);
-                if(t.Responsive_Tenders && !isNaN(t.Responsive_Tenders)) tResp += parseInt(t.Responsive_Tenders);
-            });
-            if(tSold === 0) { tSold = 10; tRecv = 3; tResp = 1; }
-
-            if(dropoutChartObj) dropoutChartObj.destroy();
-            dropoutChartObj = new Chart(document.getElementById('dropoutChart'), {
-                type: 'bar',
-                data: {
-                    labels: ['কিনেছে', 'জমা দিয়েছে', 'যোগ্য'],
-                    datasets: [{ data: [tSold, tRecv, tResp], backgroundColor: [colorPrimary, colorSecondary, colorAccent], borderRadius: 3 }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { display: false, grid: { display: false } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } }
-            });
-
-            // 3. Timeline
+            // 4. Timeline
             const timeline = {};
             data.forEach(t => {
                 let dStr = t.Advertised_Date || t.Contract_Signing_Date;
@@ -471,6 +492,62 @@
                     datasets: [{ data: dateCounts, borderColor: colorPrimary, backgroundColor: colorAccent, fill: true, tension: 0.3, pointRadius: 2 }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { display: false } }, plugins: { legend: { display: false } } }
+            });
+
+            // 5. NEW: Risk Level Distribution (Doughnut)
+            let highCount = 0, medCount = 0, lowCount = 0;
+            data.forEach(t => {
+                if(t.Risk_Level === 'HIGH') highCount++;
+                else if(t.Risk_Level === 'MEDIUM') medCount++;
+                else if(t.Risk_Level === 'LOW') lowCount++;
+            });
+
+            if(riskPieChartObj) riskPieChartObj.destroy();
+            riskPieChartObj = new Chart(document.getElementById('riskPieChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['উচ্চ (HIGH)', 'মাঝারি (MEDIUM)', 'নিম্ন (LOW)'],
+                    datasets: [{ 
+                        data: [highCount, medCount, lowCount], 
+                        backgroundColor: [colorPrimary, '#2563eb', colorSecondary], 
+                        borderWidth: 1, 
+                        borderColor: '#fff' 
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { position: 'bottom', labels: {font: {size: 11}} } } 
+                }
+            });
+
+            // 6. NEW: Top Agencies by High Risk Value (Bar)
+            const agencies = {};
+            data.forEach(t => {
+                if (t.Risk_Level === 'HIGH' && t.Organization_Agency && t.Contract_Value_BDT) {
+                    let name = t.Organization_Agency.split('Procuring')[0].trim();
+                    if(!agencies[name]) agencies[name] = 0;
+                    agencies[name] += parseFloat(t.Contract_Value_BDT);
+                }
+            });
+            const sortedAgencies = Object.entries(agencies).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            const agLabels = sortedAgencies.map(s => s[0].length > 15 ? s[0].substring(0, 15) + ".." : s[0]);
+            const agValues = sortedAgencies.map(s => s[1]);
+
+            if(agencyChartObj) agencyChartObj.destroy();
+            agencyChartObj = new Chart(document.getElementById('agencyChart'), {
+                type: 'bar',
+                data: {
+                    labels: agLabels,
+                    datasets: [{ data: agValues, backgroundColor: colorPrimary, borderRadius: 3 }]
+                },
+                options: { 
+                    indexAxis: 'y', 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    scales: { x: { display: false }, y: { grid: { display: false } } }, 
+                    plugins: { legend: { display: false } } 
+                }
             });
         }
 

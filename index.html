@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>e-GP Syndicate Tracker | Massive Data Lab</title>
-    <!-- Free Open Source Charting Library -->
+    <!-- Chart.js for Visualizations -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- PDF.js for Live Fact Checking -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    
     <style>
+        /* Premium Dark Black & Deep Blue Theme Layout */
         :root {
             --dark-bg: #080c14;      
             --dark-card: #111827;    
@@ -18,12 +20,17 @@
             --text-muted: #94a3b8;   
             --border-dark: #1e293b;  
         }
+        
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--dark-bg); color: var(--text-light); margin: 0; padding: 0; line-height: 1.6; }
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        /* Header */
         header { background-color: var(--dark-card); padding: 30px 20px; margin-bottom: 25px; text-align: center; border-bottom: 4px solid var(--netra-red); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);}
         header h1 { margin: 0; font-size: 32px; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px;}
         header p { margin: 8px 0 0 0; font-size: 15px; color: var(--text-muted); font-weight: 500;}
         .transparency-note { background: rgba(56, 189, 248, 0.1); color: var(--neon-blue); padding: 10px; margin-top: 15px; border-radius: 5px; font-size: 12.5px; text-align: justify; border: 1px solid rgba(56, 189, 248, 0.3);}
+
+        /* Forensic Rules Matrix */
         .evidence-section { background: var(--dark-card); border: 1px solid var(--border-dark); padding: 25px; margin-bottom: 25px; border-radius: 8px; border-left: 5px solid var(--netra-red); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .evidence-section h3 { margin: 0 0 15px 0; font-size: 19px; color: var(--neon-blue); border-bottom: 1px solid var(--border-dark); padding-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;}
         .evidence-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 15px; }
@@ -32,28 +39,27 @@
         .evidence-item.active-rule { border-color: var(--neon-blue); background: rgba(56, 189, 248, 0.1); }
         .evidence-item strong { display: flex; justify-content: space-between; align-items: center; font-size: 14.5px; color: #ffffff; margin-bottom: 6px; border-bottom: 1px dashed var(--border-dark); padding-bottom: 5px; }
         .evidence-item p { margin: 0; font-size: 13px; color: var(--text-muted); text-align: justify; }
-        .rule-count { background-color: var(--netra-red); color: white; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 12px; box-shadow: 0 0 5px rgba(204, 0, 0, 0.5); min-width: 20px; text-align: center; }
+        .rule-count { background-color: var(--netra-red); color: white; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 12px; min-width: 20px; text-align: center; }
+
+        /* Summary Cards & Charts */
         .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .card { background: var(--dark-card); border: 1px solid var(--border-dark); padding: 20px; border-radius: 6px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3);}
+        .card { background: var(--dark-card); border: 1px solid var(--border-dark); padding: 20px; border-radius: 6px; text-align: center; }
         .card h2 { margin: 0 0 5px 0; font-size: 28px; color: var(--neon-blue); font-weight: 800; }
         .card.alert-card h2 { color: var(--netra-red); }
-        .card p { margin: 0; font-size: 13px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
+        .card p { margin: 0; font-size: 13px; font-weight: 700; text-transform: uppercase; }
         .nexus-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 30px; }
-        @media (max-width: 768px) { .nexus-grid { grid-template-columns: 1fr; } }
-        .nexus-box { background: var(--dark-card); border: 1px solid var(--border-dark); padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .nexus-box h4 { margin: 0 0 15px 0; color: var(--neon-blue); font-size: 15px; border-bottom: 1px solid var(--border-dark); padding-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .nexus-box { background: var(--dark-card); border: 1px solid var(--border-dark); padding: 20px; border-radius: 8px; }
+        .nexus-box h4 { margin: 0 0 15px 0; color: var(--neon-blue); text-transform: uppercase; border-bottom: 1px solid var(--border-dark); padding-bottom: 8px; }
         .nexus-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
         .nexus-table th, .nexus-table td { padding: 10px; border-bottom: 1px solid var(--border-dark); text-align: left;}
-        .nexus-table th { background: rgba(255,255,255,0.03); color: var(--neon-blue); font-weight: 600;}
-        .nexus-table td { color: var(--text-light); }
-        .nexus-table td strong { color: var(--netra-red); font-size: 14px;}
         .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .chart-box { background: var(--dark-card); border: 1px solid var(--border-dark); padding: 20px; border-radius: 8px; display: flex; flex-direction: column; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
-        .chart-box h3 { margin: 0 0 5px 0; font-size: 15px; color: var(--text-light); text-align: center; font-weight: 700;}
-        .chart-desc { font-size: 12px; color: var(--text-muted); margin: 0 0 15px 0; text-align: center;}
+        .chart-box { background: var(--dark-card); border: 1px solid var(--border-dark); padding: 20px; border-radius: 8px; display: flex; flex-direction: column; }
+        .chart-box h3 { margin: 0 0 15px 0; font-size: 15px; text-align: center; font-weight: 700;}
         .chart-container { position: relative; height: 220px; width: 100%; flex-grow: 1; } 
-        .ledger-section { background: var(--dark-card); border: 1px solid var(--border-dark); padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
-        .ledger-section h3 { margin: 0 0 15px 0; color: var(--neon-blue); text-transform: uppercase; font-size: 18px; letter-spacing: 0.5px;}
+
+        /* Tools Bar */
+        .ledger-section { background: var(--dark-card); border: 1px solid var(--border-dark); padding: 20px; border-radius: 8px; }
+        .ledger-section h3 { margin: 0 0 15px 0; color: var(--neon-blue); text-transform: uppercase; font-size: 18px; }
         .tools-bar { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; background: rgba(255,255,255,0.01); padding: 15px; border-radius: 6px; border: 1px solid var(--border-dark);}
         .tools-bar input, .tools-bar select { padding: 8px 12px; border: 1px solid var(--border-dark); border-radius: 4px; font-size: 13px; outline: none; flex: 1; min-width: 150px; background: var(--dark-bg); color: white;}
         .tools-bar input:focus, .tools-bar select:focus { border-color: var(--neon-blue); }
@@ -61,37 +67,51 @@
         .btn-clear:hover { background: var(--neon-blue); color: var(--dark-bg); }
         .btn-download { padding: 8px 15px; border: none; border-radius: 4px; font-size: 13px; font-weight: 700; cursor: pointer; color: white; background-color: #1e40af; }
         .btn-download:hover { background: #2563eb; }
+        .btn-home { padding: 8px 15px; border: none; border-radius: 4px; font-size: 13px; font-weight: 700; cursor: pointer; color: white; background-color: #059669; }
+        .btn-home:hover { background: #047857; }
+
+        /* Table & Pagination */
         .table-responsive { overflow-x: auto; }
         table.main-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
         table.main-table th, table.main-table td { padding: 12px 10px; border-bottom: 1px solid var(--border-dark); vertical-align: top; }
-        table.main-table th { color: var(--neon-blue); font-weight: 700; font-size: 11.5px; text-transform: uppercase; background: rgba(255,255,255,0.02); letter-spacing: 0.5px;}
+        table.main-table th { color: var(--neon-blue); font-weight: 700; font-size: 11.5px; text-transform: uppercase; background: rgba(255,255,255,0.02);}
         table.main-table tr:hover { background-color: rgba(255,255,255,0.01); }
         .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.02); border-radius: 5px; }
-        .page-btn { padding: 6px 15px; background: transparent; border: 1px solid var(--neon-blue); color: var(--neon-blue); font-weight: 600; cursor: pointer; border-radius: 4px; transition: 0.2s;}
+        .page-btn { padding: 6px 15px; background: transparent; border: 1px solid var(--neon-blue); color: var(--neon-blue); font-weight: 600; cursor: pointer; border-radius: 4px;}
         .page-btn:hover:not(:disabled) { background: var(--neon-blue); color: var(--dark-bg); }
         .page-btn:disabled { border-color: var(--border-dark); color: var(--text-muted); cursor: not-allowed; }
-        .page-info { font-size: 13px; color: var(--text-light); }
         .risk-badge { font-weight: 700; font-size: 10px; padding: 2px 6px; border-radius: 3px; color: white; display: inline-block; text-transform: uppercase;}
         .risk-high { background-color: var(--netra-red); }
         .risk-medium { background-color: #d97706; }
         .risk-low { background-color: #059669; }
         .doc-link { color: var(--neon-blue); text-decoration: underline; font-weight: 600; font-size: 12px; display: inline-block; margin-right: 8px;}
-        .doc-link:hover { color: white; }
         .btn-verify { background-color: rgba(56, 189, 248, 0.1); color: var(--neon-blue); border: 1px solid var(--neon-blue); padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; margin-top: 5px; transition: 0.2s;}
         .btn-verify:hover { background-color: var(--neon-blue); color: var(--dark-bg); }
+
+        /* Modals */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(5px); align-items: center; justify-content: center; }
-        .modal-content { background-color: var(--dark-card); border: 1px solid var(--border-dark); border-top: 4px solid var(--neon-blue); border-radius: 8px; width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto; padding: 30px; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.7); animation: modalFadeIn 0.3s; }
-        @keyframes modalFadeIn { from {opacity: 0; transform: translateY(-20px);} to {opacity: 1; transform: translateY(0);} }
-        .close-btn { position: absolute; right: 20px; top: 15px; color: var(--text-muted); font-size: 28px; font-weight: bold; cursor: pointer; transition: 0.2s;}
+        .modal-content { background-color: var(--dark-card); border: 1px solid var(--border-dark); border-top: 4px solid var(--neon-blue); border-radius: 8px; width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto; padding: 30px; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.7); }
+        .close-btn { position: absolute; right: 20px; top: 15px; color: var(--text-muted); font-size: 28px; font-weight: bold; cursor: pointer;}
         .close-btn:hover { color: var(--netra-red); }
-        .modal-title { font-size: 18px; color: white; margin: 0 0 10px 0; border-bottom: 1px solid var(--border-dark); padding-bottom: 10px;}
         .raw-data-box { background: #080c14; border: 1px dashed #334155; padding: 15px; border-radius: 5px; color: #cbd5e1; font-family: monospace; font-size: 13px; line-height: 1.6; margin-bottom: 15px; word-wrap: break-word;}
         .raw-data-box strong { color: var(--neon-blue); font-family: sans-serif; }
         .highlight-red { color: #fca5a5; font-weight: bold; background: rgba(220, 38, 38, 0.1); padding: 0 3px;}
         .explanation-box { background: rgba(56, 189, 248, 0.05); border-left: 4px solid var(--neon-blue); padding: 15px; font-size: 13.5px; color: #f8fafc; line-height: 1.5; margin-bottom: 15px;}
-        .clickable-rule { cursor: pointer; color: var(--neon-blue); text-decoration: underline; text-decoration-style: dashed; transition: 0.2s;}
-        .clickable-rule:hover { color: white; background: rgba(56, 189, 248, 0.1); border-radius: 3px; }
+        .clickable-rule { cursor: pointer; color: var(--neon-blue); text-decoration: underline; text-decoration-style: dashed;}
         .live-fact-check { margin-top: 10px; padding-top: 10px; border-top: 1px solid #334155; font-size: 12.5px; }
+
+        /* --- Bulletproof Evidence Print Styles --- */
+        @media print {
+            body * { visibility: hidden; }
+            #inspectorModal, #inspectorModal * { visibility: visible; }
+            #inspectorModal { position: absolute; left: 0; top: 0; width: 100%; max-width: 100%; background: white !important; color: black !important; padding: 0; margin: 0; border: none; box-shadow: none; }
+            .modal-content { border: 2px solid #000; width: 100%; max-height: none; overflow: visible; box-shadow: none; padding: 20px; }
+            .raw-data-box, .explanation-box { background: #f8fafc !important; color: #000 !important; border: 1px solid #ccc !important; }
+            .modal-title { color: black !important; border-bottom: 2px solid black; padding-bottom: 5px; }
+            .close-btn, .btn-verify, .tools-bar, header, .evidence-section { display: none !important; }
+            .highlight-red { background: transparent !important; color: #dc2626 !important; font-weight: bold; border-bottom: 2px solid #dc2626; }
+            .modal-content::before { content: "DATA LAB - FORENSIC EVIDENCE"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 50px; color: rgba(0,0,0,0.05); font-weight: bold; pointer-events: none; z-index: -1; }
+        }
     </style>
 </head>
 <body>
@@ -102,11 +122,11 @@
             <h1>e-GP Syndicate Tracker: Data Lab</h1>
             <p>উন্নয়ন কর্তৃপক্ষ এবং সরকারি প্রকিউরমেন্টের ডিজিটাল ইনভেস্টিগেশন</p>
             <div class="transparency-note">
-                <strong>স্বচ্ছতা গ্যারান্টি (Transparency Note):</strong> এই সিস্টেমটি সম্পূর্ণ ওপেন-সোর্স এবং ই-জিপি পোর্টাল থেকে প্রাপ্ত উন্মুক্ত (Public) ডেটা গাণিতিক বিশ্লেষণের মাধ্যমে তৈরি।
+                <strong>স্বচ্ছতা গ্যারান্টি:</strong> এই সিস্টেমটি সম্পূর্ণ ওপেন-সোর্স এবং ই-জিপি পোর্টাল থেকে প্রাপ্ত উন্মুক্ত ডেটা গাণিতিক বিশ্লেষণের মাধ্যমে তৈরি।
             </div>
         </header>
 
-        <!-- ফরেসনিক রুলবুক ম্যাট্রিক্স -->
+        <!-- Rulebook Matrix -->
         <div class="evidence-section">
             <h3>e-GP Forensic Audit Rulebook & Engine ম্যাট্রিক্স (যেকোনো রুল ফিল্টার করতে ক্লিক করুন)</h3>
             <div class="evidence-grid">
@@ -145,99 +165,44 @@
             </div>
         </div>
 
-        <!-- ডাইনামিক অডিট সামারি -->
+        <!-- Summary -->
         <div class="summary-grid">
-            <div class="card">
-                <h2 id="totalContracts">0</h2>
-                <p>স্ক্যান করা টেন্ডার (লগ)</p>
-            </div>
-            <div class="card alert-card">
-                <h2>৯৬.৭%</h2>
-                <p>কাজ পেয়েছে শীর্ষ ১০ সিন্ডিকেট</p>
-            </div>
-            <div class="card alert-card">
-                <h2 id="totalOwnersMissing">০ টি</h2>
-                <p>মালিকানার তথ্য গোপন</p>
-            </div>
-            <div class="card alert-card">
-                <h2 id="totalValue">৳০</h2>
-                <p>উচ্চ-ঝুঁকিপূর্ণ চুক্তিমূল্য</p>
-            </div>
+            <div class="card"><h2 id="totalContracts">0</h2><p>স্ক্যান করা টেন্ডার (লগ)</p></div>
+            <div class="card alert-card"><h2>৯৬.৭%</h2><p>কাজ পেয়েছে শীর্ষ ১০ সিন্ডিকেট</p></div>
+            <div class="card alert-card"><h2 id="totalOwnersMissing">০ টি</h2><p>মালিকানার তথ্য গোপন</p></div>
+            <div class="card alert-card"><h2 id="totalValue">৳০</h2><p>উচ্চ-ঝুঁকিপূর্ণ চুক্তিমূল্য</p></div>
         </div>
 
-        <!-- Systematic Nexus Section -->
+        <!-- Nexus -->
         <div class="nexus-grid">
             <div class="nexus-box">
                 <h4>সংস্থা-ঠিকাদার আঁতাত (Agency-Supplier Nexus)</h4>
                 <table class="nexus-table">
-                    <thead>
-                        <tr>
-                            <th>Procuring Entity (সংস্থা)</th>
-                            <th>Contractor (ঠিকাদার)</th>
-                            <th>Total Deals</th>
-                        </tr>
-                    </thead>
-                    <tbody id="nexusBody">
-                        <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">ডেটা লোড হচ্ছে...</td></tr>
-                    </tbody>
+                    <thead><tr><th>Procuring Entity (সংস্থা)</th><th>Contractor (ঠিকাদার)</th><th>Total Deals</th></tr></thead>
+                    <tbody id="nexusBody"><tr><td colspan="3" style="text-align: center; color: var(--text-muted);">ডেটা লোড হচ্ছে...</td></tr></tbody>
                 </table>
             </div>
             <div class="nexus-box">
                 <h4>সিস্টেমেটিক ম্যানিপুলেশন অ্যালার্ট</h4>
-                <div class="alert-mini">
-                    <h5>অতি-দ্রুত টেন্ডার ক্লোজিং</h5>
-                    <p>আইন ভেঙে ১৪-২৮ দিনের কম সময়ে (Rush Jobs) টেন্ডার ক্লোজ করা হয়েছে:</p>
-                    <span id="rushJobsCount" style="color:var(--netra-red); font-weight:bold;">০ টি</span>
-                </div>
-                <div style="margin-top: 15px;" class="alert-mini">
-                    <h5>যোগ্যতার শর্তে কারসাজি</h5>
-                    <p>নির্দিষ্ট কোম্পানির জন্য টেইলর-মেইড (Tailored Criteria) শর্ত দেওয়া হয়েছে:</p>
-                    <span id="tailoredCriteriaCount" style="color:var(--netra-red); font-weight:bold;">০ টি</span>
-                </div>
+                <div class="alert-mini"><h5>অতি-দ্রুত টেন্ডার ক্লোজিং</h5><p>১৪ দিনের কম সময়ে টেন্ডার ক্লোজ করা হয়েছে:</p><span id="rushJobsCount" style="color:var(--netra-red); font-weight:bold;">০ টি</span></div>
+                <div style="margin-top: 15px;" class="alert-mini"><h5>যোগ্যতার শর্তে কারসাজি</h5><p>টেইলর-মেইড (Tailored Criteria) শর্ত দেওয়া হয়েছে:</p><span id="tailoredCriteriaCount" style="color:var(--netra-red); font-weight:bold;">০ টি</span></div>
             </div>
         </div>
 
-        <!-- চার্ট গ্রিড -->
+        <!-- Charts -->
         <div class="chart-grid">
-            <div class="chart-box">
-                <h3>দুর্নীতির ধরন (Macro-analysis)</h3>
-                <div class="chart-container"><canvas id="violationChart"></canvas></div>
-            </div>
-            <div class="chart-box">
-                <h3>টেন্ডার ড্রপ-আউট (Bid-Rigging)</h3>
-                <div class="chart-container"><canvas id="dropoutChart"></canvas></div>
-            </div>
-            <div class="chart-box">
-                <h3>সিন্ডিকেট লিডারবোর্ড</h3>
-                <div class="chart-container"><canvas id="syndicateChart"></canvas></div>
-            </div>
-            <div class="chart-box">
-                <h3>ম্যানিপুলেশন টাইমলাইন</h3>
-                <div class="chart-container"><canvas id="timelineChart"></canvas></div>
-            </div>
-            <div class="chart-box">
-                <h3>টেন্ডার সংখ্যার ভিত্তিতে ঝুঁকি</h3>
-                <div class="chart-container"><canvas id="riskPieChart"></canvas></div>
-            </div>
-            <div class="chart-box">
-                <h3>শীর্ষ ঝুঁকিপূর্ণ সংস্থা (Agencies)</h3>
-                <div class="chart-container"><canvas id="agencyChart"></canvas></div>
-            </div>
-            <div class="chart-box">
-                <h3>অনিয়মের প্রধান হাতিয়ার</h3>
-                <div class="chart-container"><canvas id="redFlagChart"></canvas></div>
-            </div>
-            <div class="chart-box">
-                <h3>একক দরদাতার আধিপত্য (Monopoly)</h3>
-                <div class="chart-container"><canvas id="singleBidderChart"></canvas></div>
-            </div>
-            <div class="chart-box">
-                <h3>টাকার অঙ্কে ঝুঁকির অনুপাত</h3>
-                <div class="chart-container"><canvas id="riskValuePieChart"></canvas></div>
-            </div>
+            <div class="chart-box"><h3>দুর্নীতির ধরন (Macro-analysis)</h3><div class="chart-container"><canvas id="violationChart"></canvas></div></div>
+            <div class="chart-box"><h3>টেন্ডার ড্রপ-আউট (Bid-Rigging)</h3><div class="chart-container"><canvas id="dropoutChart"></canvas></div></div>
+            <div class="chart-box"><h3>সিন্ডিকেট লিডারবোর্ড</h3><div class="chart-container"><canvas id="syndicateChart"></canvas></div></div>
+            <div class="chart-box"><h3>ম্যানিপুলেশন টাইমলাইন</h3><div class="chart-container"><canvas id="timelineChart"></canvas></div></div>
+            <div class="chart-box"><h3>টেন্ডার সংখ্যার ভিত্তিতে ঝুঁকি</h3><div class="chart-container"><canvas id="riskPieChart"></canvas></div></div>
+            <div class="chart-box"><h3>শীর্ষ ঝুঁকিপূর্ণ সংস্থা (Agencies)</h3><div class="chart-container"><canvas id="agencyChart"></canvas></div></div>
+            <div class="chart-box"><h3>অনিয়মের প্রধান হাতিয়ার</h3><div class="chart-container"><canvas id="redFlagChart"></canvas></div></div>
+            <div class="chart-box"><h3>একক দরদাতার আধিপত্য (Monopoly)</h3><div class="chart-container"><canvas id="singleBidderChart"></canvas></div></div>
+            <div class="chart-box"><h3>টাকার অঙ্কে ঝুঁকির অনুপাত</h3><div class="chart-container"><canvas id="riskValuePieChart"></canvas></div></div>
         </div>
 
-        <!-- এভিডেন্স লেজার -->
+        <!-- Ledger (Table) -->
         <div class="ledger-section">
             <h3>এভিডেন্স লেজার (Database)</h3>
             
@@ -246,7 +211,9 @@
                 <button class="btn-clear" onclick="resetRuleFilter()">ফিল্টার সরান (Show All)</button>
             </div>
 
+            <!-- THE NEW TOOLS BAR WITH HOME BUTTON -->
             <div class="tools-bar">
+                <button class="btn-home" onclick="resetDashboard()" title="ক্লিক করলে ড্যাশবোর্ডটি শুরুর অবস্থায় ফিরে যাবে">🏠 হোম / সব রিসেট করুন</button>
                 <input type="text" id="searchInput" placeholder="ঠিকাদার, সংস্থা বা ID খুঁজুন..." onkeyup="debouncedFilter()">
                 <select id="riskFilter" onchange="triggerFilter()">
                     <option value="ALL">সব ঝুঁকি (All Risks)</option>
@@ -261,14 +228,9 @@
                 <table class="main-table" id="tenderTable">
                     <thead>
                         <tr>
-                            <th style="width: 70px;">ID</th>
-                            <th>Procuring Entity</th>
-                            <th>Contractor / Supplier</th>
-                            <th style="width: 60px;">Risk</th>
-                            <th style="text-align: right;">Value (৳)</th>
-                            <th>Detected Findings & Verification</th>
-                            <th style="width: 150px;">Violated Rules</th>
-                            <th style="width: 60px;">Docs</th>
+                            <th style="width: 70px;">ID</th><th>Procuring Entity</th><th>Contractor / Supplier</th>
+                            <th style="width: 60px;">Risk</th><th style="text-align: right;">Value (৳)</th>
+                            <th>Detected Findings & Verification</th><th style="width: 150px;">Violated Rules</th><th style="width: 60px;">Docs</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
@@ -287,38 +249,49 @@
 
     <!-- Rule Details Modal -->
     <div id="ruleModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 500px;">
             <span class="close-btn" onclick="closeModal('ruleModal')">&times;</span>
             <h2 class="modal-title" id="modalTitle">Rule Title</h2>
-            <div class="rule-meta" style="margin-bottom: 15px; font-size:12px; color:var(--text-muted);">
-                <span id="modalEnacted">Enactment Year</span> | 
-                <span style="color: #fca5a5;">Forensic Audit Engine</span>
-            </div>
-            <div class="rule-desc-box" id="modalDesc" style="margin-bottom: 15px; line-height: 1.6;">Rule description goes here...</div>
-            <div class="rule-penalty" style="background: rgba(220, 38, 38, 0.1); padding: 10px; border-radius: 4px; border-left: 3px solid var(--netra-red);">
+            <div style="margin-bottom: 15px; font-size:12px; color:var(--text-muted);"><span id="modalEnacted"></span> | <span style="color: #fca5a5;">Forensic Engine</span></div>
+            <div id="modalDesc" style="margin-bottom: 15px; line-height: 1.6;"></div>
+            <div style="background: rgba(220, 38, 38, 0.1); padding: 10px; border-radius: 4px; border-left: 3px solid var(--netra-red);">
                 <strong style="color: #fca5a5;">শাস্তি ও আইনি বিধান:</strong>
-                <span id="modalPenalty" style="display:block; margin-top:5px; font-size:13.5px;">Penalty description goes here...</span>
+                <span id="modalPenalty" style="display:block; margin-top:5px; font-size:13.5px;"></span>
             </div>
         </div>
     </div>
 
-    <!-- Data Inspector Modal -->
+    <!-- Data Inspector Modal (Bulletproof Evidence) -->
     <div id="inspectorModal" class="modal">
-        <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-content" style="max-width: 850px;">
             <span class="close-btn" onclick="closeModal('inspectorModal')">&times;</span>
-            <h2 class="modal-title">🔍 কাঁচা তথ্য ও প্রমাণ যাচাই (Data Inspector)</h2>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-dark); padding-bottom: 10px; margin-bottom: 15px;">
+                <h2 class="modal-title" style="border:none; margin:0; padding:0;">🔍 Forensic Evidence Docket</h2>
+                <div>
+                    <!-- Official e-GP Link -->
+                    <a id="egpOfficialLink" href="#" target="_blank" style="background: #1e3a8a; color: white; padding: 6px 12px; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: bold; margin-right: 10px;">🏛️ Verify on e-GP</a>
+                    <!-- Print Evidence Button -->
+                    <button onclick="window.print()" style="background: var(--netra-red); color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">🖨️ Print PDF</button>
+                </div>
+            </div>
+
+            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 15px; text-transform: uppercase; font-family: monospace;">
+                Timestamp: <span id="timestampData"></span> | ID: <span id="footprintID"></span> | Source: e-GP Public Database
+            </div>
+
             <div class="explanation-box" id="inspectorExplanation"></div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                 <div class="raw-data-box">
-                    <strong>টেন্ডার মেটাডেটা:</strong><br><br>
+                    <strong>টেন্ডার মেটাডেটা (Metadata):</strong><br><br>
                     ID: <span id="insID" class="highlight-red"></span><br>
                     Contract Value: <span id="insVal"></span><br>
                     Document Price: <span id="insPrice" class="highlight-red"></span><br>
                     Sold: <span id="insSold"></span> | Received: <span id="insRecv"></span> | Responsive: <span id="insResp" class="highlight-red"></span>
                 </div>
                 <div class="raw-data-box">
-                    <strong>টাইমলাইন:</strong><br><br>
+                    <strong>টাইমলাইন (Timeline):</strong><br><br>
                     Published: <span id="insPub"></span><br>
                     Closing: <span id="insClose"></span><br>
                     NOA Given: <span id="insNoa"></span><br>
@@ -330,11 +303,18 @@
                 <strong>অফিশিয়াল যোগ্যতার শর্ত (Eligibility Criteria):</strong><br><br>
                 <div id="insExp" style="white-space: pre-wrap;"></div>
             </div>
+
+            <!-- PDF Viewer Container -->
+            <div id="pdfViewerContainer" style="display: none; margin-top: 15px; border: 1px solid var(--neon-blue); border-radius: 5px; overflow: hidden; background: #fff;">
+                <div style="background: var(--dark-card); padding: 10px; text-align: right; border-bottom: 1px solid var(--border-dark);">
+                    <button class="btn-clear" onclick="document.getElementById('pdfViewerContainer').style.display='none'" style="padding: 4px 10px; font-size: 11px;">Close PDF ✖</button>
+                </div>
+                <iframe id="pdfIframe" style="width: 100%; height: 500px; border: none;"></iframe>
+            </div>
         </div>
     </div>
 
     <script>
-        // Setup PDF.js Worker
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         const jsonFileName = 'Procurement_Database.json';
@@ -345,29 +325,22 @@
         let timelineChartObj = null, riskPieChartObj = null, agencyChartObj = null;
         let redFlagChartObj = null, singleBidderChartObj = null, riskValuePieChartObj = null;
 
-        const colorPrimary = '#38bdf8';   
-        const colorSecondary = '#1e3a8a'; 
-        const colorAccent = '#60a5fa';    
-        const colorAlert = '#dc2626';     
+        const colorPrimary = '#38bdf8', colorSecondary = '#1e3a8a', colorAccent = '#60a5fa', colorAlert = '#dc2626';     
+        Chart.defaults.color = '#94a3b8'; Chart.defaults.borderColor = '#1e3a5f';
 
-        Chart.defaults.color = '#94a3b8';
-        Chart.defaults.borderColor = '#1e3a5f';
-
-        // Pagination State
         let currentPage = 1;
         const rowsPerPage = 50;
         let searchDebounceTimer = null;
 
-        // UI Rule Dict
         const RULE_DETAILS = {
-            owner: { title: "e-PG3 ITT 5.14 – Beneficial Ownership Disclosure", enacted: "২০০৬ (PPA)", purpose: "প্রকৃত মালিকের নাম প্রকাশ বাধ্যতামূলক। স্বার্থের সংঘাত ঠেকাতে এই রুল তৈরি হয়েছে।", penalty: "টেন্ডার বাতিল ও কালোতালিকাভুক্তি।" },
-            split: { title: "PPA 2006 Section 17 – Artificial Contract Splitting", enacted: "২০০৬ (PPA)", purpose: "উচ্চতর অনুমোদন এড়াতে মেগা-প্রজেক্টকে ছোট লটে ভাগ করা অবৈধ।", penalty: "বিভাগীয় ব্যবস্থা এবং টেন্ডার বাতিল।" },
-            cpv: { title: "EU CPV Regulation / e-GP Metadata Manipulation", enacted: "ই-জিপি গাইডলাইন", purpose: "ভুল CPV কোড দিয়ে টেন্ডার লুকানোর কারসাজি।", penalty: "টেন্ডার প্রক্রিয়া বাতিল।" },
-            tailored: { title: "PPR 2008 Rule 98 – Restrictive Qualification Criteria", enacted: "২০০৮ (PPR)", purpose: "নির্দিষ্ট ঠিকাদারকে কাজ দিতে শর্ত ফিক্স করা।", penalty: "পুনঃদরপত্র আহ্বান।" },
-            monopoly: { title: "e-PG3 ITT 50.6 – Lack of Effective Competition", enacted: "২০০৬ (PPA)", purpose: "মাত্র ১ জন যোগ্য হলে রি-টেন্ডার আবশ্যক।", penalty: "টেন্ডার বাতিল।" },
-            outlier: { title: "World Bank ALB Guideline", enacted: "বিশ্বব্যাংক রেগুলেশন", purpose: "বাজেটের চেয়ে অনেক বেশি বা কম দরে বিড করা।", penalty: "টেন্ডার সরাসরি বাতিল।" },
-            meeting: { title: "PPR Schedule 2 – Minimum Tender Preparation Time", enacted: "২০০৮ (PPR)", purpose: "১৪ দিনের কম সময়ে টেন্ডার ক্লোজ করা অবৈধ।", penalty: "অডিট আপত্তি।" },
-            rigging: { title: "Competition Act 2012 / Bid Rigging", enacted: "২০১২ (প্রতিযোগিতা আইন)", purpose: "শিডিউল কিনে জমা না দেওয়া সিন্ডিকেশনের প্রমাণ।", penalty: "জরিমানা ও ডিবরমেন্ট।" }
+            owner: { title: "ITT 5.14 – Beneficial Ownership", enacted: "২০০৬ (PPA)", purpose: "প্রকৃত মালিকের নাম প্রকাশ বাধ্যতামূলক।", penalty: "টেন্ডার বাতিল ও কালোতালিকাভুক্তি।" },
+            split: { title: "PPA 2006 Sec 17 – Contract Splitting", enacted: "২০০৬ (PPA)", purpose: "মেগা-প্রজেক্টকে ছোট লটে ভাগ করা অবৈধ।", penalty: "বিভাগীয় ব্যবস্থা এবং টেন্ডার বাতিল।" },
+            cpv: { title: "CPV Manipulation", enacted: "ই-জিপি গাইডলাইন", purpose: "ভুল CPV কোড দিয়ে টেন্ডার লুকানোর কারসাজি।", penalty: "টেন্ডার প্রক্রিয়া বাতিল।" },
+            tailored: { title: "PPR 2008 Rule 98 – Restrictive Criteria", enacted: "২০০৮ (PPR)", purpose: "নির্দিষ্ট ঠিকাদারকে কাজ দিতে শর্ত ফিক্স করা।", penalty: "পুনঃদরপত্র আহ্বান।" },
+            monopoly: { title: "ITT 50.6 – Lack of Competition", enacted: "২০০৬ (PPA)", purpose: "মাত্র ১ জন যোগ্য হলে রি-টেন্ডার আবশ্যক।", penalty: "টেন্ডার বাতিল।" },
+            outlier: { title: "Abnormally Low/High Bids", enacted: "বিশ্বব্যাংক রেগুলেশন", purpose: "বাজেটের চেয়ে অস্বাভাবিক দরে বিড করা।", penalty: "টেন্ডার সরাসরি বাতিল।" },
+            meeting: { title: "Minimum Tender Time", enacted: "২০০৮ (PPR)", purpose: "১৪ দিনের কম সময়ে টেন্ডার ক্লোজ করা অবৈধ।", penalty: "অডিট আপত্তি।" },
+            rigging: { title: "Bid Rigging / Collusion", enacted: "২০১২ (প্রতিযোগিতা আইন)", purpose: "শিডিউল কিনে জমা না দেওয়া সিন্ডিকেশনের প্রমাণ।", penalty: "জরিমানা ও ডিবরমেন্ট।" }
         };
 
         function showModal(ruleKey) {
@@ -384,46 +357,35 @@
         window.onclick = function(e) { if (e.target.classList.contains('modal')) e.target.style.display = "none"; }
 
         const safeNum = (val) => parseFloat(String(val).replace(/,/g, '')) || 0;
-        function extractCleanAgencyName(agencyString) { return agencyString ? agencyString.replace(/Procuring Entity.*/i, '').trim() : "Unknown Agency"; }
+        function extractCleanAgencyName(str) { return str ? str.replace(/Procuring Entity.*/i, '').trim() : "Unknown Agency"; }
         function formatCurrency(amount) {
-            const value = safeNum(amount);
-            if (value === 0) return '-';
-            if (value >= 10000000) return (value / 10000000).toFixed(2) + ' Cr';
-            else if (value >= 100000) return (value / 100000).toFixed(2) + ' L';
-            return value.toLocaleString('en-IN');
+            const v = safeNum(amount);
+            if (v === 0) return '-';
+            if (v >= 10000000) return (v / 10000000).toFixed(2) + ' Cr';
+            if (v >= 100000) return (v / 100000).toFixed(2) + ' L';
+            return v.toLocaleString('en-IN');
         }
 
-        // --- PDF EXTRACTION LOGIC ---
         async function extractTextFromPDF(pdfUrl) {
             try {
-                const loadingTask = pdfjsLib.getDocument(pdfUrl);
-                const pdf = await loadingTask.promise;
-                let fullText = '';
-                for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-                    const page = await pdf.getPage(pageNum);
-                    const textContent = await page.getTextContent();
-                    const pageText = textContent.items.map(item => item.str).join(' ');
-                    fullText += pageText + '\n';
+                const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
+                let text = '';
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const content = await page.getTextContent();
+                    text += content.items.map(item => item.str).join(' ') + '\n';
                 }
-                return fullText.toLowerCase();
-            } catch (error) {
-                console.error("Error reading PDF:", error);
-                return null;
-            }
+                return text.toLowerCase();
+            } catch (error) { return null; }
         }
 
-        // --- WEB WORKER INITIALIZATION ---
+        // --- WEB WORKER ---
         let dataWorker;
-        if (window.Worker) {
-            dataWorker = new Worker('worker.js');
-        } else {
-            document.getElementById('tableBody').innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--netra-red);">Your browser does not support Web Workers.</td></tr>`;
-        }
+        if (window.Worker) { dataWorker = new Worker('worker.js'); }
 
         dataWorker.onmessage = function(e) {
-            const { action, data } = e.data;
-            if (action === 'DATA_READY' || action === 'FILTER_COMPLETE') {
-                currentFilteredData = data;
+            if (e.data.action === 'DATA_READY' || e.data.action === 'FILTER_COMPLETE') {
+                currentFilteredData = e.data.data;
                 updateSummaries(currentFilteredData);
                 updateAdvancedAnalysis(currentFilteredData);
                 updateDynamicCharts(currentFilteredData);
@@ -434,26 +396,41 @@
 
         async function init() {
             try {
-                document.getElementById('tableBody').innerHTML = `<tr><td colspan="8" style="text-align: center; color: #38bdf8; padding: 30px;">Loading and transferring 50k+ records to Background Worker...</td></tr>`;
                 const res = await fetch(jsonFileName);
-                if (!res.ok) throw new Error("File not found");
+                if (!res.ok) throw new Error();
                 const data = await res.json();
-                const rawArray = data.Merged_Database || data;
-                dataWorker.postMessage({ action: 'INIT_DATA', payload: rawArray });
+                dataWorker.postMessage({ action: 'INIT_DATA', payload: data.Merged_Database || data });
             } catch (err) {
-                document.getElementById('tableBody').innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--netra-red);">ডেটা লোড করা যায়নি। লোকাল ফোল্ডারে JSON ফাইলটি রাখুন বা Live Server ব্যবহার করুন।</td></tr>`;
+                document.getElementById('tableBody').innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--netra-red);">ডেটা লোড করা যায়নি। লোকাল সার্ভার ব্যবহার করুন।</td></tr>`;
             }
         }
 
+        // --- FILTERING & NEW HOME RESET ---
         function debouncedFilter() {
             clearTimeout(searchDebounceTimer);
             searchDebounceTimer = setTimeout(() => { triggerFilter(); }, 300); 
         }
 
         function triggerFilter() {
-            const term = document.getElementById('searchInput').value.toLowerCase();
-            const risk = document.getElementById('riskFilter').value;
-            dataWorker.postMessage({ action: 'APPLY_FILTER', payload: { term, risk, activeRuleKey } });
+            dataWorker.postMessage({ action: 'APPLY_FILTER', payload: { 
+                term: document.getElementById('searchInput').value.toLowerCase(), 
+                risk: document.getElementById('riskFilter').value, 
+                activeRuleKey 
+            }});
+        }
+
+        // Home Button Logic
+        function resetDashboard() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('riskFilter').value = 'ALL';
+            
+            // Clear Rule filters without triggering double worker updates
+            activeRuleKey = null;
+            document.querySelectorAll('.evidence-item').forEach(el => el.classList.remove('active-rule'));
+            document.getElementById('filterBanner').style.display = 'none';
+            
+            triggerFilter();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function filterByRule(ruleKey, element) {
@@ -466,6 +443,7 @@
             triggerFilter();
             document.getElementById('filterBanner').scrollIntoView({ behavior: 'smooth' });
         }
+
         function resetRuleFilter() {
             activeRuleKey = null;
             document.querySelectorAll('.evidence-item').forEach(el => el.classList.remove('active-rule'));
@@ -473,6 +451,7 @@
             triggerFilter();
         }
 
+        // --- RENDERING ---
         function renderTablePage() {
             const tbody = document.getElementById('tableBody');
             const totalRows = currentFilteredData.length;
@@ -485,50 +464,38 @@
             document.getElementById('currentPageLabel').innerText = currentPage;
             document.getElementById('totalPagesLabel').innerText = totalPages;
             
-            const pControls = document.getElementById('paginationControls');
-            pControls.style.display = totalRows > 0 ? 'flex' : 'none';
+            document.getElementById('paginationControls').style.display = totalRows > 0 ? 'flex' : 'none';
             document.getElementById('prevPageBtn').disabled = currentPage === 1;
             document.getElementById('nextPageBtn').disabled = currentPage === totalPages;
 
             if (totalRows === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 20px; color: var(--text-muted);">No records found matching your criteria.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 20px;">No records found.</td></tr>`;
                 return;
             }
 
-            const startIdx = (currentPage - 1) * rowsPerPage;
-            const pageData = currentFilteredData.slice(startIdx, startIdx + rowsPerPage);
-            
-            const htmlArray = pageData.map(t => {
+            const pageData = currentFilteredData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+            tbody.innerHTML = pageData.map(t => {
                 let riskClass = t.Risk_Level === 'HIGH' ? 'risk-high' : (t.Risk_Level === 'MEDIUM' ? 'risk-medium' : 'risk-low');
-                let org = extractCleanAgencyName(t.Organization_Agency);
-                let sup = t.Supplier_Name ? String(t.Supplier_Name).split('(')[0].trim() : "<span style='color:var(--text-muted)'>-</span>";
-                
                 let pdfHtml = '-';
                 if (t.Source_Files_Merged) {
-                    pdfHtml = String(t.Source_Files_Merged).split('|').filter(f => f.trim()).map((file, i) => 
-                        `<a href="downloaded_pdfs/${file.trim()}" target="_blank" class="doc-link">${i > 0 ? 'NOA 📄' : 'Notice 📄'}</a>`
-                    ).join('');
+                    pdfHtml = String(t.Source_Files_Merged).split('|').filter(f => f.trim()).map((file, i) => `<a href="downloaded_pdfs/${file.trim()}" target="_blank" class="doc-link">${i > 0 ? 'NOA 📄' : 'Notice 📄'}</a>`).join('');
                 } else if(t.Source_File) {
                     pdfHtml = `<a href="downloaded_pdfs/${String(t.Source_File).trim()}" target="_blank" class="doc-link">Notice 📄</a>`;
                 }
 
                 let verifyBtn = t._findings.html !== '-' ? `<button class="btn-verify" onclick="showDataInspector('${t.Tender_Proposal_ID}')">🔍 প্রমাণ</button>` : '';
 
-                return `
-                    <tr>
-                        <td style="font-family: monospace; font-weight: bold; color: var(--neon-blue);">${t.Tender_Proposal_ID}</td>
-                        <td style="color: #cbd5e1;">${org}</td>
-                        <td style="font-weight: bold; color: #fff;">${sup}</td>
-                        <td><span class="risk-badge ${riskClass}">${t.Risk_Level||'N/A'}</span></td>
-                        <td style="text-align: right; font-family: monospace; font-weight: bold; color: #fff;">${formatCurrency(t.Contract_Value_BDT)}</td>
-                        <td style="line-height: 1.4; padding-right:15px;">${t._findings.html} ${verifyBtn}</td>
-                        <td style="font-size: 11.5px; color: #38bdf8; font-weight: 600; line-height: 1.4;">${t._findings.rulesHtml}</td>
-                        <td>${pdfHtml}</td>
-                    </tr>
-                `;
-            });
-
-            tbody.innerHTML = htmlArray.join('');
+                return `<tr>
+                    <td style="font-family: monospace; font-weight: bold; color: var(--neon-blue);">${t.Tender_Proposal_ID}</td>
+                    <td style="color: #cbd5e1;">${extractCleanAgencyName(t.Organization_Agency)}</td>
+                    <td style="font-weight: bold; color: #fff;">${t.Supplier_Name ? String(t.Supplier_Name).split('(')[0].trim() : "-"}</td>
+                    <td><span class="risk-badge ${riskClass}">${t.Risk_Level||'N/A'}</span></td>
+                    <td style="text-align: right; font-family: monospace; font-weight: bold; color: #fff;">${formatCurrency(t.Contract_Value_BDT)}</td>
+                    <td style="line-height: 1.4; padding-right:15px;">${t._findings.html} ${verifyBtn}</td>
+                    <td style="font-size: 11.5px; color: #38bdf8; font-weight: 600;">${t._findings.rulesHtml}</td>
+                    <td>${pdfHtml}</td>
+                </tr>`;
+            }).join('');
         }
 
         function changePage(direction) {
@@ -537,133 +504,111 @@
             document.getElementById('tenderTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
+        // Dashboard Updates
         function updateSummaries(data) {
             document.getElementById('totalContracts').innerText = data.length.toLocaleString();
-            let highRiskValue = 0, missingOwnerCount = 0;
+            let hVal = 0, missing = 0;
             data.forEach(t => {
-                if (t.Risk_Level === 'HIGH') highRiskValue += safeNum(t.Contract_Value_BDT);
-                if (t._findings.keys.owner) missingOwnerCount++;
+                if (t.Risk_Level === 'HIGH') hVal += safeNum(t.Contract_Value_BDT);
+                if (t._findings.keys.owner) missing++;
             });
-            let unit = highRiskValue >= 1000000000 ? (highRiskValue/1000000000).toFixed(2) + " বিলিয়ন" : (highRiskValue/10000000).toFixed(2) + " কোটি";
-            document.getElementById('totalValue').innerText = "৳" + unit;
-            document.getElementById('totalOwnersMissing').innerText = missingOwnerCount.toLocaleString() + " টি";
+            document.getElementById('totalValue').innerText = "৳" + (hVal >= 1000000000 ? (hVal/1000000000).toFixed(2) + " বিলিয়ন" : (hVal/10000000).toFixed(2) + " কোটি");
+            document.getElementById('totalOwnersMissing').innerText = missing.toLocaleString() + " টি";
         }
 
         function updateAdvancedAnalysis(data) {
-            const nexus = {};
-            let tailoredCount = 0, rushCount = 0;
-
+            const nexus = {}; let tailored = 0, rush = 0;
             data.forEach(t => {
                 if(t.Supplier_Name && t.Organization_Agency && (t.Tender_Status || "").toLowerCase().includes("awarded")) {
                     let key = extractCleanAgencyName(t.Organization_Agency) + "|||" + String(t.Supplier_Name).split('(')[0].trim();
                     if(!nexus[key]) nexus[key] = { count: 0 };
                     nexus[key].count++;
                 }
-                if(t._findings.keys.tailored) tailoredCount++;
-                if(t._findings.keys.meeting) rushCount++;
+                if(t._findings.keys.tailored) tailored++;
+                if(t._findings.keys.meeting) rush++;
             });
 
-            const sortedNexus = Object.entries(nexus).sort((a, b) => b[1].count - a[1].count).slice(0, 5);
-            const nBody = document.getElementById('nexusBody');
-            
-            if(sortedNexus.length > 0 && sortedNexus[0][1].count > 1) {
-                nBody.innerHTML = sortedNexus.map(n => {
-                    let [ag, sup] = n[0].split('|||');
-                    return `<tr><td style="color:var(--text-muted);">${ag.substring(0,30)}..</td><td style="font-weight:600;">${sup.substring(0,25)}</td><td><strong>${n[1].count} বার</strong></td></tr>`;
-                }).join('');
-            } else {
-                nBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color: var(--text-muted);">পর্যাপ্ত ডেটা পাওয়া যায়নি</td></tr>`;
-            }
+            const sNexus = Object.entries(nexus).sort((a, b) => b[1].count - a[1].count).slice(0, 5);
+            document.getElementById('nexusBody').innerHTML = (sNexus.length > 0 && sNexus[0][1].count > 1) 
+                ? sNexus.map(n => `<tr><td style="color:var(--text-muted);">${n[0].split('|||')[0].substring(0,30)}..</td><td style="font-weight:600;">${n[0].split('|||')[1].substring(0,25)}</td><td><strong>${n[1].count} বার</strong></td></tr>`).join('')
+                : `<tr><td colspan="3" style="text-align:center;">পর্যাপ্ত ডেটা নেই</td></tr>`;
 
-            document.getElementById('tailoredCriteriaCount').innerText = `${tailoredCount.toLocaleString()} টি টেন্ডার`;
-            document.getElementById('rushJobsCount').innerText = `${rushCount.toLocaleString()} টি টেন্ডার`; 
+            document.getElementById('tailoredCriteriaCount').innerText = `${tailored.toLocaleString()} টি টেন্ডার`;
+            document.getElementById('rushJobsCount').innerText = `${rush.toLocaleString()} টি টেন্ডার`; 
         }
 
         function updateDynamicCharts(data) {
-            let vCounts = { owner: 0, split: 0, cpv: 0, tailored: 0, monopoly: 0, outlier: 0, meeting: 0, rigging: 0 };
-            const suppliers = {}, timeline = {}, agencies = {}, reasons = {};
-            let tSold = 0, tRecv = 0, tResp = 0;
-            let highCount = 0, medCount = 0, lowCount = 0;
-            let hVal = 0, mVal = 0, lVal = 0;
+            let v = { owner:0, split:0, cpv:0, tailored:0, monopoly:0, outlier:0, meeting:0, rigging:0 };
+            const sups = {}, dates = {}, ags = {}, reasons = {};
+            let tSold=0, tRecv=0, tResp=0, hc=0, mc=0, lc=0, hv=0, mv=0, lv=0;
             
             data.forEach(t => {
                 const k = t._findings.keys;
-                if (k.owner) vCounts.owner++; if (k.split) vCounts.split++; if (k.cpv) vCounts.cpv++;
-                if (k.tailored) vCounts.tailored++; if (k.monopoly) vCounts.monopoly++; if (k.outlier) vCounts.outlier++;
-                if (k.meeting) vCounts.meeting++; if (k.rigging) vCounts.rigging++;
+                if (k.owner) v.owner++; if (k.split) v.split++; if (k.cpv) v.cpv++; if (k.tailored) v.tailored++; 
+                if (k.monopoly) v.monopoly++; if (k.outlier) v.outlier++; if (k.meeting) v.meeting++; if (k.rigging) v.rigging++;
 
                 let val = safeNum(t.Contract_Value_BDT);
                 if (t.Risk_Level === 'HIGH') {
-                    highCount++; hVal += val;
-                    if (t.Supplier_Name) { let n = String(t.Supplier_Name).split('(')[0].trim(); suppliers[n] = (suppliers[n]||0) + val; }
-                    if (t.Organization_Agency) { let a = extractCleanAgencyName(t.Organization_Agency); agencies[a] = (agencies[a]||0) + val; }
-                } else if (t.Risk_Level === 'MEDIUM') { medCount++; mVal += val; } 
-                else { lowCount++; lVal += val; }
+                    hc++; hv += val;
+                    if (t.Supplier_Name) { let n = String(t.Supplier_Name).split('(')[0].trim(); sups[n] = (sups[n]||0) + val; }
+                    if (t.Organization_Agency) { let a = extractCleanAgencyName(t.Organization_Agency); ags[a] = (ags[a]||0) + val; }
+                } else if (t.Risk_Level === 'MEDIUM') { mc++; mv += val; } else { lc++; lv += val; }
 
                 let dStr = t.Advertised_Date || t.Contract_Signing_Date;
-                if(dStr) {
-                    let d = new Date(dStr);
-                    if(!isNaN(d)) {
-                        let my = `${d.getFullYear()}-${('0'+(d.getMonth()+1)).slice(-2)}`;
-                        if(!timeline[my]) timeline[my] = { HIGH:0, MEDIUM:0, LOW:0 };
-                        timeline[my][t.Risk_Level||'LOW']++;
-                    }
+                if(dStr && !isNaN(new Date(dStr))) {
+                    let d = new Date(dStr), my = `${d.getFullYear()}-${('0'+(d.getMonth()+1)).slice(-2)}`;
+                    if(!dates[my]) dates[my] = { HIGH:0, MEDIUM:0, LOW:0 };
+                    dates[my][t.Risk_Level||'LOW']++;
                 }
-
                 tSold += safeNum(t.Tenders_Sold); tRecv += safeNum(t.Tenders_Received); tResp += safeNum(t.Responsive_Tenders);
-                
-                if(t._findings.csv !== "-") {
-                    let textClean = t._findings.csv.split(' (Proof')[0].trim().substring(0, 20);
-                    reasons[textClean] = (reasons[textClean] || 0) + 1;
-                }
+                if(t._findings.csv !== "-") { let c = t._findings.csv.split(' (Proof')[0].trim().substring(0, 20); reasons[c] = (reasons[c] || 0) + 1; }
             });
 
-            ['owner','split','cpv','tailored','monopoly','outlier','meeting','rigging'].forEach(key => {
-                document.getElementById('count-'+key).innerText = vCounts[key].toLocaleString();
-            });
+            ['owner','split','cpv','tailored','monopoly','outlier','meeting','rigging'].forEach(key => document.getElementById('count-'+key).innerText = v[key].toLocaleString());
 
             const cOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
-            const barOptsY = { ...cOpts, indexAxis: 'y', scales: { x: { display: false }, y: { grid: { display: false }, ticks: {color: '#f8fafc', font:{size:10}} } } };
+            const barY = { ...cOpts, indexAxis: 'y', scales: { x: { display: false }, y: { grid: { display: false }, ticks: {color: '#f8fafc', font:{size:10}} } } };
 
             if(violationChartObj) violationChartObj.destroy();
-            violationChartObj = new Chart(document.getElementById('violationChart'), { type: 'bar', data: { labels: ['মালিকানা গোপন', 'চুক্তি বিভাজন', 'অবান্তর CPV', 'বৈষম্যমূলক শর্ত', 'একক দরদাতা', 'অস্বাভাবিক দর', 'প্রি-টেন্ডার মিটিং', 'বিড-রিগিং'], datasets: [{ data: [vCounts.owner, vCounts.split, vCounts.cpv, vCounts.tailored, vCounts.monopoly, vCounts.outlier, vCounts.meeting, vCounts.rigging], backgroundColor: colorSecondary, borderRadius: 3 }] }, options: barOptsY });
+            violationChartObj = new Chart(document.getElementById('violationChart'), { type: 'bar', data: { labels: ['মালিকানা গোপন', 'চুক্তি বিভাজন', 'অবান্তর CPV', 'বৈষম্যমূলক শর্ত', 'একক দরদাতা', 'অস্বাভাবিক দর', 'প্রি-টেন্ডার মিটিং', 'বিড-রিগিং'], datasets: [{ data: [v.owner, v.split, v.cpv, v.tailored, v.monopoly, v.outlier, v.meeting, v.rigging], backgroundColor: colorSecondary }] }, options: barY });
 
             if(dropoutChartObj) dropoutChartObj.destroy();
-            dropoutChartObj = new Chart(document.getElementById('dropoutChart'), { type: 'bar', data: { labels: ['শিডিউল কিনেছে', 'বিড জমা দিয়েছে', 'যোগ্য বিবেচিত'], datasets: [{ data: [tSold, tRecv, tResp], backgroundColor: [colorAlert, colorAccent, colorPrimary], borderRadius: 3 }] }, options: { ...cOpts, scales: { y: { display: false }, x: { grid: { display: false }, ticks: {color: '#f8fafc'} } } } });
+            dropoutChartObj = new Chart(document.getElementById('dropoutChart'), { type: 'bar', data: { labels: ['শিডিউল কিনেছে', 'বিড জমা দিয়েছে', 'যোগ্য বিবেচিত'], datasets: [{ data: [tSold, tRecv, tResp], backgroundColor: [colorAlert, colorAccent, colorPrimary] }] }, options: { ...cOpts, scales: { y: { display: false }, x: { grid: { display: false }, ticks: {color: '#f8fafc'} } } } });
 
-            const sortTop5 = (obj) => Object.entries(obj).sort((a,b) => b[1]-a[1]).slice(0,5);
-            const topSup = sortTop5(suppliers);
+            const sTop5 = (obj) => Object.entries(obj).sort((a,b) => b[1]-a[1]).slice(0,5);
             if(syndicateChartObj) syndicateChartObj.destroy();
-            syndicateChartObj = new Chart(document.getElementById('syndicateChart'), { type: 'bar', data: { labels: topSup.map(s => s[0].substring(0,15)), datasets: [{ data: topSup.map(s => s[1]), backgroundColor: colorAlert, borderRadius: 3 }] }, options: barOptsY });
+            syndicateChartObj = new Chart(document.getElementById('syndicateChart'), { type: 'bar', data: { labels: sTop5(sups).map(s => s[0].substring(0,15)), datasets: [{ data: sTop5(sups).map(s => s[1]), backgroundColor: colorAlert }] }, options: barY });
 
-            const sDates = Object.keys(timeline).sort();
+            const sD = Object.keys(dates).sort();
             if(timelineChartObj) timelineChartObj.destroy();
-            timelineChartObj = new Chart(document.getElementById('timelineChart'), { type: 'line', data: { labels: sDates, datasets: [ { label: 'HIGH', data: sDates.map(d => timeline[d].HIGH), borderColor: colorAlert, backgroundColor: 'rgba(220, 38, 38, 0.1)', fill: true, tension: 0.3, pointRadius: 2 }, { label: 'LOW', data: sDates.map(d => timeline[d].LOW), borderColor: colorSecondary, backgroundColor: 'transparent', tension: 0.3, pointRadius: 0 } ] }, options: { ...cOpts, plugins:{legend:{display:true, labels:{color:'#fff'}}}, scales: { x: { grid: { display: false }, ticks:{color:'#fff'} }, y: { display: false } } } });
+            timelineChartObj = new Chart(document.getElementById('timelineChart'), { type: 'line', data: { labels: sD, datasets: [{ label: 'HIGH', data: sD.map(d => dates[d].HIGH), borderColor: colorAlert, fill: true, backgroundColor: 'rgba(220,38,38,0.1)' }, { label: 'LOW', data: sD.map(d => dates[d].LOW), borderColor: colorSecondary }] }, options: { ...cOpts, plugins:{legend:{display:true, labels:{color:'#fff'}}}, scales: { x: { ticks:{color:'#fff'} }, y: { display: false } } } });
 
-            const pieOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: {font: {size: 11}, color: '#f8fafc'} } } };
-            
-            if(riskPieChartObj) riskPieChartObj.destroy();
-            riskPieChartObj = new Chart(document.getElementById('riskPieChart'), { type: 'doughnut', data: { labels: ['HIGH', 'MEDIUM', 'LOW'], datasets: [{ data: [highCount, medCount, lowCount], backgroundColor: [colorAlert, colorAccent, colorSecondary], borderWidth: 0 }] }, options: pieOpts });
-
-            const topAg = sortTop5(agencies);
-            if(agencyChartObj) agencyChartObj.destroy();
-            agencyChartObj = new Chart(document.getElementById('agencyChart'), { type: 'bar', data: { labels: topAg.map(s => s[0].substring(0,20)), datasets: [{ data: topAg.map(s => s[1]), backgroundColor: colorSecondary, borderRadius: 3 }] }, options: barOptsY });
-
-            const topR = sortTop5(reasons);
-            if(redFlagChartObj) redFlagChartObj.destroy();
-            redFlagChartObj = new Chart(document.getElementById('redFlagChart'), { type: 'bar', data: { labels: topR.map(r => r[0]), datasets: [{ data: topR.map(r => r[1]), backgroundColor: colorAccent, borderRadius: 3 }] }, options: barOptsY });
-
-            if(singleBidderChartObj) singleBidderChartObj.destroy();
-            singleBidderChartObj = new Chart(document.getElementById('singleBidderChart'), { type: 'doughnut', data: { labels: ['১ জন যোগ্য', 'একাধিক যোগ্য'], datasets: [{ data: [vCounts.monopoly, data.length - vCounts.monopoly], backgroundColor: [colorAlert, colorSecondary], borderWidth: 0 }] }, options: pieOpts });
-
-            if(riskValuePieChartObj) riskValuePieChartObj.destroy();
-            riskValuePieChartObj = new Chart(document.getElementById('riskValuePieChart'), { type: 'pie', data: { labels: ['HIGH (৳)', 'MEDIUM (৳)', 'LOW (৳)'], datasets: [{ data: [hVal, mVal, lVal], backgroundColor: [colorAlert, colorAccent, colorSecondary], borderWidth: 0 }] }, options: pieOpts });
+            const pieOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: {color: '#f8fafc'} } } };
+            if(riskPieChartObj) riskPieChartObj.destroy(); riskPieChartObj = new Chart(document.getElementById('riskPieChart'), { type: 'doughnut', data: { labels: ['HIGH', 'MEDIUM', 'LOW'], datasets: [{ data: [hc, mc, lc], backgroundColor: [colorAlert, colorAccent, colorSecondary], borderWidth:0 }] }, options: pieOpts });
+            if(agencyChartObj) agencyChartObj.destroy(); agencyChartObj = new Chart(document.getElementById('agencyChart'), { type: 'bar', data: { labels: sTop5(ags).map(s => s[0].substring(0,20)), datasets: [{ data: sTop5(ags).map(s => s[1]), backgroundColor: colorSecondary }] }, options: barY });
+            if(redFlagChartObj) redFlagChartObj.destroy(); redFlagChartObj = new Chart(document.getElementById('redFlagChart'), { type: 'bar', data: { labels: sTop5(reasons).map(r => r[0]), datasets: [{ data: sTop5(reasons).map(r => r[1]), backgroundColor: colorAccent }] }, options: barY });
+            if(singleBidderChartObj) singleBidderChartObj.destroy(); singleBidderChartObj = new Chart(document.getElementById('singleBidderChart'), { type: 'doughnut', data: { labels: ['১ জন যোগ্য', 'একাধিক যোগ্য'], datasets: [{ data: [v.monopoly, data.length - v.monopoly], backgroundColor: [colorAlert, colorSecondary], borderWidth:0 }] }, options: pieOpts });
+            if(riskValuePieChartObj) riskValuePieChartObj.destroy(); riskValuePieChartObj = new Chart(document.getElementById('riskValuePieChart'), { type: 'pie', data: { labels: ['HIGH (৳)', 'MEDIUM (৳)', 'LOW (৳)'], datasets: [{ data: [hv, mv, lv], backgroundColor: [colorAlert, colorAccent, colorSecondary], borderWidth:0 }] }, options: pieOpts });
         }
 
-        // --- UPDATED LIVE FACT-CHECKING INSPECTOR ---
+        // --- FORENSIC DATA INSPECTOR ---
+        function showPdfInModal(filename, keyword) {
+            const container = document.getElementById('pdfViewerContainer');
+            document.getElementById('pdfIframe').src = `downloaded_pdfs/${filename}#search=${keyword}`;
+            container.style.display = 'block';
+            setTimeout(() => container.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+        }
+
         async function showDataInspector(tenderId) {
             const t = currentFilteredData.find(x => x.Tender_Proposal_ID == tenderId);
             if(!t) return;
+
+            document.getElementById('pdfViewerContainer').style.display = 'none';
+            
+            // Set Official Link & Timestamp
+            document.getElementById('egpOfficialLink').href = `https://www.eprocure.gov.bd/resources/common/StdTenderSearch.jsp?tenderId=${t.Tender_Proposal_ID}`;
+            document.getElementById('timestampData').innerText = new Date().toISOString();
+            document.getElementById('footprintID').innerText = t.Tender_Proposal_ID;
 
             document.getElementById('insID').innerText = t.Tender_Proposal_ID || "N/A";
             document.getElementById('insVal').innerText = formatCurrency(t.Contract_Value_BDT);
@@ -671,81 +616,60 @@
             document.getElementById('insSold').innerText = t.Tenders_Sold || "0";
             document.getElementById('insRecv').innerText = t.Tenders_Received || "0";
             document.getElementById('insResp').innerText = t.Responsive_Tenders || "0";
-            document.getElementById('insPub').innerText = t.Advertised_Date || t.Published_Date || "N/A";
-            document.getElementById('insClose').innerText = t.Tender_Valid_Up_To || t.Closing_Date || "N/A";
+            document.getElementById('insPub').innerText = t.Advertised_Date || "N/A";
+            document.getElementById('insClose').innerText = t.Closing_Date || "N/A";
             document.getElementById('insNoa').innerText = t.Notification_of_Award_Date || "N/A";
             document.getElementById('insSign').innerText = t.Contract_Signing_Date || "N/A";
 
-            // 1. Show pre-computed static JSON text
-            let rawExp = t.Eligibility_of_Tenderer || t.Extracted_Specific_Experience || t.Qualification_Criteria || "শর্তের কোনো তথ্য ডেটাবেসে পাওয়া যায়নি।";
-            let highlightedExp = rawExp.replace(/\b(rajuk|cda|kda|rda|coxda|gda|pwd|lged|city corporation|petrobangla)\b/gi, '<span class="highlight-red">$&</span>');
-            highlightedExp = highlightedExp.replace(/(chattogram|chittagong|dhaka|khulna|rajshahi|sylhet|barisal|rangpur)/gi, '<span class="highlight-red">$&</span>');
-            highlightedExp = highlightedExp.replace(/\d+\.[1-9]\d+\s*(crore|lac|lakh)/gi, '<span class="highlight-red">$&</span>');
-            highlightedExp = highlightedExp.replace(/(single contract|single tender|একক চুক্তি)/gi, '<span class="highlight-red">$&</span>');
+            let rawExp = t.Eligibility_of_Tenderer || t.Extracted_Specific_Experience || t.Qualification_Criteria || "তথ্য পাওয়া যায়নি।";
+            let hl = rawExp.replace(/\b(rajuk|cda|kda|pwd|lged|petrobangla)\b/gi, '<span class="highlight-red">$&</span>')
+                           .replace(/(chattogram|dhaka|khulna|rajshahi|sylhet|barisal|rangpur)/gi, '<span class="highlight-red">$&</span>')
+                           .replace(/\d+\.[1-9]\d+\s*(crore|lac|lakh)/gi, '<span class="highlight-red">$&</span>');
             
             const expContainer = document.getElementById('insExp');
-            expContainer.innerHTML = highlightedExp;
+            expContainer.innerHTML = hl;
 
-            let laymenExp = "<strong>সহজ ভাষায় বিশ্লেষণ:</strong><br>";
+            let laymenExp = "<strong>ফলাফল বিশ্লেষণ:</strong><br>";
             const fk = t._findings.keys;
-            if(fk.owner) laymenExp += "• বেনামী কোম্পানির লক্ষণ: প্রকৃত মালিকের নাম গোপন।<br>";
-            if(fk.tailored) laymenExp += "• সাধারণ ঠিকাদারদের আটকাতে নির্দিষ্ট এলাকার বা অদ্ভুত দশমিক সংখ্যার শর্ত দেওয়া হয়েছে।<br>";
-            if(fk.monopoly) laymenExp += "• ফাঁকা মাঠে গোল: রেস্পন্সিভ (যোগ্য) ঘোষণা করা হয়েছে মাত্র ১ জনকে।<br>";
-            if(fk.cpv) laymenExp += "• টেন্ডার লুকানোর চেষ্টা: অবান্তর CPV কোড বা অস্বাভাবিক শিডিউল ফি।<br>";
-            if(fk.outlier) laymenExp += "• বাজেট লিক: চুক্তিমূল্যে ৩-ডিজিটের ভগ্নাংশ, যা এস্টিমেটের সাথে গোপন আঁতাতের প্রমাণ।<br>";
-            if(fk.meeting) laymenExp += "• তাড়াহুড়া: টেন্ডার প্রকাশ থেকে চুক্তির মাঝে অস্বাভাবিক কম সময়, কাজ আগে থেকেই ফিক্স করা ছিল।<br>";
-            if(fk.rigging) laymenExp += "• বিড রিগিং: শিডিউল কিনেছে অনেকেই, কিন্তু জমা দিয়েছে খুব কম।<br>";
-            if(laymenExp === "<strong>সহজ ভাষায় বিশ্লেষণ:</strong><br>") laymenExp += "এই টেন্ডারে দৃশ্যত বড় কোনো দুর্নীতি ধরা পড়েনি।";
+            if(fk.owner) laymenExp += "• প্রকৃত মালিকের নাম গোপন করা হয়েছে।<br>";
+            if(fk.tailored) laymenExp += "• নির্দিষ্ট এলাকার বা অদ্ভুত দশমিক সংখ্যার শর্ত দেওয়া হয়েছে।<br>";
+            if(fk.monopoly) laymenExp += "• রেস্পন্সিভ ঘোষণা করা হয়েছে মাত্র ১ জনকে।<br>";
+            if(fk.cpv) laymenExp += "• অবান্তর CPV কোড বা অস্বাভাবিক শিডিউল ফি।<br>";
+            if(fk.outlier) laymenExp += "• চুক্তিমূল্যে ৩-ডিজিটের ভগ্নাংশ পাওয়া গেছে।<br>";
+            if(fk.meeting) laymenExp += "• টেন্ডার প্রকাশ থেকে চুক্তির মাঝে অস্বাভাবিক কম সময়।<br>";
+            if(fk.rigging) laymenExp += "• শিডিউল কিনেছে অনেকেই, জমা দিয়েছে খুব কম।<br>";
+            document.getElementById('inspectorExplanation').innerHTML = laymenExp === "<strong>ফলাফল বিশ্লেষণ:</strong><br>" ? laymenExp + "বড় কোনো দুর্নীতি ধরা পড়েনি।" : laymenExp;
             
-            document.getElementById('inspectorExplanation').innerHTML = laymenExp;
             document.getElementById('inspectorModal').style.display = 'flex';
 
-            // 2. Perform Live PDF Fact-Checking if a PDF file is linked
             const pdfFilename = t.Source_File || (t.Source_Files_Merged ? t.Source_Files_Merged.split('|')[0] : null);
             if (pdfFilename) {
                 const liveCheckDiv = document.createElement('div');
                 liveCheckDiv.className = 'live-fact-check';
-                liveCheckDiv.innerHTML = `<span style="color:var(--neon-blue)">⏳ Downloading PDF and extracting text for live verification...</span>`;
+                liveCheckDiv.innerHTML = `<span style="color:var(--neon-blue)">⏳ Downloading PDF for live verification...</span>`;
                 expContainer.appendChild(liveCheckDiv);
 
-                // Run PDF extraction in the background
                 const livePdfText = await extractTextFromPDF(`downloaded_pdfs/${pdfFilename}`);
-                
                 if (livePdfText) {
-                    let verificationResults = "<strong>Live PDF Verification Results:</strong><br>";
-                    
-                    // Cross-check 1: Does the PDF actually contain the contract value?
                     const jsonValue = safeNum(t.Contract_Value_BDT);
+                    let res = "<strong>Live PDF Verification Results:</strong><br>";
                     if (jsonValue > 0) {
                         if (livePdfText.includes(jsonValue.toString())) {
-                            verificationResults += `✅ Contract value (৳${jsonValue}) found in original PDF.<br>`;
+                            res += `✅ Contract value (৳${jsonValue}) found in original PDF. <button class="btn-verify" style="background:#16a34a; color:white; border:none; margin-left:10px;" onclick="showPdfInModal('${pdfFilename}', '${jsonValue}')">📄 PDF ওপেন করে দেখুন</button><br>`;
                         } else {
-                            verificationResults += `<span class="highlight-red">⚠️ ALERT: Contract value (৳${jsonValue}) NOT found in the original PDF! (Possible manipulation)</span><br>`;
+                            res += `<span class="highlight-red">⚠️ ALERT: Contract value (৳${jsonValue}) NOT found in PDF!</span> <button class="btn-verify" onclick="showPdfInModal('${pdfFilename}', '${jsonValue}')">PDF চেক করুন</button><br>`;
                         }
                     }
-
-                    // Cross-check 2: Run heuristic AI over the RAW live text
-                    // Need to duplicate logic locally or pass to worker (keeping simple local regex for demo)
-                    let liveFlags = [];
-                    if (/\d+\.[1-9]\d+\s*(crore|lac|lakh)/i.test(livePdfText)) liveFlags.push("Abnormal Decimals");
-                    if (/(office|branch office|industry)\s+(must be|should be)?\s*(situated|located)?\s*(in|within)\s+(chattogram|chittagong|dhaka|khulna|rajshahi|sylhet|barisal|rangpur)/i.test(livePdfText)) liveFlags.push("Geofencing");
-                    
-                    if (liveFlags.length > 0) {
-                        verificationResults += `⚠️ Live AI found matching flags in document: ${liveFlags.join(', ')}<br>`;
-                    } else {
-                        verificationResults += `✅ Live text scan completed.<br>`;
-                    }
-
-                    liveCheckDiv.innerHTML = verificationResults;
+                    liveCheckDiv.innerHTML = res;
                 } else {
-                    liveCheckDiv.innerHTML = `<span style="color:var(--text-muted)">⚠️ PDF extraction failed (Document may be a scanned image or missing).</span>`;
+                    liveCheckDiv.innerHTML = `<span style="color:var(--text-muted)">⚠️ PDF extraction failed.</span>`;
                 }
             }
         }
 
         function downloadCSV() {
             if(!currentFilteredData.length) return alert("No data available to export.");
-            let csv = "\uFEFF" + "Tender_ID,Agency,Supplier,Risk,Value_BDT,Detected_Findings_With_Evidence,Violated_Rules\n";
+            let csv = "\uFEFFTender_ID,Agency,Supplier,Risk,Value_BDT,Detected_Findings,Violated_Rules\n";
             currentFilteredData.forEach(r => {
                 csv += `${r.Tender_Proposal_ID},"${extractCleanAgencyName(r.Organization_Agency).replace(/"/g, '""')}","${(r.Supplier_Name||"").replace(/"/g, '""')}",${r.Risk_Level || "N/A"},${safeNum(r.Contract_Value_BDT)},"${r._findings.csv.replace(/"/g, '""')}","${r._findings.rulesCsv.replace(/"/g, '""')}"\n`;
             });

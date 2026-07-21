@@ -1,313 +1,4 @@
-<!DOCTYPE html>
-<html lang="bn">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>e-GP Syndicate Tracker | Data Lab</title>
-    <!-- Free Open Source Charting Library -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        /* Premium Dark Black & Deep Blue Theme Layout */
-        :root {
-            --dark-bg: #080c14;      
-            --dark-card: #111827;    
-            --netra-red: #cc0000;    
-            --neon-blue: #38bdf8;    
-            --text-light: #f8fafc;   
-            --text-muted: #94a3b8;   
-            --border-dark: #1e293b;  
-        }
-        
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--dark-bg); color: var(--text-light); margin: 0; padding: 0; line-height: 1.6; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        
-        /* Header */
-        header { background-color: var(--dark-card); padding: 30px 20px; margin-bottom: 25px; text-align: center; border-bottom: 4px solid var(--netra-red); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);}
-        header h1 { margin: 0; font-size: 32px; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px;}
-        header p { margin: 8px 0 0 0; font-size: 15px; color: var(--text-muted); font-weight: 500;}
-
-        /* Forensic Rules Matrix Section */
-        .evidence-section { background: var(--dark-card); border: 1px solid var(--border-dark); padding: 25px; margin-bottom: 25px; border-radius: 8px; border-left: 5px solid var(--netra-red); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .evidence-section h3 { margin: 0 0 15px 0; font-size: 19px; color: var(--neon-blue); border-bottom: 1px solid var(--border-dark); padding-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;}
-        .evidence-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 15px; }
-        
-        /* Interactive Rule Items & Badges */
-        .evidence-item { background: rgba(255,255,255,0.01); padding: 15px; border-radius: 6px; border: 1px solid var(--border-dark); transition: 0.2s; cursor: pointer; }
-        .evidence-item:hover { border-color: var(--neon-blue); background: rgba(56, 189, 248, 0.05); transform: translateY(-2px); }
-        .evidence-item.active-rule { border-color: var(--neon-blue); background: rgba(56, 189, 248, 0.1); }
-        .evidence-item strong { display: flex; justify-content: space-between; align-items: center; font-size: 14.5px; color: #ffffff; margin-bottom: 6px; border-bottom: 1px dashed var(--border-dark); padding-bottom: 5px; }
-        .evidence-item p { margin: 0; font-size: 13px; color: var(--text-muted); text-align: justify; }
-
-        .rule-count { background-color: var(--netra-red); color: white; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 12px; box-shadow: 0 0 5px rgba(204, 0, 0, 0.5); min-width: 20px; text-align: center; }
-
-        /* Summary Cards */
-        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .card { background: var(--dark-card); border: 1px solid var(--border-dark); padding: 20px; border-radius: 6px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3);}
-        .card h2 { margin: 0 0 5px 0; font-size: 28px; color: var(--neon-blue); font-weight: 800; }
-        .card.alert-card h2 { color: var(--netra-red); }
-        .card p { margin: 0; font-size: 13px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
-
-        /* Systematic Nexus Section */
-        .nexus-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 30px; }
-        @media (max-width: 768px) { .nexus-grid { grid-template-columns: 1fr; } }
-        
-        .nexus-box { background: var(--dark-card); border: 1px solid var(--border-dark); padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .nexus-box h4 { margin: 0 0 15px 0; color: var(--neon-blue); font-size: 15px; border-bottom: 1px solid var(--border-dark); padding-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        .nexus-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-        .nexus-table th, .nexus-table td { padding: 10px; border-bottom: 1px solid var(--border-dark); text-align: left;}
-        .nexus-table th { background: rgba(255,255,255,0.03); color: var(--neon-blue); font-weight: 600;}
-        .nexus-table td { color: var(--text-light); }
-        .nexus-table td strong { color: var(--netra-red); font-size: 14px;}
-
-        .alert-mini { background: rgba(255,255,255,0.01); padding: 12px; border-left: 3px solid var(--netra-red); margin-bottom: 10px; border-radius: 0 4px 4px 0; border: 1px solid var(--border-dark); border-left-width: 3px;}
-        .alert-mini h5 { margin: 0 0 3px 0; color: var(--text-light); font-size: 13px;}
-        .alert-mini p { margin: 0; font-size: 12px; color: var(--text-muted);}
-        .alert-mini span { display: block; font-size: 18px; font-weight: bold; color: var(--netra-red); margin-top: 5px;}
-
-        /* Charts */
-        .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .chart-box { background: var(--dark-card); border: 1px solid var(--border-dark); padding: 20px; border-radius: 8px; display: flex; flex-direction: column; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
-        .chart-box h3 { margin: 0 0 5px 0; font-size: 15px; color: var(--text-light); text-align: center; font-weight: 700;}
-        .chart-desc { font-size: 12px; color: var(--text-muted); margin: 0 0 15px 0; text-align: center;}
-        .chart-container { position: relative; height: 220px; width: 100%; flex-grow: 1; } 
-        .chart-explanation { margin-top: 15px; font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--border-dark); padding-top: 12px; text-align: justify; line-height: 1.6; }
-        .chart-explanation strong { color: var(--neon-blue); }
-
-        /* Tools (Search & Download) */
-        .ledger-section { background: var(--dark-card); border: 1px solid var(--border-dark); padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
-        .ledger-section h3 { margin: 0 0 15px 0; color: var(--neon-blue); text-transform: uppercase; font-size: 18px; letter-spacing: 0.5px;}
-        .tools-bar { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; background: rgba(255,255,255,0.01); padding: 15px; border-radius: 6px; border: 1px solid var(--border-dark);}
-        .tools-bar input, .tools-bar select { padding: 8px 12px; border: 1px solid var(--border-dark); border-radius: 4px; font-size: 13px; outline: none; flex: 1; min-width: 150px; background: var(--dark-bg); color: white;}
-        .tools-bar input:focus, .tools-bar select:focus { border-color: var(--neon-blue); }
-        
-        .btn-clear { padding: 8px 15px; border: 1px solid var(--neon-blue); border-radius: 4px; font-size: 13px; font-weight: 700; cursor: pointer; color: var(--neon-blue); background: transparent; transition: 0.2s; }
-        .btn-clear:hover { background: var(--neon-blue); color: var(--dark-bg); }
-        .btn-download { padding: 8px 15px; border: none; border-radius: 4px; font-size: 13px; font-weight: 700; cursor: pointer; color: white; background-color: #1e40af; }
-        .btn-download:hover { background: #2563eb; }
-
-        /* Data Table */
-        .table-responsive { overflow-x: auto; }
-        table.main-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
-        table.main-table th, table.main-table td { padding: 12px 10px; border-bottom: 1px solid var(--border-dark); vertical-align: top; }
-        table.main-table th { color: var(--neon-blue); font-weight: 700; font-size: 11.5px; text-transform: uppercase; background: rgba(255,255,255,0.02); letter-spacing: 0.5px;}
-        table.main-table tr:hover { background-color: rgba(255,255,255,0.01); }
-        
-        .risk-badge { font-weight: 700; font-size: 10px; padding: 2px 6px; border-radius: 3px; color: white; display: inline-block; text-transform: uppercase;}
-        .risk-high { background-color: var(--netra-red); }
-        .risk-medium { background-color: #d97706; }
-        .risk-low { background-color: #059669; }
-        
-        .doc-link { color: var(--neon-blue); text-decoration: underline; font-weight: 600; font-size: 12px; display: inline-block; margin-right: 8px;}
-        .doc-link:hover { color: white; }
-        .doc-link.noa { color: #f43f5e; }
-        .doc-link.noa:hover { color: #fda4af; }
-        
-        .error { color: var(--netra-red); text-align: center; padding: 20px; font-size: 14px; font-weight: 600;}
-        .active-filter-banner { background: rgba(56, 189, 248, 0.1); border: 1px dashed var(--neon-blue); padding: 8px 15px; margin-bottom: 15px; border-radius: 4px; font-size: 13px; display: none; justify-content: space-between; align-items: center; }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        
-        <header>
-            <h1>e-GP Syndicate Tracker: Data Lab</h1>
-            <p>উন্নয়ন কর্তৃপক্ষ এবং সরকারি প্রকিউরমেন্টের ডিজিটাল ইনভেস্টিগেশন</p>
-        </header>
-
-        <!-- ফরেসনিক রুলবুক ম্যাট্রিক্স -->
-        <div class="evidence-section">
-            <h3>e-GP Forensic Audit Rulebook & Engine ম্যাট্রিক্স (যেকোনো রুল ফিল্টার করতে ক্লিক করুন)</h3>
-            <div class="evidence-grid">
-                <div class="evidence-item" onclick="filterByRule('owner', this)">
-                    <strong>১. তথ্য গোপন (Rule: ITT 5.14) <span class="rule-count" id="count-owner">0</span></strong>
-                    <p>স্ট্যান্ডার্ড টেন্ডার ডকুমেন্টের ITT 5.14 ধারা অনুযায়ী প্রতিটি বিডারের 'Beneficial Owner' বা প্রকৃত মালিকানার বিবরণ দেওয়া বাধ্যতামূলক। এটি গোপন রাখা স্বার্থের সংঘাত ও বেনামী দুর্নীতির অকাট্য লক্ষণ।</p>
-                </div>
-                <div class="evidence-item" onclick="filterByRule('split', this)">
-                    <strong>২. চুক্তি বিভাজন (PPA 2006) <span class="rule-count" id="count-split">0</span></strong>
-                    <p>পাবলিক প্রকিউরমেন্ট রুলস (PPR) এবং জিপিএ আইনের রুল ELG_005 লঙ্ঘন। কোনো মেগা প্রজেক্টের কাজের উচ্চতর মন্ত্রণালয়ের অনুমোদন এড়াতে সুনির্দিষ্ট উদ্দেশ্যে কাজকে কৃত্রিমভাবে একাধিক ছোট ছোট লটে ভাগ করার নামান্তর।</p>
-                </div>
-                <div class="evidence-item" onclick="filterByRule('cpv', this)">
-                    <strong>৩. CPV কারসাজি (CPV Staffing) <span class="rule-count" id="count-cpv">0</span></strong>
-                    <p><strong>CPV (Common Procurement Vocabulary)</strong> হলো আন্তর্জাতিক টেন্ডার কোড। জালিয়াতি করার জন্য মূল কাজের সাথে সম্পর্কহীন গোপন কোড (যেমন- রাস্তার কাজে জাহাজের কোড) জোর করে ঢুকিয়ে টেন্ডার লুকানোর কারসাজি।</p>
-                </div>
-                <div class="evidence-item" onclick="filterByRule('tailored', this)">
-                    <strong>৪. বৈষম্যমূলক শর্ত (Tailored Criteria) <span class="rule-count" id="count-tailored">0</span></strong>
-                    <p>টেন্ডার ডকুমেন্টের 'Eligibility' কলামে এমন অদ্ভুত ও অস্বাভাবিক স্পেসিফিক শর্ত (যেমন- নির্দিষ্ট কোনো এরিয়াতে সাব-অফিস বা নির্দিষ্ট ডেসিমাল ফিন্যান্সিয়াল টার্নওভার) দেওয়া, যা শুধু সিন্ডিকেটের সাথে মিলে যায়।</p>
-                </div>
-                <div class="evidence-item" onclick="filterByRule('monopoly', this)">
-                    <strong>৫. মনোপলি ফানেলিং (Rule: ITT 50.6) <span class="rule-count" id="count-monopoly">0</span></strong>
-                    <p>ITT 50.6 ও 56.2(b) ধারা অনুসারে কার্যকর প্রতিযোগিতা না থাকলে বা মাত্র ১ জন রেস্পন্সিভ বিডার থাকলে রি-টেন্ডার আবশ্যক। কিন্তু স্ক্রিনিংয়ের মাধ্যমে বাকিদের অযোগ্য করে একক দরদাতাকে কাজ পাইয়ে দেওয়ার মেথড।</p>
-                </div>
-                <div class="evidence-item" onclick="filterByRule('outlier', this)">
-                    <strong>৬. অস্বাভাবিক দর (Price Outliers) <span class="rule-count" id="count-outlier">0</span></strong>
-                    <p>রুল STAT_001 এবং ওয়ার্ল্ড ব্যাংকের Abnormally Low/High Bids (ALB) গাইডলাইনের সরাসরি লঙ্ঘন। প্রজেক্টের অফিশিয়াল বাজেট এস্টিমেটের চেয়ে চরম কম বা বেশি প্রাইস ড্রপ করে বাজেট ম্যানিপুলেশন।</p>
-                </div>
-                <div class="evidence-item" onclick="filterByRule('meeting', this)">
-                    <strong>৭. প্রি-টেন্ডার মিটিং প্রহসন <span class="rule-count" id="count-meeting">0</span></strong>
-                    <p>টেন্ডার প্রকাশের মাত্র ৫ থেকে ৩০ মিনিটের ব্যবধানে অনলাইন বা অফলাইন মিটিংয়ের ডেট ফিক্সড করা, যা বাইরের সাধারণ কোনো ডেকোরেটেড প্রফেশনাল কোম্পানির পক্ষে এটেন্ড করা বা প্রজেক্ট কোয়েরি তোলার সুযোগ সম্পূর্ণ কেড়ে নেয়।</p>
-                </div>
-                <div class="evidence-item" onclick="filterByRule('rigging', this)">
-                    <strong>৮. বিড-রিগিং কোড (Dropout Ratio) <span class="rule-count" id="count-rigging">0</span></strong>
-                    <p>বিপুল সংখ্যক ঠিকাদার টেন্ডার শিডিউল বা ডকুমেন্ট পারচেজ করার পরেও ফাইনাল ড্রপিং লেজারে কোনো বিড জমা না দেওয়া। এটি সরাসরি মাঠ পর্যায়ে শক্তিশালী সিন্ডিকেটের ভয়ভীতি প্রদর্শন অথবা আর্থিক রফার প্রমাণ।</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- ডাইনামিক অডিট সামারি -->
-        <div class="summary-grid">
-            <div class="card">
-                <h2 id="totalContracts">0</h2>
-                <p>স্ক্যান করা টেন্ডার (লগ)</p>
-            </div>
-            <div class="card alert-card">
-                <h2>৯৬.৭%</h2>
-                <p>কাজ পেয়েছে শীর্ষ ১০ সিন্ডিকেট</p>
-            </div>
-            <div class="card alert-card">
-                <h2 id="totalOwnersMissing">০ টি</h2>
-                <p>মালিকানার তথ্য গোপন</p>
-            </div>
-            <div class="card alert-card">
-                <h2 id="totalValue">৳০</h2>
-                <p>উচ্চ-ঝুঁকিপূর্ণ চুক্তিমূল্য</p>
-            </div>
-        </div>
-
-        <!-- Systematic Nexus Section -->
-        <div class="nexus-grid">
-            <div class="nexus-box">
-                <h4>সংস্থা-ঠিকাদার আঁতাত (Agency-Supplier Nexus)</h4>
-                <table class="nexus-table">
-                    <thead>
-                        <tr>
-                            <th>Procuring Entity (সংস্থা)</th>
-                            <th>Contractor (ঠিকাদার)</th>
-                            <th>Total Deals</th>
-                        </tr>
-                    </thead>
-                    <tbody id="nexusBody">
-                        <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">ডেটা লোড হচ্ছে...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="nexus-box">
-                <h4>সিস্টেমেটিক ম্যানিপুলেশন অ্যালার্ট</h4>
-                <div class="alert-mini">
-                    <h5>অতি-দ্রুত টেন্ডার ক্লোজিং</h5>
-                    <p>আইন ভেঙে ১৪-২৮ দিনের কম সময়ে (Rush Jobs) টেন্ডার ক্লোজ করা হয়েছে:</p>
-                    <span id="rushJobsCount">০ টি</span>
-                </div>
-                <div class="alert-mini">
-                    <h5>যোগ্যতার শর্তে কারসাজি</h5>
-                    <p>নির্দিষ্ট কোম্পানির জন্য টেইলর-মেইড (Tailored Criteria) শর্ত দেওয়া হয়েছে:</p>
-                    <span id="tailoredCriteriaCount">০ টি</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- চার্ট গ্রিড (৯টি চার্ট) -->
-        <div class="chart-grid">
-            <div class="chart-box">
-                <h3>১. দুর্নীতির ধরন (Macro-analysis)</h3>
-                <p class="chart-desc">সিস্টেমে পাওয়া মূল ৮টি প্রাতিষ্ঠানিক ভায়োলেশন</p>
-                <div class="chart-container"><canvas id="violationChart"></canvas></div>
-                <div class="chart-explanation"><strong>কী নির্দেশ করে:</strong> ই-জিপি সিস্টেমে আইন ভাঙার জন্য কোন কৌশলগুলো ঠিকাদারেরা সবচেয়ে বেশি ব্যবহার করেছে তার পরিসংখ্যান চিত্র।</div>
-            </div>
-            <div class="chart-box">
-                <h3>২. টেন্ডার ড্রপ-আউট (Bid-Rigging)</h3>
-                <p class="chart-desc">ডকুমেন্ট কিনেছেন বনাম ফাইনাল বিড জমা দিয়েছেন</p>
-                <div class="chart-container"><canvas id="dropoutChart"></canvas></div>
-                <div class="chart-explanation"><strong>কী নির্দেশ করে:</strong> টেন্ডার কেনার পর বিপুল সংখক ঠিকাদার গায়েব হওয়া প্রমাণ করে যে, জমার আগেই গোপনে টাকার বিনিময়ে সমঝোতা করা হয়েছে।</div>
-            </div>
-            <div class="chart-box">
-                <h3>৩. সিন্ডিকেট লিডারবোর্ড</h3>
-                <p class="chart-desc">সর্বোচ্চ মূল্যের 'HIGH' রিস্ক টেন্ডার প্রাপ্ত ঠিকাদার</p>
-                <div class="chart-container"><canvas id="syndicateChart"></canvas></div>
-                <div class="chart-explanation"><strong>কী নির্দেশ করে:</strong> সরকারি মেগা প্রজেক্টের সিংহভাগ টাকা প্রতিযোগিতা ছাড়াই কোন বিশেষ কোম্পানিগুলোর পকেটে যাচ্ছে তা স্পষ্ট করে।</div>
-            </div>
-            <div class="chart-box">
-                <h3>৪. ম্যানিপুলেশন টাইমলাইন</h3>
-                <p class="chart-desc">টেন্ডার প্রকাশের সময়কাল অনুযায়ী রুল ভায়োলেশনের প্রবণতা</p>
-                <div class="chart-container"><canvas id="timelineChart"></canvas></div>
-                <div class="chart-explanation"><strong>কী নির্দেশ করে:</strong> বছরের কোন নির্দিষ্ট মাসে বা কোন অর্থবছর শেষ হওয়ার আগে তাড়াহুড়ো করে ব্যাকডোর টেন্ডার ছাড়ার হার বেড়েছে তা ট্র্যাক করে।</div>
-            </div>
-            <div class="chart-box">
-                <h3>৫. টেন্ডার সংখ্যার ভিত্তিতে ঝুঁকি</h3>
-                <p class="chart-desc">উচ্চ, মাঝারি ও নিম্ন ঝুঁকির মোট অনুপাত (টেন্ডার সংখ্যায়)</p>
-                <div class="chart-container"><canvas id="riskPieChart"></canvas></div>
-                <div class="chart-explanation"><strong>কী নির্দেশ করে:</strong> স্ক্যান করা প্রজেক্টগুলোর মধ্যে কত বিশাল শতাংশ টেন্ডার কোনো না কোনো দুর্নীতির রেড ফ্ল্যাগ নিয়ে পাশ হয়েছে।</div>
-            </div>
-            <div class="chart-box">
-                <h3>৬. শীর্ষ ঝুঁকিপূর্ণ সংস্থা (Agencies)</h3>
-                <p class="chart-desc">যেসব উন্নয়ন সংস্থার টেন্ডারে সবচেয়ে বেশি টাকার অসঙ্গতি</p>
-                <div class="chart-container"><canvas id="agencyChart"></canvas></div>
-                <div class="chart-explanation"><strong>কী নির্দেশ করে:</strong> দুর্নীতি ও মনোপলি সিন্ডিকেটের পেছনে কোন প্রজেক্ট ডিরেক্টর বা সরকারি দপ্তরগুলো সবচেয়ে বেশি দায়ী তা চিহ্নিত করে।</div>
-            </div>
-            <div class="chart-box">
-                <h3>৭. অনিয়মের প্রধান হাতিয়ার</h3>
-                <p class="chart-desc">অডিট ডাইনামিক ডেটা অনুসারে সবচেয়ে বেশি ব্যবহৃত ভায়োলেশন কোড</p>
-                <div class="chart-container"><canvas id="redFlagChart"></canvas></div>
-                <div class="chart-explanation"><strong>কী নির্দেশ করে:</strong> ইনভেস্টিগেশনে ফিল্টার করা ডেটায় সবচেয়ে বেশি কোন অপরাধের কারণে টেন্ডারগুলো ফ্ল্যাগড বা ঝুঁকিপূর্ণ হয়েছে।</div>
-            </div>
-            <div class="chart-box">
-                <h3>৮. একক দরদাতার আধিপত্য (Monopoly)</h3>
-                <p class="chart-desc">১ জন যোগ্য দরদাতা বনাম সত্যিকারের প্রতিযোগীতা</p>
-                <div class="chart-container"><canvas id="singleBidderChart"></canvas></div>
-                <div class="chart-explanation"><strong>কী নির্দেশ করে:</strong> কত বিপুল শতাংশ টেন্ডারে ড্রপিংয়ের নাটক করা হলেও মূলত ১ জন ঠিকাদারকে ফাঁকা মাঠে গোল দেওয়ার ব্যবস্থা করে দেওয়া হয়েছে।</div>
-            </div>
-            <div class="chart-box">
-                <h3>৯. টাকার অঙ্কে ঝুঁকির অনুপাত</h3>
-                <p class="chart-desc">উচ্চ, মাঝারি ও নিম্ন ঝুঁকির সামগ্রিক আর্থিক গ্রাফ (BDT)</p>
-                <div class="chart-container"><canvas id="riskValuePieChart"></canvas></div>
-                <div class="chart-explanation"><strong>কী নির্দেশ করে:</strong> মোট সরকারি বরাদ্দের কত হাজার কোটি টাকা উচ্চ-ঝুঁকিপূর্ণ টেন্ডারের মাধ্যমে সিন্ডিকেটের কাছে সমর্পিত হয়েছে।</div>
-            </div>
-        </div>
-
-        <!-- এভিডেন্স লেজার (ডেটা টেবিল) -->
-        <div class="ledger-section">
-            <h3>এভিডেন্স লেজার (Database)</h3>
-            
-            <div class="active-filter-banner" id="filterBanner">
-                <span id="bannerText" style="color: var(--neon-blue); font-weight: bold;"></span>
-                <button class="btn-clear" onclick="resetRuleFilter()">ফিল্টার সরান (Show All)</button>
-            </div>
-
-            <div class="tools-bar">
-                <input type="text" id="searchInput" placeholder="ঠিকাদার, সংস্থা বা ID খুঁজুন..." onkeyup="filterData()">
-                <select id="riskFilter" onchange="filterData()">
-                    <option value="ALL">সব ঝুঁকি (All Risks)</option>
-                    <option value="HIGH">উচ্চ ঝুঁকি (HIGH)</option>
-                    <option value="MEDIUM">মাঝারি ঝুঁকি (MEDIUM)</option>
-                    <option value="LOW">নিম্ন ঝুঁকি (LOW)</option>
-                </select>
-                <button class="btn-download" onclick="downloadCSV()">CSV এক্সপোর্ট</button>
-            </div>
-
-            <div class="table-responsive">
-                <table class="main-table" id="tenderTable">
-                    <thead>
-                        <tr>
-                            <th style="width: 70px;">ID</th>
-                            <th>Procuring Entity</th>
-                            <th>Contractor / Supplier</th>
-                            <th style="width: 60px;">Risk</th>
-                            <th style="text-align: right;">Value (৳)</th>
-                            <th>Detected Findings</th>
-                            <th>Violated Rules</th>
-                            <th style="width: 100px;">Documents</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <tr><td colspan="8" style="text-align: center; color: #777; padding: 30px;">Loading Audit Data...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <script>
+<script>
         const jsonFileName = 'Procurement_Database.json';
         let globalTenderData = []; 
         let activeRuleKey = null; 
@@ -336,8 +27,7 @@
             rigging: ["OECD Guidelines for Fighting Bid Rigging"]
         };
 
-        // --- FREE NLP HEURISTIC ENGINE FOR ELIGIBILITY CRITERIA ---
-        // Operates 100% locally in the browser with no paid API calls required.
+        // --- UNIVERSAL NLP HEURISTIC ENGINE FOR ALL AUTHORITIES ---
         function analyzeEligibilityAI(text) {
             if (!text) return false;
             let score = 0;
@@ -346,34 +36,38 @@
             // 1. Overly Specific Decimals (e.g. 15.35 Crore instead of 15 Crore)
             if (/\d+\.\d{2,}/.test(t)) score += 40; 
             
-            // 2. Geofencing/Local constraints (Restricting to a specific zone illegally)
-            if (/(specific area|particular zone|local authority|rajuk|rda|cda|kda area)/i.test(t)) score += 30;
+            // 2. Universal Geofencing & Authority Locking (Catches ALL Development Authorities)
+            // If they demand experience specifically under RAJUK, CDA, KDA, RDA, CoxDA, GDA, PWD etc.
+            if (/\b(rajuk|cda|kda|rda|coxda|gda|pwd|lged|city corporation|rajdhani unnayan|chittagong development|khulna development|rajshahi development|cox\'s bazar development|gazipur development)\b/i.test(t)) {
+                score += 30; // Illegal Authority Locking
+            }
+            if (/(specific area|particular zone|local authority|chattogram|chittagong|dhaka|khulna|rajshahi|gazipur|cox\'s bazar)/i.test(t)) {
+                score += 20; // Illegal Geographical Locking
+            }
             
             // 3. Monopoly phrasing (Single contract + similar nature + narrow timeframe)
-            if (t.includes("single contract") || t.includes("একক চুক্তি")) score += 20;
+            if (t.includes("single contract") || t.includes("একক চুক্তি") || t.includes("single work")) score += 20;
             if (t.includes("similar nature") || t.includes("সমমনা কাজ")) score += 10;
-            if (/(last 1 year|within 12 months|১ বছরের মধ্যে)/i.test(t)) score += 20;
+            if (/(last 1 year|within 12 months|১ বছরের মধ্যে|last 2 years)/i.test(t)) score += 20;
             
             // 4. Equipment/Brand Locking
-            if (/(must own|own equipment|specific brand|sole distributor|নিজস্ব)/i.test(t)) score += 30;
+            if (/(must own|own equipment|specific brand|sole distributor|নিজস্ব|authorization from)/i.test(t)) score += 30;
 
-            // 5. Unrelated Certifications (e.g., asking for ISO in a basic road repair job)
-            if (/(iso 9001|specific certification)/i.test(t)) score += 15;
+            // 5. Unrelated Certifications
+            if (/(iso 9001|iso|fsc|specific certification)/i.test(t)) score += 15;
 
             // Threshold: If total suspicion score is 50 or more, flag it as Tailored!
             return score >= 50; 
         }
 
-        // --- NEW: DEEP FORENSIC ENGINE (Data-Driven Intelligence) ---
-        // Analyzes numbers, dates, and package patterns directly to auto-detect violations without needing paid APIs.
+        // --- DEEP FORENSIC ENGINE ---
         function getDynamicFindings(t) {
             let findings = [];
             let rules = [];
 
-            // Normalize all available text for aggressive heuristic searching
             const fullText = Object.values(t).join(" ").toLowerCase();
             const rReason = (t.Red_Flag_Reason || "").toLowerCase();
-            const exp = (t.Extracted_Specific_Experience || t.Eligibility_of_Tenderer || t.Qualification_Criteria || "").toLowerCase();
+            const exp = (t.Extracted_Specific_Experience || t.Eligibility_of_Tenderer || t.Qualification_Criteria || t.Eligibility_Criteria || "").toLowerCase();
             const cpvText = (t.CPV_Code || t.CPV_Category || t.Procurement_Category || "").toLowerCase();
             const pkgNo = (t.Package_No || t.Package_Number || "").toLowerCase();
             
@@ -383,38 +77,37 @@
             const val = parseFloat(t.Contract_Value_BDT || t.Contract_Value);
             const est = parseFloat(t.Official_Estimated_Cost || t.Estimated_Cost);
 
-            // ১. Owner info check
+            // 1. Owner info check
             if (/owner|beneficial|গোপন|itt\s*5\.14|missing owner/i.test(fullText) || t.Beneficial_Owner === false || t.Beneficial_Owner === "Missing") {
                 findings.push("Beneficial Owner Info Hidden");
                 rules.push(...RULE_MAP.owner);
             }
 
-            // ২. Splitting Check (Package Number Pattern Analysis)
+            // 2. Splitting Check
             if (/split|lot|বিভাজন|artificial splitting/i.test(rReason) || /(lot|part|group|sec|phase)[\s\-_]*[a-z0-9]+/i.test(pkgNo)) {
                 findings.push("Artificial Contract Splitting (Lot/Part Pattern)");
                 rules.push(...RULE_MAP.split);
             }
 
-            // ৩. CPV Match Check (Missing or dummy CPV logic)
-            if (/cpv|vocabulary|ক্যাটাগরি|কোড|mismatch/i.test(rReason) || 
-                cpvText === "" || cpvText === "not defined" || cpvText.includes("000000") || (cpvText && !/\d/.test(cpvText))) {
+            // 3. CPV Match Check
+            if (/cpv|vocabulary|ক্যাটাগরি|কোড|mismatch/i.test(rReason) || cpvText === "" || cpvText === "not defined" || cpvText.includes("000000") || (cpvText && !/\d/.test(cpvText))) {
                 findings.push("CPV Category Manipulated or Hidden");
                 rules.push(...RULE_MAP.cpv);
             }
 
-            // ৪. Tailored Criteria Check (Using the Local Heuristic NLP Engine)
+            // 4. Tailored Criteria Check (Using Universal NLP)
             if (analyzeEligibilityAI(exp) || /\d+\.\d+/.test(exp) || /\d{2,}\s*\(/.test(exp) || /restrictive|tailored|নির্দিষ্ট|specific/i.test(fullText)) {
                 findings.push("Tailored Eligibility Criteria");
                 rules.push(...RULE_MAP.tailored);
             }
 
-            // ৫. Monopoly Data Check
+            // 5. Monopoly Data Check
             if (resp === 1 || /single|একক|monopoly|50\.6/i.test(fullText)) {
                 findings.push("Single Responsive Bidder");
                 rules.push(...RULE_MAP.monopoly);
             }
 
-            // ৬. Price Outlier Data Check (Calculates exact deviation > 10%)
+            // 6. Price Outlier Data Check
             if (!isNaN(est) && !isNaN(val) && est > 0 && val > 0 && (Math.abs(est - val) / est > 0.10)) {
                 let dev = ((Math.abs(est - val) / est) * 100).toFixed(1);
                 findings.push(`Price Outlier (${dev}% deviation from estimate)`);
@@ -424,7 +117,7 @@
                 rules.push(...RULE_MAP.outlier);
             }
 
-            // ৭. Pre-Tender Meeting / Rush Job Check (Calculates Date Gaps)
+            // 7. Pre-Tender Meeting / Rush Job Check
             let isRush = false;
             let isFakeMeeting = false;
             
@@ -448,7 +141,7 @@
                 rules.push(...RULE_MAP.meeting);
             }
 
-            // ৮. Bid Rigging Data Check (High Dropout Ratio > 50% and minimum 5 sold)
+            // 8. Bid Rigging Data Check
             if ((!isNaN(sold) && !isNaN(recv) && sold > (recv * 1.5) && sold >= 5)) {
                 findings.push(`High Dropout Ratio (${sold} sold, only ${recv} dropped)`);
                 rules.push(...RULE_MAP.rigging);
@@ -457,7 +150,6 @@
                 rules.push(...RULE_MAP.rigging);
             }
 
-            // Fallback to JSON reason if nothing mathematically triggered
             if (findings.length === 0 && rReason && !['no significant issue detected', 'clean', '-'].includes(rReason)) {
                 findings.push(t.Red_Flag_Reason);
             }
@@ -480,7 +172,6 @@
 
         async function init() {
             try {
-                // Ensure your provided JSON text is saved in this file.
                 const res = await fetch(jsonFileName);
                 if (!res.ok) throw new Error("File not found");
                 const data = await res.json();
@@ -488,7 +179,7 @@
                 
                 filterData(); 
             } catch (err) {
-                document.getElementById('tableBody').innerHTML = `<tr><td colspan="8" class="error">ডেটা লোড করা যায়নি। ব্রাউজারের পলিসির কারণে লোকাল ফোল্ডার থেকে JSON রিড করতে সমস্যা হচ্ছে। 파일টি লাইভ সার্ভারে ওপেন করুন বা IDE Live Server ব্যবহার করুন।</td></tr>`;
+                document.getElementById('tableBody').innerHTML = `<tr><td colspan="8" class="error">ডেটা লোড করা যায়নি। ব্রাউজারের পলিসির কারণে লোকাল ফোল্ডার থেকে JSON রিড করতে সমস্যা হচ্ছে। ফাইলটি লাইভ সার্ভারে ওপেন করুন বা IDE Live Server ব্যবহার করুন।</td></tr>`;
             }
         }
 
@@ -569,6 +260,13 @@
             document.getElementById('totalOwnersMissing').innerText = missingOwnerCount + " টি";
         }
 
+        // --- UNIVERSAL AGENCY NAME EXTRACTOR ---
+        function extractCleanAgencyName(agencyString) {
+            if(!agencyString) return "Unknown Agency";
+            // Removes unnecessary e-GP formatting like "Procuring Entity Name :"
+            return agencyString.replace(/Procuring Entity.*/i, '').trim();
+        }
+
         function updateAdvancedAnalysis(data) {
             const nexus = {};
             let tailoredCount = 0;
@@ -576,7 +274,7 @@
 
             data.forEach(t => {
                 if(t.Supplier_Name && t.Organization_Agency && t.Tender_Status === "Contract Awarded") {
-                    let agency = t.Organization_Agency.split('Procuring')[0].trim();
+                    let agency = extractCleanAgencyName(t.Organization_Agency);
                     let sup = t.Supplier_Name.split('(')[0].trim();
                     let key = agency + "|||" + sup;
                     if(!nexus[key]) nexus[key] = { agency, sup, count: 0 };
@@ -595,8 +293,8 @@
                 sortedNexus.forEach(n => {
                     nBody.insertAdjacentHTML('beforeend', `
                         <tr>
-                            <td style="color:var(--text-muted);">${n.agency.substring(0,25)}..</td>
-                            <td style="font-weight:600;">${n.sup.substring(0,20)}</td>
+                            <td style="color:var(--text-muted);">${n.agency.substring(0,30)}..</td>
+                            <td style="font-weight:600;">${n.sup.substring(0,25)}</td>
                             <td><strong>${n.count} বার</strong></td>
                         </tr>
                     `);
@@ -630,7 +328,6 @@
                 }
             });
 
-            // UPDATE BADGES IN MATRIX
             document.getElementById('count-owner').innerText = vCounts.owner;
             document.getElementById('count-split').innerText = vCounts.split;
             document.getElementById('count-cpv').innerText = vCounts.cpv;
@@ -725,7 +422,7 @@
             const agencies = {};
             data.forEach(t => {
                 if (t.Risk_Level === 'HIGH' && t.Organization_Agency && t.Contract_Value_BDT) {
-                    let name = t.Organization_Agency.split('Procuring')[0].trim();
+                    let name = extractCleanAgencyName(t.Organization_Agency);
                     if(!agencies[name]) agencies[name] = 0;
                     agencies[name] += parseFloat(t.Contract_Value_BDT);
                 }
@@ -734,7 +431,7 @@
             if(agencyChartObj) agencyChartObj.destroy();
             agencyChartObj = new Chart(document.getElementById('agencyChart'), {
                 type: 'bar',
-                data: { labels: sortedAgencies.map(s => s[0].length > 15 ? s[0].substring(0, 15) + ".." : s[0]), datasets: [{ data: sortedAgencies.map(s => s[1]), backgroundColor: colorSecondary, borderColor: colorPrimary, borderWidth: 1, borderRadius: 3 }] },
+                data: { labels: sortedAgencies.map(s => s[0].length > 20 ? s[0].substring(0, 20) + ".." : s[0]), datasets: [{ data: sortedAgencies.map(s => s[1]), backgroundColor: colorSecondary, borderColor: colorPrimary, borderWidth: 1, borderRadius: 3 }] },
                 options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { grid: { display: false }, ticks: {color: '#f8fafc'} } }, plugins: { legend: { display: false } } }
             });
 
@@ -780,10 +477,9 @@
                 let riskClass = t.Risk_Level === 'HIGH' ? 'risk-high' : (t.Risk_Level === 'MEDIUM' ? 'risk-medium' : 'risk-low');
                 let valStr = formatCurrency(t.Contract_Value_BDT);
                 
-                let org = t.Organization_Agency ? t.Organization_Agency.split('Procuring')[0].trim() : "Unknown";
+                let org = extractCleanAgencyName(t.Organization_Agency);
                 let sup = t.Supplier_Name ? t.Supplier_Name.split('(')[0].trim() : "<span style='color:var(--text-muted)'>-</span>";
                 
-                // USE LOCAL NLP ENGINE INSTEAD OF RELYING ON JSON FIELDS
                 const f = getDynamicFindings(t);
                 let reason = f.findingsText;
                 let rulesHtml = f.rulesList.join("<br>");
@@ -832,9 +528,8 @@
             dataToExport.forEach(r => {
                 const f = getDynamicFindings(r);
                 
-                const escAgency = (r.Organization_Agency || "").replace(/"/g, '""');
+                const escAgency = extractCleanAgencyName(r.Organization_Agency).replace(/"/g, '""');
                 const escSupplier = (r.Supplier_Name || "").replace(/"/g, '""');
-                // Format for clean CSV without HTML breaks
                 const escReason = f.findingsText.replace(/<br>/g, " ").replace(/"/g, '""');
                 const escRules = f.rulesList.join(" | ").replace(/"/g, '""');
 
@@ -843,11 +538,9 @@
 
             const link = document.createElement("a");
             link.href = encodeURI("data:text/csv;charset=utf-8," + csv);
-            link.download = "eGP_Forensic_Audit_Data.csv";
+            link.download = "eGP_Forensic_Audit_Data_All_Authorities.csv";
             link.click();
         }
 
         init();
     </script>
-</body>
-</html>

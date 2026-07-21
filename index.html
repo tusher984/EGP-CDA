@@ -4,17 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>e-GP Syndicate Tracker | Data Lab</title>
+    <!-- Free Open Source Charting Library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* Premium Dark Black & Deep Blue Theme Layout */
         :root {
-            --dark-bg: #080c14;
-            --dark-card: #111827;
-            --netra-red: #cc0000;
-            --neon-blue: #38bdf8;
-            --text-light: #f8fafc;
-            --text-muted: #94a3b8;
-            --border-dark: #1e293b;
+            --dark-bg: #080c14;      
+            --dark-card: #111827;    
+            --netra-red: #cc0000;    
+            --neon-blue: #38bdf8;    
+            --text-light: #f8fafc;   
+            --text-muted: #94a3b8;   
+            --border-dark: #1e293b;  
         }
         
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--dark-bg); color: var(--text-light); margin: 0; padding: 0; line-height: 1.6; }
@@ -112,7 +113,7 @@
         
         <header>
             <h1>e-GP Syndicate Tracker: Data Lab</h1>
-            <p>উন্নয়ন কর্তৃপক্ষ (RAJUK, CDA, KDA, RDA, CoxDA, GDA) এবং সরকারি প্রকিউরমেন্টের ডিজিটাল ইনভেস্টিগেশন</p>
+            <p>উন্নয়ন কর্তৃপক্ষ এবং সরকারি প্রকিউরমেন্টের ডিজিটাল ইনভেস্টিগেশন</p>
         </header>
 
         <!-- ফরেসনিক রুলবুক ম্যাট্রিক্স -->
@@ -137,7 +138,7 @@
                 </div>
                 <div class="evidence-item" onclick="filterByRule('monopoly', this)">
                     <strong>৫. মনোপলি ফানেলিং (Rule: ITT 50.6) <span class="rule-count" id="count-monopoly">0</span></strong>
-                    <p>ITT 50.6 ও 56.2(b) ধারা অনুসারে কার্যকর প্রতিযোগিতা না থাকলে বা মাত্র ১ জন রেস্পন্সিভ বিডার থাকলে রি-টেন্ডার আবশ্যক। কিন্তু স্ক্রিনিংয়ের মাধ্যমে বাকিদের অযোগ্য করে একক দরদাতাকে কাজ পাইয়ে দেওয়ার মেথড।</p>
+                    <p>ITT 50.6 ও 56.2(b) ধারা অনুসারে কার্যকর প্রতিযোগিতা না থাকলে বা মাত্র ১ জন রেস্পন্সিভ বিডার থাকলে রি-টেন্ডার আবশ্যক। কিন্তু স্ক্রিনিংয়ের মাধ্যমে বাকিদের অযোগ্য করে একক দরদাতাকে কাজ পাইয়ে দেওয়ার মেথড।</p>
                 </div>
                 <div class="evidence-item" onclick="filterByRule('outlier', this)">
                     <strong>৬. অস্বাভাবিক দর (Price Outliers) <span class="rule-count" id="count-outlier">0</span></strong>
@@ -335,109 +336,151 @@
             rigging: ["OECD Guidelines for Fighting Bid Rigging"]
         };
 
-        // NEW: FULLY INDEPENDENT FORENSIC ENGINE
-        // Analyzes numbers and dates directly, overriding the JSON's Red_Flag_Reason
+        // --- FREE NLP HEURISTIC ENGINE FOR ELIGIBILITY CRITERIA ---
+        // Operates 100% locally in the browser with no paid API calls required.
+        function analyzeEligibilityAI(text) {
+            if (!text) return false;
+            let score = 0;
+            let t = text.toLowerCase();
+            
+            // 1. Overly Specific Decimals (e.g. 15.35 Crore instead of 15 Crore)
+            if (/\d+\.\d{2,}/.test(t)) score += 40; 
+            
+            // 2. Geofencing/Local constraints (Restricting to a specific zone illegally)
+            if (/(specific area|particular zone|local authority|rajuk|rda|cda|kda area)/i.test(t)) score += 30;
+            
+            // 3. Monopoly phrasing (Single contract + similar nature + narrow timeframe)
+            if (t.includes("single contract") || t.includes("একক চুক্তি")) score += 20;
+            if (t.includes("similar nature") || t.includes("সমমনা কাজ")) score += 10;
+            if (/(last 1 year|within 12 months|১ বছরের মধ্যে)/i.test(t)) score += 20;
+            
+            // 4. Equipment/Brand Locking
+            if (/(must own|own equipment|specific brand|sole distributor|নিজস্ব)/i.test(t)) score += 30;
+
+            // 5. Unrelated Certifications (e.g., asking for ISO in a basic road repair job)
+            if (/(iso 9001|specific certification)/i.test(t)) score += 15;
+
+            // Threshold: If total suspicion score is 50 or more, flag it as Tailored!
+            return score >= 50; 
+        }
+
+        // --- NEW: DEEP FORENSIC ENGINE (Data-Driven Intelligence) ---
+        // Analyzes numbers, dates, and package patterns directly to auto-detect violations without needing paid APIs.
         function getDynamicFindings(t) {
             let findings = [];
             let rules = [];
 
+            // Normalize all available text for aggressive heuristic searching
+            const fullText = Object.values(t).join(" ").toLowerCase();
             const rReason = (t.Red_Flag_Reason || "").toLowerCase();
-            const exp = (t.Extracted_Specific_Experience || t.Eligibility_Criteria || t.Qualification_Criteria || t.Eligibility || "").toLowerCase();
+            const exp = (t.Extracted_Specific_Experience || t.Eligibility_of_Tenderer || t.Qualification_Criteria || "").toLowerCase();
             const cpvText = (t.CPV_Code || t.CPV_Category || t.Procurement_Category || "").toLowerCase();
+            const pkgNo = (t.Package_No || t.Package_Number || "").toLowerCase();
             
             const sold = parseInt(t.Tenders_Sold);
             const recv = parseInt(t.Tenders_Received);
             const resp = parseInt(t.Responsive_Tenders);
-            const val = parseFloat(t.Contract_Value_BDT);
-            const est = parseFloat(t.Official_Estimated_Cost);
+            const val = parseFloat(t.Contract_Value_BDT || t.Contract_Value);
+            const est = parseFloat(t.Official_Estimated_Cost || t.Estimated_Cost);
 
-            // 1. Owner info check
-            if (/owner|beneficial|গোপন|itt\s*5\.14|missing owner/i.test(rReason) || t.Beneficial_Owner === false || t.Beneficial_Owner === "Missing") {
+            // ১. Owner info check
+            if (/owner|beneficial|গোপন|itt\s*5\.14|missing owner/i.test(fullText) || t.Beneficial_Owner === false || t.Beneficial_Owner === "Missing") {
                 findings.push("Beneficial Owner Info Hidden");
                 rules.push(...RULE_MAP.owner);
             }
 
-            // 2. Splitting Check
-            if (/split|lot|বিভাজন|artificial splitting/i.test(rReason) || /multiple lots/i.test(exp)) {
-                findings.push("Artificial Contract Splitting");
+            // ২. Splitting Check (Package Number Pattern Analysis)
+            if (/split|lot|বিভাজন|artificial splitting/i.test(rReason) || /(lot|part|group|sec|phase)[\s\-_]*[a-z0-9]+/i.test(pkgNo)) {
+                findings.push("Artificial Contract Splitting (Lot/Part Pattern)");
                 rules.push(...RULE_MAP.split);
             }
 
-            // 3. CPV Match Check
-            if (/cpv|vocabulary|ক্যাটাগরি|কোড|mismatch/i.test(rReason) || /unrelated cpv/i.test(cpvText)) {
-                findings.push("CPV Category Manipulation");
+            // ৩. CPV Match Check (Missing or dummy CPV logic)
+            if (/cpv|vocabulary|ক্যাটাগরি|কোড|mismatch/i.test(rReason) || 
+                cpvText === "" || cpvText === "not defined" || cpvText.includes("000000") || (cpvText && !/\d/.test(cpvText))) {
+                findings.push("CPV Category Manipulated or Hidden");
                 rules.push(...RULE_MAP.cpv);
             }
 
-            // 4. Tailored Criteria Check (Scanning the text directly)
-            if (/\d+\.\d+/.test(exp) || /\d{2,}\s*\(/.test(exp) || /restrictive|tailored|নির্দিষ্ট/i.test(rReason) || /tailored/i.test(exp)) {
+            // ৪. Tailored Criteria Check (Using the Local Heuristic NLP Engine)
+            if (analyzeEligibilityAI(exp) || /\d+\.\d+/.test(exp) || /\d{2,}\s*\(/.test(exp) || /restrictive|tailored|নির্দিষ্ট|specific/i.test(fullText)) {
                 findings.push("Tailored Eligibility Criteria");
                 rules.push(...RULE_MAP.tailored);
             }
 
-            // 5. Monopoly Data Check (OVERRIDING JSON)
-            if (resp === 1 || /single|একক|monopoly|50\.6/i.test(rReason)) {
+            // ৫. Monopoly Data Check
+            if (resp === 1 || /single|একক|monopoly|50\.6/i.test(fullText)) {
                 findings.push("Single Responsive Bidder");
                 rules.push(...RULE_MAP.monopoly);
             }
 
-            // 6. Price Outlier Data Check (OVERRIDING JSON)
-            if (!isNaN(est) && !isNaN(val) && est > 0 && val > 0 && Math.abs(est - val) / est > 0.20) {
+            // ৬. Price Outlier Data Check (Calculates exact deviation > 10%)
+            if (!isNaN(est) && !isNaN(val) && est > 0 && val > 0 && (Math.abs(est - val) / est > 0.10)) {
                 let dev = ((Math.abs(est - val) / est) * 100).toFixed(1);
-                findings.push(`Price Outlier (${dev}% deviation)`);
+                findings.push(`Price Outlier (${dev}% deviation from estimate)`);
                 rules.push(...RULE_MAP.outlier);
-            } else if (/outlier|অস্বাভাবিক|abnormally|low|high|alb/i.test(rReason)) {
+            } else if (/(outlier|abnormal|unusually|alb|below\s*10%|above\s*10%)/i.test(fullText)) {
                 findings.push("Price Outlier / Abnormal Bid");
                 rules.push(...RULE_MAP.outlier);
             }
 
-            // 7. Rush Job Data Check (OVERRIDING JSON)
-            let rushJob = false;
-            if(t.Advertised_Date && t.Tender_Valid_Up_To) {
-                let adDate = new Date(t.Advertised_Date);
-                let closeDate = new Date(t.Tender_Valid_Up_To);
-                if(!isNaN(adDate) && !isNaN(closeDate)) {
+            // ৭. Pre-Tender Meeting / Rush Job Check (Calculates Date Gaps)
+            let isRush = false;
+            let isFakeMeeting = false;
+            
+            let adDate = new Date(t.Advertised_Date || t.Published_Date);
+            let closeDate = new Date(t.Tender_Valid_Up_To || t.Closing_Date);
+            let meetingDate = new Date(t.Pre_Tender_Meeting_Start_Date || t.Pre_Tender_Start);
+
+            if (!isNaN(adDate)) {
+                if (!isNaN(closeDate)) {
                     let diffDays = Math.ceil(Math.abs(closeDate - adDate) / (1000 * 60 * 60 * 24));
-                    if(diffDays < 14) rushJob = true; 
+                    if (diffDays <= 14) isRush = true; 
+                }
+                if (!isNaN(meetingDate)) {
+                    let meetDiff = Math.ceil(Math.abs(meetingDate - adDate) / (1000 * 60 * 60 * 24));
+                    if (meetDiff <= 1) isFakeMeeting = true; 
                 }
             }
-            if (rushJob || /meeting|মিটিং|pre-tender|rush/i.test(rReason)) {
-                findings.push(rushJob ? "< 14 Days Rush Tender" : "Pre-Tender Process Irregularity");
+
+            if (isFakeMeeting || isRush || /meeting|মিটিং|pre-tender|rush/i.test(fullText)) {
+                findings.push(isFakeMeeting ? "Pre-Tender Meeting < 24h of Publish" : (isRush ? "< 14 Days Rush Tender" : "Pre-Tender Process Irregularity"));
                 rules.push(...RULE_MAP.meeting);
             }
 
-            // 8. Bid Rigging Data Check (OVERRIDING JSON)
-            if ((!isNaN(sold) && !isNaN(recv) && sold > recv * 1.3 && sold >= 3)) {
-                findings.push(`High Dropout Ratio (${sold} sold, ${recv} dropped)`);
+            // ৮. Bid Rigging Data Check (High Dropout Ratio > 50% and minimum 5 sold)
+            if ((!isNaN(sold) && !isNaN(recv) && sold > (recv * 1.5) && sold >= 5)) {
+                findings.push(`High Dropout Ratio (${sold} sold, only ${recv} dropped)`);
                 rules.push(...RULE_MAP.rigging);
-            } else if (/rigging|dropout|collusion|কারসাজি/i.test(rReason)) {
+            } else if (/rigging|dropout|collusion|কারসাজি/i.test(fullText)) {
                 findings.push("Bid Rigging / Collusion Risk");
                 rules.push(...RULE_MAP.rigging);
             }
 
-            // Fallback to JSON reason if we missed something but it wasn't strictly clean
+            // Fallback to JSON reason if nothing mathematically triggered
             if (findings.length === 0 && rReason && !['no significant issue detected', 'clean', '-'].includes(rReason)) {
                 findings.push(t.Red_Flag_Reason);
             }
 
             return {
-                findingsText: findings.length > 0 ? findings.join(" + ") : "-",
+                findingsText: findings.length > 0 ? findings.join(" +<br>") : "-",
                 rulesList: rules.length > 0 ? [...new Set(rules)] : ["-"],
                 keys: {
-                    owner: findings.some(f => f.includes("Owner")),
-                    split: findings.some(f => f.includes("Splitting")),
-                    cpv: findings.some(f => f.includes("CPV")),
-                    tailored: findings.some(f => f.includes("Tailored")),
-                    monopoly: findings.some(f => f.includes("Single Responsive Bidder")),
-                    outlier: findings.some(f => f.includes("Outlier")),
-                    meeting: findings.some(f => f.includes("Rush") || f.includes("Pre-Tender")),
-                    rigging: findings.some(f => f.includes("Dropout") || f.includes("Rigging"))
+                    owner: findings.some(f => /Owner/i.test(f)),
+                    split: findings.some(f => /Splitting/i.test(f)),
+                    cpv: findings.some(f => /CPV/i.test(f)),
+                    tailored: findings.some(f => /Tailored/i.test(f)),
+                    monopoly: findings.some(f => /Responsive Bidder/i.test(f)),
+                    outlier: findings.some(f => /Outlier/i.test(f)),
+                    meeting: findings.some(f => /Meeting|Rush|Irregularity/i.test(f)),
+                    rigging: findings.some(f => /Dropout|Rigging/i.test(f))
                 }
             };
         }
 
         async function init() {
             try {
+                // Ensure your provided JSON text is saved in this file.
                 const res = await fetch(jsonFileName);
                 if (!res.ok) throw new Error("File not found");
                 const data = await res.json();
@@ -445,7 +488,7 @@
                 
                 filterData(); 
             } catch (err) {
-                document.getElementById('tableBody').innerHTML = `<tr><td colspan="8" class="error">ডেটা লোড করা যায়নি। লোকাল ফোল্ডার থেকে JSON রিড করতে ব্রাউজারের পলিসি সমস্যা করছে। লাইভ সার্ভারে ওপেন করুন।</td></tr>`;
+                document.getElementById('tableBody').innerHTML = `<tr><td colspan="8" class="error">ডেটা লোড করা যায়নি। ব্রাউজারের পলিসির কারণে লোকাল ফোল্ডার থেকে JSON রিড করতে সমস্যা হচ্ছে। 파일টি লাইভ সার্ভারে ওপেন করুন বা IDE Live Server ব্যবহার করুন।</td></tr>`;
             }
         }
 
@@ -582,7 +625,7 @@
                 if (f.keys.rigging) vCounts.rigging++;
 
                 if(f.findingsText !== "-") {
-                    let textClean = f.findingsText.split('+')[0].trim().substring(0, 20);
+                    let textClean = f.findingsText.split('+')[0].trim().replace(/<br>/g, "").substring(0, 20);
                     reasons[textClean] = (reasons[textClean] || 0) + 1;
                 }
             });
@@ -740,7 +783,7 @@
                 let org = t.Organization_Agency ? t.Organization_Agency.split('Procuring')[0].trim() : "Unknown";
                 let sup = t.Supplier_Name ? t.Supplier_Name.split('(')[0].trim() : "<span style='color:var(--text-muted)'>-</span>";
                 
-                // USE DYNAMIC ENGINE INSTEAD OF JSON FIELD
+                // USE LOCAL NLP ENGINE INSTEAD OF RELYING ON JSON FIELDS
                 const f = getDynamicFindings(t);
                 let reason = f.findingsText;
                 let rulesHtml = f.rulesList.join("<br>");
@@ -791,7 +834,8 @@
                 
                 const escAgency = (r.Organization_Agency || "").replace(/"/g, '""');
                 const escSupplier = (r.Supplier_Name || "").replace(/"/g, '""');
-                const escReason = f.findingsText.replace(/"/g, '""');
+                // Format for clean CSV without HTML breaks
+                const escReason = f.findingsText.replace(/<br>/g, " ").replace(/"/g, '""');
                 const escRules = f.rulesList.join(" | ").replace(/"/g, '""');
 
                 csv += `${r.Tender_Proposal_ID},"${escAgency}","${escSupplier}",${r.Risk_Level || "N/A"},${r.Contract_Value_BDT || 0},"${escReason}","${escRules}"\n`;

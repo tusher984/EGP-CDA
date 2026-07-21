@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>e-GP Syndicate Tracker | Massive Data Lab</title>
     
-    <!-- Google Fonts Fallback for Bengali -->
+    <!-- Google Fonts Fallback -->
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- External Libraries -->
@@ -61,7 +61,7 @@
         .tools-bar input:focus, .tools-bar select:focus { border-color: var(--neon-blue); }
         .btn-clear { font-family: inherit; padding: 8px 15px; border: 1px solid var(--neon-blue); border-radius: 4px; font-size: 14px; cursor: pointer; color: var(--neon-blue); background: transparent; transition: 0.2s; }
         .btn-download { font-family: inherit; padding: 8px 15px; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; color: white; background-color: #1e40af; }
-        .btn-home { font-family: inherit; padding: 6px 12px; border: none; border-radius: 4px; font-size: 18px; cursor: pointer; color: white; background-color: #059669; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;}
+        .btn-home { font-family: inherit; padding: 6px 12px; border: none; border-radius: 4px; font-size: 18px; cursor: pointer; color: white; background-color: #059669; transition: 0.2s; display: flex; align-items: center; justify-content: center;}
         .btn-home:hover { background: #047857; transform: translateY(-1px); }
         .top-action-bar { text-align: center; margin-bottom: 25px; display: flex; justify-content: center; gap: 15px;}
         .btn-nexus { padding: 10px 25px; font-size: 16px; border: none; border-radius: 4px; cursor: pointer; color: white; background-color: #7e22ce; font-family: inherit; font-weight: bold; transition: 0.3s; box-shadow: 0 4px 15px rgba(126, 34, 206, 0.4);}
@@ -88,17 +88,20 @@
         .close-btn { position: absolute; right: 20px; top: 15px; color: var(--text-muted); font-size: 28px; font-weight: bold; cursor: pointer;}
         .raw-data-box { background: #080c14; border: 1px dashed #334155; padding: 15px; border-radius: 5px; color: #cbd5e1; font-size: 14px; line-height: 1.6; margin-bottom: 15px; word-wrap: break-word;}
         .highlight-red { color: #fca5a5; font-weight: bold; background: rgba(220, 38, 38, 0.2); padding: 0 4px; border-radius:3px;}
-        .explanation-box { background: rgba(56, 189, 248, 0.05); border-left: 4px solid var(--neon-blue); padding: 15px; font-size: 15px; color: #f8fafc; line-height: 1.6; margin-bottom: 15px; font-weight: 500;}
+        .clickable-rule { cursor: pointer; color: var(--neon-blue); text-decoration: underline; text-decoration-style: dashed; }
+        .clickable-rule:hover { color: white; }
         
         .meter-container { background: rgba(255,255,255,0.02); border: 1px solid var(--border-dark); border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 15px; display: flex; justify-content: space-around; align-items: center;}
         .risk-gauge { width: 150px; height: 15px; background: #334155; border-radius: 10px; overflow: hidden; margin: 10px auto; position: relative;}
         .risk-fill { height: 100%; background: linear-gradient(90deg, #10b981, #f59e0b, #ef4444); transition: width 1s ease-in-out; }
         .meta-tag { font-family: monospace; font-size: 11px; background: rgba(56, 189, 248, 0.1); color: var(--neon-blue); padding: 3px 6px; border-radius: 3px; border: 1px solid rgba(56,189,248,0.3); margin-top: 5px; display: inline-block;}
+
         .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-dark);}
         .comp-col { padding: 20px; }
         .comp-db { background: rgba(56, 189, 248, 0.05); border-right: 1px solid var(--border-dark); }
         .comp-pdf { background: rgba(16, 185, 129, 0.05); }
         .comp-col h4 { margin: 0 0 10px 0; color: var(--text-light); font-size: 16px; border-bottom: 1px dashed #334155; padding-bottom: 5px;}
+        
         .docket-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--border-dark); padding-bottom: 15px; margin-bottom: 20px; }
         .docket-meta { font-family: monospace; font-size: 11px; color: var(--text-muted); line-height: 1.5; }
         .qr-container { background: #fff; padding: 5px; border-radius: 4px; width: 64px; height: 64px; }
@@ -128,7 +131,7 @@
         <header>
             <h1>e-GP Syndicate Tracker: Data Lab</h1>
             <p>উন্নয়ন কর্তৃপক্ষ এবং সরকারি প্রকিউরমেন্টের ডিজিটাল ইনভেস্টিগেশন</p>
-            <div class="transparency-note">
+            <div class="transparency-note" id="serverAlert">
                 <span style="text-align: left; padding-right: 15px; font-weight: 500;">
                     <strong>স্বচ্ছতা গ্যারান্টি:</strong> এই সিস্টেমটি সম্পূর্ণ ওপেন-সোর্স এবং ই-জিপি পোর্টাল থেকে প্রাপ্ত উন্মুক্ত ডেটা গাণিতিক বিশ্লেষণের মাধ্যমে তৈরি।
                 </span>
@@ -162,10 +165,17 @@
             <div class="card alert-card"><h2 id="totalValue">৳০</h2><p>উচ্চ-ঝুঁকিপূর্ণ চুক্তিমূল্য</p></div>
         </div>
 
+        <!-- 9 FULL CHARTS RESTORED -->
         <div class="chart-grid">
             <div class="chart-box"><h3>দুর্নীতির ধরন (Macro-analysis)</h3><div class="chart-container"><canvas id="violationChart"></canvas></div></div>
             <div class="chart-box"><h3>টেন্ডার ড্রপ-আউট (Bid-Rigging)</h3><div class="chart-container"><canvas id="dropoutChart"></canvas></div></div>
             <div class="chart-box"><h3>সিন্ডিকেট লিডারবোর্ড</h3><div class="chart-container"><canvas id="syndicateChart"></canvas></div></div>
+            <div class="chart-box"><h3>ম্যানিপুলেশন টাইমলাইন</h3><div class="chart-container"><canvas id="timelineChart"></canvas></div></div>
+            <div class="chart-box"><h3>টেন্ডার সংখ্যার ভিত্তিতে ঝুঁকি</h3><div class="chart-container"><canvas id="riskPieChart"></canvas></div></div>
+            <div class="chart-box"><h3>শীর্ষ ঝুঁকিপূর্ণ সংস্থা (Agencies)</h3><div class="chart-container"><canvas id="agencyChart"></canvas></div></div>
+            <div class="chart-box"><h3>অনিয়মের প্রধান হাতিয়ার</h3><div class="chart-container"><canvas id="redFlagChart"></canvas></div></div>
+            <div class="chart-box"><h3>একক দরদাতার আধিপত্য (Monopoly)</h3><div class="chart-container"><canvas id="singleBidderChart"></canvas></div></div>
+            <div class="chart-box"><h3>টাকার অঙ্কে ঝুঁকির অনুপাত</h3><div class="chart-container"><canvas id="riskValuePieChart"></canvas></div></div>
         </div>
 
         <div class="ledger-section">
@@ -182,6 +192,7 @@
                     <option value="MEDIUM">মাঝারি ঝুঁকি (MEDIUM)</option>
                     <option value="LOW">নিম্ন ঝুঁকি (LOW)</option>
                 </select>
+                <button class="btn-download" onclick="downloadCSV()">CSV এক্সপোর্ট</button>
             </div>
             <div class="table-responsive">
                 <table class="main-table" id="tenderTable">
@@ -194,7 +205,8 @@
                     </thead>
                     <tbody id="tableBody">
                         <tr><td colspan="8" style="text-align: center; padding: 30px;">
-                            <span style="color:#38bdf8; font-size:16px;">⏳ Initializing Local Data Engine...</span>
+                            <span style="color:#38bdf8; font-size:16px;">⏳ Initializing Local Data Engine...</span><br>
+                            <span style="color:#fca5a5; font-size:13px;">(Note: You MUST open this file using VS Code 'Live Server' or XAMPP.)</span>
                         </td></tr>
                     </tbody>
                 </table>
@@ -207,18 +219,21 @@
         </div>
     </div>
 
-    <!-- Modals -->
+    <!-- Rule Details Modal -->
     <div id="ruleModal" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-content" style="max-width: 600px;">
             <span class="close-btn" onclick="closeModal('ruleModal')">&times;</span>
-            <h2 class="modal-title" id="modalTitle">Rule Title</h2>
-            <div style="background: rgba(220, 38, 38, 0.1); padding: 10px; border-radius: 4px; border-left: 3px solid var(--netra-red);">
+            <h2 class="modal-title" id="modalTitle" style="color:var(--neon-blue); border-bottom: 1px solid var(--border-dark); padding-bottom: 10px; margin-top:0;">Rule Title</h2>
+            <div style="margin-bottom: 15px; font-size:13px; color:var(--text-muted);"><span id="modalEnacted"></span> | <span style="color: #fca5a5; font-weight:600;">Forensic Engine</span></div>
+            <div id="modalDesc" style="margin-bottom: 15px; line-height: 1.6; font-size: 14.5px; color: var(--text-light);"></div>
+            <div style="background: rgba(220, 38, 38, 0.1); padding: 12px; border-radius: 4px; border-left: 3px solid var(--netra-red);">
                 <strong style="color: #fca5a5;">শাস্তি ও আইনি বিধান:</strong>
-                <span id="modalPenalty" style="display:block; margin-top:5px; font-size:15px;"></span>
+                <span id="modalPenalty" style="display:block; margin-top:5px; font-size:14px; color:#f8fafc;"></span>
             </div>
         </div>
     </div>
 
+    <!-- Network Graph Modal -->
     <div id="networkModal" class="modal">
         <div class="modal-content" style="max-width: 95%; height: 85vh; display: flex; flex-direction: column;">
             <span class="close-btn" onclick="closeModal('networkModal')">&times;</span>
@@ -228,6 +243,7 @@
         </div>
     </div>
 
+    <!-- Data Inspector Modal (Evidence) -->
     <div id="inspectorModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('inspectorModal')">&times;</span>
@@ -266,9 +282,12 @@
                     <h4>🏛️ Official Database Record</h4>
                     <p style="margin:0; font-family:-apple-system, sans-serif; font-size:14px; line-height:1.8;">
                         <strong>Contract Value:</strong> <span id="insVal" class="highlight-red"></span><br>
-                        <strong>Tenderers (Sold/Resp):</strong> <span id="insSold"></span> / <span id="insResp"></span><br>
+                        <strong>Document Price:</strong> <span id="insPrice" class="highlight-red"></span><br>
+                        <strong>Tenderers (Sold/Recv/Resp):</strong> <span id="insSold"></span> / <span id="insRecv"></span> / <span id="insResp"></span><br>
                         <strong>Publish Date:</strong> <span id="insPub"></span><br>
-                        <strong>Closing Date:</strong> <span id="insClose"></span>
+                        <strong>Closing Date:</strong> <span id="insClose"></span><br>
+                        <strong>NOA Given:</strong> <span id="insNoa"></span><br>
+                        <strong>Contract Signing:</strong> <span id="insSign" class="highlight-red"></span>
                     </p>
                     <div style="margin-top: 15px; font-size:13px; border-top: 1px dashed var(--border-dark); padding-top: 10px;">
                         <strong>Raw Eligibility Criteria:</strong><br>
@@ -294,7 +313,7 @@
         </div>
     </div>
 
-    <!-- MAIN SINGLE-FILE JAVASCRIPT ENGINE -->
+    <!-- MAIN JAVASCRIPT ENGINE -->
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -304,7 +323,10 @@
         let activeRuleKey = null; 
         
         let violationChartObj = null, syndicateChartObj = null, dropoutChartObj = null;
+        let timelineChartObj = null, riskPieChartObj = null, agencyChartObj = null;
+        let redFlagChartObj = null, singleBidderChartObj = null, riskValuePieChartObj = null;
 
+        const colorPrimary = '#38bdf8', colorSecondary = '#1e3a8a', colorAccent = '#60a5fa', colorAlert = '#dc2626';     
         Chart.defaults.color = '#94a3b8'; 
         Chart.defaults.borderColor = '#1e3a5f';
         Chart.defaults.font.family = "'Li Ador', 'Hind Siliguri', sans-serif";
@@ -314,29 +336,38 @@
         let searchDebounceTimer = null;
 
         const RULE_TITLES = {
-            owner: "ITT 5.14 – Beneficial Ownership", split: "PPA 2006 Sec 17 – Contract Splitting",
-            cpv: "CPV Manipulation", tailored: "PPR 2008 Rule 98 – Restrictive Criteria",
-            monopoly: "ITT 50.6 – Lack of Competition", outlier: "Abnormally Low/High Bids",
-            meeting: "Minimum Tender Time", rigging: "Bid Rigging / Collusion"
+            owner: "e-PG3 ITT 5.14 – Beneficial Ownership Disclosure",
+            split: "PPA 2006 Section 17 – Artificial Contract Splitting",
+            cpv: "EU CPV Regulation / e-GP Metadata Manipulation",
+            tailored: "PPR 2008 Rule 98 – Restrictive Qualification Criteria",
+            monopoly: "e-PG3 ITT 50.6 – Lack of Effective Competition",
+            outlier: "World Bank ALB Guideline – Abnormally Low/High Bids",
+            meeting: "PPR Schedule 2 – Minimum Tender Preparation Time",
+            rigging: "Competition Act 2012 / Bid Rigging Guidelines"
         };
 
         const RULE_DETAILS = {
-            owner: { title: "ITT 5.14 – Beneficial Ownership", penalty: "টেন্ডার বাতিল ও কালোতালিকাভুক্তি।" },
-            split: { title: "PPA 2006 Sec 17 – Contract Splitting", penalty: "বিভাগীয় ব্যবস্থা এবং টেন্ডার বাতিল।" },
-            cpv: { title: "CPV Manipulation", penalty: "টেন্ডার প্রক্রিয়া বাতিল।" },
-            tailored: { title: "PPR 2008 Rule 98 – Restrictive Criteria", penalty: "পুনঃদরপত্র আহ্বান।" },
-            monopoly: { title: "ITT 50.6 – Lack of Competition", penalty: "টেন্ডার বাতিল।" },
-            outlier: { title: "Abnormally Low/High Bids", penalty: "টেন্ডার সরাসরি বাতিল।" },
-            meeting: { title: "Minimum Tender Time", penalty: "অডিট আপত্তি।" },
-            rigging: { title: "Bid Rigging / Collusion", penalty: "জরিমানা ও ডিবরমেন্ট।" }
+            owner: { title: "e-PG3 ITT 5.14 – Beneficial Ownership Disclosure", enacted: "২০০৬ (PPA)", purpose: "প্রকৃত মালিকের নাম প্রকাশ বাধ্যতামূলক। স্বার্থের সংঘাত ঠেকাতে এই রুল তৈরি হয়েছে।", penalty: "টেন্ডার বাতিল ও কালোতালিকাভুক্তি।" },
+            split: { title: "PPA 2006 Section 17 – Artificial Contract Splitting", enacted: "২০০৬ (PPA)", purpose: "উচ্চতর অনুমোদন এড়াতে মেগা-প্রজেক্টকে ছোট লটে ভাগ করা অবৈধ।", penalty: "বিভাগীয় ব্যবস্থা এবং টেন্ডার বাতিল।" },
+            cpv: { title: "EU CPV Regulation / e-GP Metadata Manipulation", enacted: "ই-জিপি গাইডলাইন", purpose: "ভুল CPV কোড দিয়ে টেন্ডার লুকানোর কারসাজি।", penalty: "টেন্ডার প্রক্রিয়া বাতিল।" },
+            tailored: { title: "PPR 2008 Rule 98 – Restrictive Qualification Criteria", enacted: "২০০৮ (PPR)", purpose: "নির্দিষ্ট ঠিকাদারকে কাজ দিতে শর্ত ফিক্স করা।", penalty: "পুনঃদরপত্র আহ্বান।" },
+            monopoly: { title: "e-PG3 ITT 50.6 – Lack of Effective Competition", enacted: "২০০৬ (PPA)", purpose: "মাত্র ১ জন যোগ্য হলে রি-টেন্ডার আবশ্যক।", penalty: "টেন্ডার বাতিল।" },
+            outlier: { title: "World Bank ALB Guideline", enacted: "বিশ্বব্যাংক রেগুলেশন", purpose: "বাজেটের চেয়ে অনেক বেশি বা কম দরে বিড করা।", penalty: "টেন্ডার সরাসরি বাতিল।" },
+            meeting: { title: "PPR Schedule 2 – Minimum Tender Preparation Time", enacted: "২০০৮ (PPR)", purpose: "১৪ দিনের কম সময়ে টেন্ডার ক্লোজ করা অবৈধ।", penalty: "অডিট আপত্তি।" },
+            rigging: { title: "Competition Act 2012 / Bid Rigging", enacted: "২০১২ (প্রতিযোগিতা আইন)", purpose: "শিডিউল কিনে জমা না দেওয়া সিন্ডিকেশনের প্রমাণ।", penalty: "জরিমানা ও ডিবরমেন্ট।" }
         };
 
         // Crypto Hash
         async function generateHash(text) {
-            const msgBuffer = new TextEncoder().encode(text);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            try {
+                if (!crypto || !crypto.subtle) return "HASH_UNAVAILABLE_IN_INSECURE_LOCAL_NETWORK";
+                const msgBuffer = new TextEncoder().encode(text);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            } catch (e) {
+                return "HASH_ERROR_OR_INSECURE_CONTEXT";
+            }
         }
 
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
@@ -416,9 +447,9 @@
         // INITIALIZATION
         async function init() {
             try {
-                // If running locally without server, it will fail gracefully.
                 if (window.location.protocol === 'file:') {
-                    document.getElementById('tableBody').innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--netra-red); padding:30px; font-size:16px; font-weight:bold;">⚠️ Security Blocked: You must run this using VS Code 'Live Server' or XAMPP. Double-clicking the HTML file is blocked by browsers.</td></tr>`;
+                    document.getElementById('tableBody').innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--netra-red); padding:30px; font-size:16px; font-weight:bold;">⚠️ Security Blocked: You must run this using VS Code 'Live Server' or XAMPP.</td></tr>`;
+                    document.getElementById('serverAlert').innerHTML = `<strong style="color:#fca5a5;">⚠️ ERROR: Please open using Live Server.</strong>`;
                     return;
                 }
 
@@ -428,14 +459,12 @@
                 
                 let dataArray = Array.isArray(data) ? data : (data.Merged_Database || []);
                 
-                // Process on Main Thread with a small timeout to let UI paint
                 setTimeout(() => {
                     globalData = dataArray.map(t => {
                         t._findings = getDynamicFindings(t);
                         t._searchStr = Object.values(t).map(v => safeStr(v)).join(' ');
                         return t;
                     });
-                    
                     triggerFilter();
                 }, 100);
 
@@ -562,20 +591,32 @@
             document.getElementById('totalOwnersMissing').innerText = missing.toLocaleString() + " টি";
         }
 
+        // 9 DYNAMIC CHARTS UPDATE
         function updateDynamicCharts(data) {
             let v = { owner:0, split:0, cpv:0, tailored:0, monopoly:0, outlier:0, meeting:0, rigging:0 };
-            const sups = {}; let tSold=0, tRecv=0, tResp=0;
+            const sups = {}, dates = {}, ags = {}, reasons = {};
+            let tSold=0, tRecv=0, tResp=0, hc=0, mc=0, lc=0, hv=0, mv=0, lv=0;
             
             data.forEach(t => {
                 const k = t._findings.keys;
                 if (k.owner) v.owner++; if (k.split) v.split++; if (k.cpv) v.cpv++; if (k.tailored) v.tailored++; 
                 if (k.monopoly) v.monopoly++; if (k.outlier) v.outlier++; if (k.meeting) v.meeting++; if (k.rigging) v.rigging++;
 
-                if (t.Risk_Level === 'HIGH' && t.Supplier_Name) { 
-                    let n = String(t.Supplier_Name).split('(')[0].trim(); 
-                    sups[n] = (sups[n]||0) + safeNum(t.Contract_Value_BDT); 
+                let val = safeNum(t.Contract_Value_BDT);
+                if (t.Risk_Level === 'HIGH') {
+                    hc++; hv += val;
+                    if (t.Supplier_Name) { let n = String(t.Supplier_Name).split('(')[0].trim(); sups[n] = (sups[n]||0) + val; }
+                    if (t.Organization_Agency) { let a = extractCleanAgencyName(t.Organization_Agency); ags[a] = (ags[a]||0) + val; }
+                } else if (t.Risk_Level === 'MEDIUM') { mc++; mv += val; } else { lc++; lv += val; }
+
+                let dStr = t.Advertised_Date || t.Contract_Signing_Date;
+                if(dStr && !isNaN(new Date(dStr))) {
+                    let d = new Date(dStr), my = `${d.getFullYear()}-${('0'+(d.getMonth()+1)).slice(-2)}`;
+                    if(!dates[my]) dates[my] = { HIGH:0, MEDIUM:0, LOW:0 };
+                    dates[my][t.Risk_Level||'LOW']++;
                 }
                 tSold += safeNum(t.Tenders_Sold); tRecv += safeNum(t.Tenders_Received); tResp += safeNum(t.Responsive_Tenders);
+                if(t._findings.csv !== "-") { let c = t._findings.csv.split(' (Proof')[0].trim().substring(0, 20); reasons[c] = (reasons[c] || 0) + 1; }
             });
 
             ['owner','split','cpv','tailored','monopoly','outlier','meeting','rigging'].forEach(key => document.getElementById('count-'+key).innerText = v[key].toLocaleString());
@@ -583,21 +624,49 @@
             const cOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
             const barY = { ...cOpts, indexAxis: 'y', scales: { x: { display: false }, y: { grid: { display: false }, ticks: {color: '#f8fafc', font:{size:11, family: "'Li Ador', 'Hind Siliguri', sans-serif"}} } } };
 
+            // 1. Violation Bar
             if(violationChartObj) violationChartObj.destroy();
-            violationChartObj = new Chart(document.getElementById('violationChart'), { type: 'bar', data: { labels: ['মালিকানা গোপন', 'চুক্তি বিভাজন', 'অবান্তর CPV', 'বৈষম্যমূলক শর্ত', 'একক দরদাতা', 'অস্বাভাবিক দর', 'প্রি-টেন্ডার মিটিং', 'বিড-রিগিং'], datasets: [{ data: [v.owner, v.split, v.cpv, v.tailored, v.monopoly, v.outlier, v.meeting, v.rigging], backgroundColor: '#1e3a8a' }] }, options: barY });
+            violationChartObj = new Chart(document.getElementById('violationChart'), { type: 'bar', data: { labels: ['মালিকানা গোপন', 'চুক্তি বিভাজন', 'অবান্তর CPV', 'বৈষম্যমূলক শর্ত', 'একক দরদাতা', 'অস্বাভাবিক দর', 'প্রি-টেন্ডার মিটিং', 'বিড-রিগিং'], datasets: [{ data: [v.owner, v.split, v.cpv, v.tailored, v.monopoly, v.outlier, v.meeting, v.rigging], backgroundColor: colorSecondary }] }, options: barY });
 
+            // 2. Dropout Bar
             if(dropoutChartObj) dropoutChartObj.destroy();
-            dropoutChartObj = new Chart(document.getElementById('dropoutChart'), { type: 'bar', data: { labels: ['শিডিউল কিনেছে', 'বিড জমা দিয়েছে', 'যোগ্য বিবেচিত'], datasets: [{ data: [tSold, tRecv, tResp], backgroundColor: ['#cc0000', '#60a5fa', '#38bdf8'] }] }, options: { ...cOpts, scales: { y: { display: false }, x: { grid: { display: false }, ticks: {color: '#f8fafc', font:{family: "'Li Ador', 'Hind Siliguri', sans-serif"}} } } } });
+            dropoutChartObj = new Chart(document.getElementById('dropoutChart'), { type: 'bar', data: { labels: ['শিডিউল কিনেছে', 'বিড জমা দিয়েছে', 'যোগ্য বিবেচিত'], datasets: [{ data: [tSold, tRecv, tResp], backgroundColor: [colorAlert, colorAccent, colorPrimary] }] }, options: { ...cOpts, scales: { y: { display: false }, x: { grid: { display: false }, ticks: {color: '#f8fafc', font:{family: "'Li Ador', 'Hind Siliguri', sans-serif"}} } } } });
 
-            const sTop5 = Object.entries(sups).sort((a,b) => b[1]-a[1]).slice(0,5);
+            // 3. Syndicate Leaderboard
+            const sTop5 = (obj) => Object.entries(obj).sort((a,b) => b[1]-a[1]).slice(0,5);
             if(syndicateChartObj) syndicateChartObj.destroy();
-            syndicateChartObj = new Chart(document.getElementById('syndicateChart'), { type: 'bar', data: { labels: sTop5.map(s => s[0].substring(0,15)), datasets: [{ data: sTop5.map(s => s[1]), backgroundColor: '#cc0000' }] }, options: barY });
+            syndicateChartObj = new Chart(document.getElementById('syndicateChart'), { type: 'bar', data: { labels: sTop5(sups).map(s => s[0].substring(0,15)), datasets: [{ data: sTop5(sups).map(s => s[1]), backgroundColor: colorAlert }] }, options: barY });
+
+            // 4. Timeline Line
+            const sD = Object.keys(dates).sort();
+            if(timelineChartObj) timelineChartObj.destroy();
+            timelineChartObj = new Chart(document.getElementById('timelineChart'), { type: 'line', data: { labels: sD, datasets: [{ label: 'HIGH', data: sD.map(d => dates[d].HIGH), borderColor: colorAlert, fill: true, backgroundColor: 'rgba(220,38,38,0.1)' }, { label: 'LOW', data: sD.map(d => dates[d].LOW), borderColor: colorSecondary }] }, options: { ...cOpts, plugins:{legend:{display:true, labels:{color:'#fff', font:{family: "'Li Ador', 'Hind Siliguri', sans-serif"}}}}, scales: { x: { ticks:{color:'#fff'} }, y: { display: false } } } });
+
+            // 5. Risk Doughnut
+            const pieOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: {color: '#f8fafc', font:{family: "'Li Ador', 'Hind Siliguri', sans-serif"}} } } };
+            if(riskPieChartObj) riskPieChartObj.destroy(); 
+            riskPieChartObj = new Chart(document.getElementById('riskPieChart'), { type: 'doughnut', data: { labels: ['HIGH', 'MEDIUM', 'LOW'], datasets: [{ data: [hc, mc, lc], backgroundColor: [colorAlert, colorAccent, colorSecondary], borderWidth:0 }] }, options: pieOpts });
+
+            // 6. Agency Bar
+            if(agencyChartObj) agencyChartObj.destroy(); 
+            agencyChartObj = new Chart(document.getElementById('agencyChart'), { type: 'bar', data: { labels: sTop5(ags).map(s => s[0].substring(0,20)), datasets: [{ data: sTop5(ags).map(s => s[1]), backgroundColor: colorSecondary }] }, options: barY });
+
+            // 7. Red Flag Tool Bar
+            if(redFlagChartObj) redFlagChartObj.destroy(); 
+            redFlagChartObj = new Chart(document.getElementById('redFlagChart'), { type: 'bar', data: { labels: sTop5(reasons).map(r => r[0]), datasets: [{ data: sTop5(reasons).map(r => r[1]), backgroundColor: colorAccent }] }, options: barY });
+
+            // 8. Single Bidder Monopoly Doughnut
+            if(singleBidderChartObj) singleBidderChartObj.destroy(); 
+            singleBidderChartObj = new Chart(document.getElementById('singleBidderChart'), { type: 'doughnut', data: { labels: ['১ জন যোগ্য', 'একাধিক যোগ্য'], datasets: [{ data: [v.monopoly, data.length - v.monopoly], backgroundColor: [colorAlert, colorSecondary], borderWidth:0 }] }, options: pieOpts });
+
+            // 9. Risk Value Pie
+            if(riskValuePieChartObj) riskValuePieChartObj.destroy(); 
+            riskValuePieChartObj = new Chart(document.getElementById('riskValuePieChart'), { type: 'pie', data: { labels: ['HIGH (৳)', 'MEDIUM (৳)', 'LOW (৳)'], datasets: [{ data: [hv, mv, lv], backgroundColor: [colorAlert, colorAccent, colorSecondary], borderWidth:0 }] }, options: pieOpts });
         }
 
         // --- NETWORK GRAPH (Vis.js) ---
         function openNetworkMap() {
             document.getElementById('networkModal').style.display = 'flex';
-            
             const nodes = new vis.DataSet();
             const edges = new vis.DataSet();
             const nodeIds = new Set();
@@ -625,9 +694,7 @@
             }
 
             const container = document.getElementById('networkGraph');
-            const data = { nodes: nodes, edges: edges };
-            const options = { physics: { stabilization: true, barnesHut: { gravitationalConstant: -2000 } } };
-            new vis.Network(container, data, options);
+            new vis.Network(container, { nodes, edges }, { physics: { stabilization: true, barnesHut: { gravitationalConstant: -2000 } } });
         }
 
         // --- SMART PDF EXTRACTION & COMPARISON ---
@@ -662,6 +729,8 @@
             const data = RULE_DETAILS[ruleKey];
             if(data) {
                 document.getElementById('modalTitle').innerText = data.title;
+                document.getElementById('modalEnacted').innerText = data.enacted;
+                document.getElementById('modalDesc').innerText = data.purpose;
                 document.getElementById('modalPenalty').innerText = data.penalty;
                 document.getElementById('ruleModal').style.display = 'flex';
             }
@@ -695,7 +764,6 @@
                 text: officialUrl, width: 64, height: 64, colorDark : "#000", colorLight : "#fff", correctLevel : QRCode.CorrectLevel.L
             });
 
-            // Set Risk Meter safely
             let safeScore = t._findings && t._findings.score ? t._findings.score : 0;
             document.getElementById('riskScoreText').innerText = safeScore + "%";
             document.getElementById('riskMeterFill').style.width = safeScore + "%";
@@ -706,12 +774,16 @@
 
             document.getElementById('pdfMetaBox').innerHTML = "Waiting for PDF Scan...";
 
+            // POPULATING DB INFO
             document.getElementById('insVal').innerText = formatCurrency(t.Contract_Value_BDT) + ` (৳${safeNum(t.Contract_Value_BDT)})`;
+            document.getElementById('insPrice').innerText = t.Document_Price_BDT ? `৳${t.Document_Price_BDT}` : "N/A";
             document.getElementById('insSold').innerText = t.Tenders_Sold || "0";
             document.getElementById('insRecv').innerText = t.Tenders_Received || "0";
             document.getElementById('insResp').innerText = t.Responsive_Tenders || "0";
             document.getElementById('insPub').innerText = t.Advertised_Date || "N/A";
             document.getElementById('insClose').innerText = t.Closing_Date || "N/A";
+            document.getElementById('insNoa').innerText = t.Notification_of_Award_Date || "N/A";
+            document.getElementById('insSign').innerText = t.Contract_Signing_Date || "N/A";
 
             let rawExp = t.Eligibility_of_Tenderer || t.Extracted_Specific_Experience || t.Qualification_Criteria || "No data.";
             document.getElementById('insExp').innerHTML = rawExp.replace(/\b(rajuk|cda|kda|pwd|lged|petrobangla)\b/gi, '<span class="highlight-red">$&</span>').replace(/\d+\.[1-9]\d+\s*(crore|lac|lakh)/gi, '<span class="highlight-red">$&</span>');
@@ -799,7 +871,6 @@
             link.click();
         }
 
-        // Boot system directly from main thread
         window.addEventListener('load', init);
     </script>
 </body>

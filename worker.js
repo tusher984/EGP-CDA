@@ -97,7 +97,6 @@ self.onmessage = function(e) {
     if (action === 'INIT_DATA') {
         const rawData = payload;
         
-        // Pre-compute O(1) structures in background
         globalData = rawData.map(t => {
             t._findings = getDynamicFindings(t);
             t._searchStr = Object.values(t).map(v => safeStr(v)).join(' ');

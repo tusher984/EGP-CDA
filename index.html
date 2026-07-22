@@ -82,7 +82,6 @@
         .risk-high { background-color: var(--netra-red); }
         .risk-medium { background-color: #d97706; }
         .risk-low { background-color: #059669; }
-        .doc-link { color: var(--neon-blue); text-decoration: underline; font-size: 12px; display: inline-block; margin-right: 8px; margin-bottom: 5px; background: rgba(56,189,248,0.1); padding: 2px 6px; border-radius: 3px;}
         .btn-verify { font-family: inherit; background-color: rgba(56, 189, 248, 0.1); color: var(--neon-blue); border: 1px solid var(--neon-blue); padding: 4px 10px; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 5px; transition: 0.2s; width: 100%;}
         .btn-verify:hover { background-color: var(--neon-blue); color: #fff;}
 
@@ -127,6 +126,8 @@
             <p>উন্নয়ন কর্তৃপক্ষ এবং সরকারি প্রকিউরমেন্টের ডিজিটাল ইনভেস্টিগেশন</p>
             <div class="header-buttons">
                 <button class="btn-home" onclick="resetDashboard()" title="রিসেট">🏠 হোম / সব ফিল্টার রিসেট</button>
+                <label for="jsonUpload" class="btn-nexus" style="cursor: pointer; display: inline-block;">📂 Load Custom JSON</label>
+                <input type="file" id="jsonUpload" accept=".json" style="display: none;" onchange="loadCustomJSON(event)">
                 <button class="btn-nexus" onclick="openNetworkMap()">🕸️ সিন্ডিকেট নেটওয়ার্ক ম্যাপ</button>
             </div>
         </header>
@@ -258,7 +259,6 @@
                 </div>
             </div>
 
-            <!-- INVESTIGATION ANALYTICS BOX -->
             <div id="investigationBox" class="investigation-box" style="display:none;"></div>
 
             <!-- ACTION BUTTONS: Documents & Merge -->
@@ -462,6 +462,9 @@
             triggerFilter();
         }
 
+        // ==========================================
+        // NEW ERROR HANDLING FOR GITHUB PAGES
+        // ==========================================
         async function init() {
             try {
                 if (window.location.protocol === 'file:') {
@@ -470,15 +473,38 @@
                 }
                 const res = await fetch(defaultJsonFileName);
                 if (res.ok) {
-                    const data = await res.json();
-                    let dataArray = Array.isArray(data) ? data : (data.Merged_Database || []);
-                    processAndRenderData(dataArray);
+                    try {
+                        const data = await res.json();
+                        let dataArray = Array.isArray(data) ? data : (data.Merged_Database || []);
+                        processAndRenderData(dataArray);
+                    } catch (parseErr) {
+                        document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color: #f59e0b; padding:30px; font-size:16px; line-height:1.6;">⚠️ ফাইল ঠিকই পাওয়া গেছে, কিন্তু আপনার JSON ফাইলের ভেতরে ভুল আছে (Syntax Error)!<br><small style="color:#94a3b8;">হয়তো কোনো লাইনের শেষে কমা (,) বাদ পড়েছে বা ব্র্যাকেট (}) ঠিক নেই।<br>Error: ${parseErr.message}</small></td></tr>`;
+                    }
                 } else {
-                    document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color: #94a3b8; padding:30px; font-size:16px;">📂 Procurement_Database.json পাওয়া যায়নি। "Load Custom JSON" বাটন থেকে ফাইল সিলেক্ট করুন।</td></tr>`;
+                    document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color: #94a3b8; padding:30px; font-size:16px; line-height:1.6;">📂 <strong>${defaultJsonFileName}</strong> ফাইলটি গিটহাব সার্ভারে পাওয়া যায়নি (404 Not Found)।<br><br><small><strong>টিপস:</strong> গিটহাব সার্ভার Case-Sensitive। অর্থাৎ <span style="color:#fff;">procurement_database.json</span> আর <span style="color:#fff;">Procurement_Database.json</span> এক নয়। আপনার ফাইলের নামের Capital/Small লেটার হুবহু ঠিক আছে কিনা চেক করুন।</small></td></tr>`;
                 }
             } catch (err) {
-                document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color: #94a3b8; padding:30px; font-size:16px;">📂 Procurement_Database.json পাওয়া যায়নি। "Load Custom JSON" বাটন থেকে ফাইল সিলেক্ট করুন।</td></tr>`;
+                document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--netra-red); padding:30px; font-size:16px;">⚠️ Network Error: ${err.message}</td></tr>`;
             }
+        }
+
+        function loadCustomJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color: #38bdf8; padding:30px; font-size:16px; font-weight:bold;">⏳ ডেটা লোড হচ্ছে... দয়া করে অপেক্ষা করুন।</td></tr>`;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let dataArray = Array.isArray(data) ? data : (data.Merged_Database || []);
+                    processAndRenderData(dataArray);
+                } catch (err) {
+                    document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--netra-red); padding:30px; font-size:16px;">⚠️ Error parsing JSON: ${err.message}</td></tr>`;
+                }
+            };
+            reader.readAsText(file);
         }
 
         function debouncedFilter() { clearTimeout(searchDebounceTimer); searchDebounceTimer = setTimeout(() => { triggerFilter(); }, 300); }
@@ -805,10 +831,10 @@
                         let label = "📄 " + docName;
                         
                         if (lower.includes('notice') || i===0) { 
-                            label = "📄 Tender Notice"; 
+                            label = "📄 Tender Notice (" + docName + ")"; 
                         }
                         if (lower.includes('noa') || lower.includes('award') || i === 1) {
-                            label = "📄 Contract Award Notice";
+                            label = "📄 Contract Award Notice (" + docName + ")";
                             searchKeyword = !isZeroValue ? intDbVal : tenderIdStr;
                         }
                         

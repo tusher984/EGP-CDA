@@ -34,8 +34,6 @@
         .btn-home:hover { background: #047857; transform: translateY(-1px); }
         .btn-nexus { padding: 8px 20px; font-size: 16px; border: none; border-radius: 4px; cursor: pointer; color: white; background-color: #7e22ce; font-family: inherit; font-weight: bold; transition: 0.3s; box-shadow: 0 4px 15px rgba(126, 34, 206, 0.4);}
         .btn-nexus:hover { background-color: #6b21a8; transform: translateY(-2px);}
-        .btn-folder { padding: 8px 20px; font-size: 16px; border: none; border-radius: 4px; cursor: pointer; color: white; background-color: #ea580c; font-family: inherit; font-weight: bold; transition: 0.3s; box-shadow: 0 4px 15px rgba(234, 88, 12, 0.4);}
-        .btn-folder:hover { background-color: #c2410c; transform: translateY(-2px);}
 
         .evidence-section { background: var(--dark-card); border: 1px solid var(--border-dark); padding: 25px; margin-bottom: 25px; border-radius: 8px; border-left: 5px solid var(--netra-red); }
         .evidence-section h3 { margin: 0 0 15px 0; font-size: 20px; color: var(--neon-blue); border-bottom: 1px solid var(--border-dark); padding-bottom: 10px;}
@@ -129,8 +127,6 @@
             <p>উন্নয়ন কর্তৃপক্ষ এবং সরকারি প্রকিউরমেন্টের ডিজিটাল ইনভেস্টিগেশন</p>
             <div class="header-buttons">
                 <button class="btn-home" onclick="resetDashboard()" title="রিসেট">🏠 হোম / সব ফিল্টার রিসেট</button>
-                <label for="jsonUpload" class="btn-nexus" style="cursor: pointer; display: inline-block;">📂 Load Custom JSON</label>
-                <input type="file" id="jsonUpload" accept=".json" style="display: none;" onchange="loadCustomJSON(event)">
                 <button class="btn-nexus" onclick="openNetworkMap()">🕸️ সিন্ডিকেট নেটওয়ার্ক ম্যাপ</button>
             </div>
         </header>
@@ -355,9 +351,7 @@
                 const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
                 const hashArray = Array.from(new Uint8Array(hashBuffer));
                 return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-            } catch (e) {
-                return "HASH_ERROR_OR_INSECURE_CONTEXT";
-            }
+            } catch (e) { return "HASH_ERROR"; }
         }
 
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
@@ -385,30 +379,53 @@
             return v.toLocaleString('en-IN');
         }
 
-        // ============================================
-        // BULLETPROOF PDF FILE LIST EXTRACTOR
-        // ============================================
-        function getPdfFilesList(t) {
+        async function checkFileExists(url) {
+            try {
+                const response = await fetch(url, { method: 'HEAD' });
+                return response.ok;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // SMART GITHUB FINDER ENGINE (DUAL FOLDERS)
+        async function getPdfFilesListFromGithub(t) {
             let files = [];
-            
-            // Priority 1: Check Source_Files_Merged
+            let idStr = String(t.Tender_Proposal_ID);
+            let noticeDir = 'Tender Notice_PDFs/';
+            let awardDir = 'Contract_Awards_PDFs/';
+
+            let rawFiles = [];
             if (t.Source_Files_Merged && t.Source_Files_Merged !== "undefined" && t.Source_Files_Merged !== "-") {
                 let raw = String(t.Source_Files_Merged).split(/\||,|;/).map(f=>f.trim()).filter(f=>f.length > 0);
-                // Append .pdf if missing so it doesn't get filtered out
-                raw.forEach(f => files.push(f.toLowerCase().endsWith('.pdf') ? f : f + '.pdf'));
-            } 
-            // Priority 2: Check Source_File
-            else if (t.Source_File && t.Source_File !== "undefined" && t.Source_File !== "-") { 
+                raw.forEach(f => rawFiles.push(f.toLowerCase().endsWith('.pdf') ? f : f + '.pdf'));
+            } else if (t.Source_File && t.Source_File !== "undefined" && t.Source_File !== "-") { 
                 let f = String(t.Source_File).trim(); 
-                if(f.length > 0) files.push(f.toLowerCase().endsWith('.pdf') ? f : f + '.pdf'); 
+                if(f.length > 0) rawFiles.push(f.toLowerCase().endsWith('.pdf') ? f : f + '.pdf'); 
             }
-            
-            // Priority 3: Fallback using Tender ID if everything else is empty
-            if (files.length === 0 && t.Tender_Proposal_ID) {
-                files.push(`${t.Tender_Proposal_ID}.pdf`);
+
+            // 1. Check exact names in both folders
+            for(let f of rawFiles) {
+                let nPath = noticeDir + f;
+                let aPath = awardDir + f;
+                if(await checkFileExists(nPath)) files.push({name: f, path: nPath});
+                else if(await checkFileExists(aPath)) files.push({name: f, path: aPath});
+                else files.push({name: f, path: nPath}); // Default fallback so button appears
             }
-            
-            return [...new Set(files)]; // Return unique files
+
+            // 2. If no files found, Aggressively guess common file names using ID in both folders
+            if (files.length === 0 && idStr) {
+                let noticeGuesses = [`${idStr}.pdf`, `${idStr}_Notice.pdf`, `Notice_${idStr}.pdf`];
+                let awardGuesses = [`${idStr}_NOA.pdf`, `NOA_${idStr}.pdf`, `${idStr}_Award.pdf`, `${idStr}.pdf`];
+                
+                for(let g of noticeGuesses) {
+                    if(await checkFileExists(noticeDir + g)) { files.push({name: g, path: noticeDir + g}); break; }
+                }
+                for(let g of awardGuesses) {
+                    if(await checkFileExists(awardDir + g)) { files.push({name: g, path: awardDir + g}); break; }
+                }
+            }
+            return files; 
         }
 
         function analyzeEligibilityAI(text, reasonsArray = []) {
@@ -499,30 +516,11 @@
                         document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color: #f59e0b; padding:30px; font-size:16px; line-height:1.6;">⚠️ ফাইল ঠিকই পাওয়া গেছে, কিন্তু আপনার JSON ফাইলের ভেতরে ভুল আছে (Syntax Error)!<br><small style="color:#94a3b8;">হয়তো কোনো লাইনের শেষে কমা (,) বাদ পড়েছে বা ব্র্যাকেট (}) ঠিক নেই।<br>Error: ${parseErr.message}</small></td></tr>`;
                     }
                 } else {
-                    document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color: #94a3b8; padding:30px; font-size:16px; line-height:1.6;">📂 <strong>${defaultJsonFileName}</strong> ফাইলটি গিটহাব সার্ভারে পাওয়া যায়নি (404 Not Found)।<br><br><small><strong>টিপস:</strong> গিটহাব সার্ভার Case-Sensitive। অর্থাৎ <span style="color:#fff;">procurement_database.json</span> আর <span style="color:#fff;">Procurement_Database.json</span> এক নয়। আপনার ফাইলের নামের Capital/Small লেটার হুবহু ঠিক আছে কিনা চেক করুন।</small></td></tr>`;
+                    document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color: #94a3b8; padding:30px; font-size:16px; line-height:1.6;">📂 <strong>${defaultJsonFileName}</strong> ফাইলটি সার্ভারে পাওয়া যায়নি (404 Not Found)।</td></tr>`;
                 }
             } catch (err) {
                 document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--netra-red); padding:30px; font-size:16px;">⚠️ Network Error: ${err.message}</td></tr>`;
             }
-        }
-
-        function loadCustomJSON(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color: #38bdf8; padding:30px; font-size:16px; font-weight:bold;">⏳ ডেটা লোড হচ্ছে... দয়া করে অপেক্ষা করুন।</td></tr>`;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    let dataArray = Array.isArray(data) ? data : (data.Merged_Database || []);
-                    processAndRenderData(dataArray);
-                } catch (err) {
-                    document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--netra-red); padding:30px; font-size:16px;">⚠️ Error parsing JSON: ${err.message}</td></tr>`;
-                }
-            };
-            reader.readAsText(file);
         }
 
         function debouncedFilter() { clearTimeout(searchDebounceTimer); searchDebounceTimer = setTimeout(() => { triggerFilter(); }, 300); }
@@ -592,9 +590,6 @@
             document.getElementById('totalOwnersMissing').innerText = missing.toLocaleString() + " টি";
         }
 
-        // ===============================================
-        // BUG FIX: ALL CHART VARIABLES PROPERLY RESTORED
-        // ===============================================
         function updateDynamicCharts(data) {
             let v = { owner:0, split:0, cpv:0, tailored:0, monopoly:0, outlier:0, meeting:0, rigging:0 };
             const sups = {}, dates = {}, ags = {}, reasons = {}; let tSold=0, tRecv=0, tResp=0, hc=0, mc=0, lc=0, hv=0, mv=0, lv=0;
@@ -609,7 +604,6 @@
                 if(dStr && !isNaN(new Date(dStr))) { let d = new Date(dStr), my = `${d.getFullYear()}-${('0'+(d.getMonth()+1)).slice(-2)}`; if(!dates[my]) dates[my] = { HIGH:0, MEDIUM:0, LOW:0 }; dates[my][t.Risk_Level||'LOW']++; }
                 tSold += safeNum(t.Tenders_Sold); tRecv += safeNum(t.Tenders_Received); tResp += safeNum(t.Responsive_Tenders);
                 
-                // Reason tracking for chart
                 if(t._findings && t._findings.csv && t._findings.csv !== "-") { 
                     let c = t._findings.csv.split(' (Proof')[0].trim().substring(0, 20); 
                     reasons[c] = (reasons[c] || 0) + 1; 
@@ -701,7 +695,7 @@
             return null;
         }
 
-        // FAST PDF TEXT EXTRACTION (NO HEAVY OCR)
+        // FAST PDF TEXT EXTRACTION
         async function extractTextFromPDF(pdfUrl) {
             try {
                 const pdf = await pdfjsLib.getDocument(pdfUrl).promise; let text = '';
@@ -714,12 +708,11 @@
             } catch (error) { return null; }
         }
 
-        function showPdfInModal(filename, keyword) {
+        function showPdfInModalUrl(url, keyword) {
             const container = document.getElementById('pdfViewerContainer');
-            // Host URL path for GitHub pages
-            const pdfUrl = `downloaded_pdfs/${filename}#search=${encodeURIComponent(keyword)}`;
-            document.getElementById('pdfIframe').src = pdfUrl; 
-            document.getElementById('pdfFallbackLink').href = pdfUrl;
+            const targetUrl = url + `#search=${encodeURIComponent(keyword)}`;
+            document.getElementById('pdfIframe').src = targetUrl; 
+            document.getElementById('pdfFallbackLink').href = targetUrl;
             container.style.display = 'block'; 
             setTimeout(() => container.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
         }
@@ -756,9 +749,6 @@
             </tr>`;
         }
 
-        // ============================================
-        // TRY-CATCH WRAPPED PDF SCANNER TO PREVENT HANGING
-        // ============================================
         async function showDataInspector(tenderId) {
             try {
                 const t = currentFilteredData.find(x => x.Tender_Proposal_ID == tenderId);
@@ -766,7 +756,6 @@
 
                 currentTenderIdInModal = tenderId;
                 
-                // 1. OPEN MODAL IMMEDIATELY
                 document.getElementById('inspectorModal').style.display = 'flex';
                 document.getElementById('mergeActionContainer').innerHTML = '';
                 document.getElementById('pdfViewerContainer').style.display = 'none';
@@ -784,11 +773,11 @@
                 else if (safeScore >= 40) document.getElementById('riskMeterFill').style.background = "#f59e0b";
                 else document.getElementById('riskMeterFill').style.background = "#10b981";
 
-                document.getElementById('pdfMetaBox').innerHTML = "Extracting Data...";
+                document.getElementById('pdfMetaBox').innerHTML = "Finding PDFs in Server...";
                 document.getElementById('verifyTableBody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:#38bdf8; padding: 40px; font-size:16px; font-weight:bold;">⚡ PDF স্ক্যান হচ্ছে... (0.5 Second)</td></tr>`;
                 document.getElementById('pdfActionButtons').innerHTML = '';
 
-                let pdfFiles = getPdfFilesList(t);
+                let pdfFiles = await getPdfFilesListFromGithub(t);
                 
                 if (pdfFiles.length > 0) {
                     const exactDbVal = safeNum(t.Contract_Value_BDT).toString();
@@ -796,7 +785,6 @@
                     const tenderIdStr = String(t.Tender_Proposal_ID);
                     const isZeroValue = exactDbVal === "0";
 
-                    // 2. NON-BLOCKING EXTRACTION WITH TRY-CATCH
                     setTimeout(async () => {
                         try {
                             let verifyItems = [
@@ -816,8 +804,9 @@
                             let ruleViolationsFoundInPDF = [];
 
                             for (let i = 0; i < pdfFiles.length; i++) {
-                                let docName = pdfFiles[i];
-                                let fileUrl = `downloaded_pdfs/${docName}`;
+                                let fileObj = pdfFiles[i];
+                                let docName = fileObj.name;
+                                let fileUrl = fileObj.path;
 
                                 const pdfResult = await extractTextFromPDF(fileUrl);
                                 
@@ -852,7 +841,6 @@
                                 }
                             }
 
-                            // UPDATE UI
                             if(finalMeta) document.getElementById('pdfMetaBox').innerHTML = `Created: <span class="meta-tag">${finalMeta.CreationDate ? finalMeta.CreationDate.substring(2,10) : 'Hidden'}</span><br>Creator: <span class="meta-tag">${finalMeta.Creator || 'Unknown'}</span><br>Producer: <span class="meta-tag">${finalMeta.Producer || 'Unknown'}</span>`;
                             else document.getElementById('pdfMetaBox').innerHTML = `<span style="color:var(--netra-red)">No Metadata Found / PDFs Not Available in Server</span>`;
 
@@ -872,21 +860,24 @@
                             document.getElementById('verifyTableBody').innerHTML = rowsHtml;
 
                             let buttonsHtml = '';
-                            pdfFiles.forEach((docName, i) => {
+                            pdfFiles.forEach((fileObj, i) => {
+                                let docName = fileObj.name;
+                                let fileUrl = fileObj.path;
                                 let lower = docName.toLowerCase(); 
                                 let searchKeyword = tenderIdStr; 
                                 let label = "📄 " + docName;
+                                let btnClass = "btn-highlight";
                                 
-                                if (lower.includes('notice') || i===0) { 
+                                if (fileUrl.includes('Tender Notice_PDFs') || lower.includes('notice')) { 
                                     label = "📄 Tender Notice"; 
                                 }
-                                if (lower.includes('noa') || lower.includes('award') || i === 1) {
+                                if (fileUrl.includes('Contract_Awards_PDFs') || lower.includes('noa') || lower.includes('award')) {
                                     label = "📄 Contract Award Notice";
                                     searchKeyword = !isZeroValue ? intDbVal : tenderIdStr;
+                                    btnClass = "btn-highlight btn-highlight-alt";
                                 }
                                 
-                                let btnClass = (i === 1 || lower.includes('noa')) ? "btn-highlight btn-highlight-alt" : "btn-highlight";
-                                buttonsHtml += `<button class="${btnClass}" onclick="showPdfInModal('${docName}', '${searchKeyword}')" style="margin-right:5px; padding: 6px 12px; font-size:13px;">${label}</button>`;
+                                buttonsHtml += `<button class="${btnClass}" onclick="showPdfInModalUrl('${fileUrl}', '${searchKeyword}')" style="margin-right:5px; padding: 6px 12px; font-size:13px;">${label}</button>`;
                             });
                             document.getElementById('pdfActionButtons').innerHTML = buttonsHtml;
 
@@ -930,7 +921,7 @@
                     }, 50);
 
                 } else {
-                    document.getElementById('verifyTableBody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">⚠️ No PDF found in Database (JSON). Please check file names.</td></tr>`;
+                    document.getElementById('verifyTableBody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">⚠️ গিটহাব সার্ভারে এই টেন্ডারের কোনো পিডিএফ পাওয়া যায়নি!</td></tr>`;
                 }
             } catch (mainErr) {
                 console.error("Inspector Error:", mainErr);

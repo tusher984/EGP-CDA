@@ -84,6 +84,7 @@
         .risk-high { background-color: var(--netra-red); }
         .risk-medium { background-color: #d97706; }
         .risk-low { background-color: #059669; }
+        .doc-link { color: var(--neon-blue); text-decoration: underline; font-size: 12px; display: inline-block; margin-right: 8px; margin-bottom: 5px; background: rgba(56,189,248,0.1); padding: 2px 6px; border-radius: 3px;}
         .btn-verify { font-family: inherit; background-color: rgba(56, 189, 248, 0.1); color: var(--neon-blue); border: 1px solid var(--neon-blue); padding: 4px 10px; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 5px; transition: 0.2s; width: 100%;}
         .btn-verify:hover { background-color: var(--neon-blue); color: #fff;}
 
@@ -308,6 +309,7 @@
         </div>
     </div>
 
+    <!-- MAIN JAVASCRIPT ENGINE -->
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -348,7 +350,7 @@
             cpv: { title: "EU CPV Regulation / e-GP Metadata Manipulation", enacted: "ই-জিপি গাইডলাইন", purpose: "ভুল CPV কোড দিয়ে টেন্ডার লুকানোর কারসাজি।", penalty: "টেন্ডার প্রক্রিয়া বাতিল।" },
             tailored: { title: "PPR 2008 Rule 98 – Restrictive Qualification Criteria", enacted: "২০০৮ (PPR)", purpose: "নির্দিষ্ট ঠিকাদারকে কাজ দিতে শর্ত ফিক্স করা।", penalty: "পুনঃদরপত্র আহ্বান।" },
             monopoly: { title: "e-PG3 ITT 50.6 – Lack of Effective Competition", enacted: "২০০৬ (PPA)", purpose: "মাত্র ১ জন যোগ্য হলে রি-টেন্ডার আবশ্যক।", penalty: "টেন্ডার বাতিল।" },
-            outlier: { title: "World Bank ALB Guideline", enacted: "বিশ্বব্যাংক রেগুলেশন", purpose: "বাজেটের চেয়ে অনেক বেশি বা কম দরে বিড করা।", penalty: "টেন্ডার সরাসরি বাতিল।" },
+            outlier: { title: "World Bank ALB Guideline", enacted: "বিশ্বব্যাংক রেগুলেশন", purpose: "বাজেটের চেয়েঙ্ঘ অনেক বেশি বা কম দরে বিড করা।", penalty: "টেন্ডার সরাসরি বাতিল।" },
             meeting: { title: "Pre-Tender Meeting Manipulation", enacted: "২০০৮ (PPR)", purpose: "মিটিংয়ের সময় অত্যন্ত কম বা একই দিনে করে অন্যদের প্রস্তুতির সুযোগ না দেওয়া।", penalty: "অডিট আপত্তি ও রি-টেন্ডার।" },
             rigging: { title: "Competition Act 2012 / Bid Rigging", enacted: "২০১২ (প্রতিযোগিতা আইন)", purpose: "শিডিউল কিনে জমা না দেওয়া সিন্ডিকেশনের প্রমাণ।", penalty: "জরিমানা ও ডিবরমেন্ট।" }
         };
@@ -463,11 +465,12 @@
             if(riskScore > 100) riskScore = 100;
 
             let html = findingsList.length > 0 ? findingsList.map(f => `<strong style="color:#fca5a5; display:block; margin-bottom:2px;">${f.name}</strong><span style="color:#94a3b8; font-size:11px; line-height:1.4; display:block;"><i>প্রমাণ: ${f.ev}</i></span>`).join("<div style='margin-bottom:8px;'></div>") : "-";
+            let csv = findingsList.length > 0 ? findingsList.map(f => `${f.name} (Proof: ${f.ev})`).join(" + ") : "-";
             let rulesHtml = uniqueRules.length > 0 ? uniqueRules.map(key => `<span class="clickable-rule" onclick="showRuleModal('${key}')">${RULE_TITLES[key].split('–')[0].trim()} ↗</span>`).join("<br><br>") : "-";
             
             if(riskScore >= 60) t.Risk_Level = "HIGH"; else if(riskScore >= 30) t.Risk_Level = "MEDIUM"; else t.Risk_Level = "LOW";
 
-            return { html, rulesHtml, score: riskScore, keys: { owner: uniqueRules.includes('owner'), split: uniqueRules.includes('split'), cpv: uniqueRules.includes('cpv'), tailored: uniqueRules.includes('tailored'), monopoly: uniqueRules.includes('monopoly'), outlier: uniqueRules.includes('outlier'), meeting: uniqueRules.includes('meeting'), rigging: uniqueRules.includes('rigging') } };
+            return { html, csv, rulesHtml, score: riskScore, keys: { owner: uniqueRules.includes('owner'), split: uniqueRules.includes('split'), cpv: uniqueRules.includes('cpv'), tailored: uniqueRules.includes('tailored'), monopoly: uniqueRules.includes('monopoly'), outlier: uniqueRules.includes('outlier'), meeting: uniqueRules.includes('meeting'), rigging: uniqueRules.includes('rigging') } };
         }
 
         function processAndRenderData(dataArray) {
@@ -592,7 +595,7 @@
 
         function updateDynamicCharts(data) {
             let v = { owner:0, split:0, cpv:0, tailored:0, monopoly:0, outlier:0, meeting:0, rigging:0 };
-            const sups = {}, dates = {}, ags = {}; let tSold=0, tRecv=0, tResp=0, hc=0, mc=0, lc=0, hv=0, mv=0, lv=0;
+            const sups = {}, dates = {}, ags = {}, reasons = {}; let tSold=0, tRecv=0, tResp=0, hc=0, mc=0, lc=0, hv=0, mv=0, lv=0;
             
             data.forEach(t => {
                 if(t._findings && t._findings.keys) { const k = t._findings.keys; if (k.owner) v.owner++; if (k.split) v.split++; if (k.cpv) v.cpv++; if (k.tailored) v.tailored++; if (k.monopoly) v.monopoly++; if (k.outlier) v.outlier++; if (k.meeting) v.meeting++; if (k.rigging) v.rigging++; }
@@ -603,6 +606,12 @@
                 let dStr = t.Advertised_Date || t.Contract_Signing_Date;
                 if(dStr && !isNaN(new Date(dStr))) { let d = new Date(dStr), my = `${d.getFullYear()}-${('0'+(d.getMonth()+1)).slice(-2)}`; if(!dates[my]) dates[my] = { HIGH:0, MEDIUM:0, LOW:0 }; dates[my][t.Risk_Level||'LOW']++; }
                 tSold += safeNum(t.Tenders_Sold); tRecv += safeNum(t.Tenders_Received); tResp += safeNum(t.Responsive_Tenders);
+                
+                // POPULATE REASONS (FIXED BUG HERE)
+                if(t._findings && t._findings.csv && t._findings.csv !== "-") { 
+                    let c = t._findings.csv.split(' (Proof')[0].trim().substring(0, 20); 
+                    reasons[c] = (reasons[c] || 0) + 1; 
+                }
             });
 
             ['owner','split','cpv','tailored','monopoly','outlier','meeting','rigging'].forEach(key => document.getElementById('count-'+key).innerText = v[key].toLocaleString());
@@ -618,7 +627,10 @@
             const pieOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: {color: '#f8fafc', font:{family: "'Li Ador', 'Hind Siliguri', sans-serif"}} } } };
             if(riskPieChartObj) riskPieChartObj.destroy(); riskPieChartObj = new Chart(document.getElementById('riskPieChart'), { type: 'doughnut', data: { labels: ['HIGH', 'MEDIUM', 'LOW'], datasets: [{ data: [hc, mc, lc], backgroundColor: ['#cc0000', '#60a5fa', '#1e3a8a'], borderWidth:0 }] }, options: pieOpts });
             if(agencyChartObj) agencyChartObj.destroy(); agencyChartObj = new Chart(document.getElementById('agencyChart'), { type: 'bar', data: { labels: sTop5(ags).map(s => s[0].substring(0,20)), datasets: [{ data: sTop5(ags).map(s => s[1]), backgroundColor: '#1e3a8a' }] }, options: barY });
-            if(redFlagChartObj) redFlagChartObj.destroy(); redFlagChartObj = new Chart(document.getElementById('redFlagChart'), { type: 'bar', data: { labels: sTop5(reasons).map(r => r[0]), datasets: [{ data: sTop5(reasons).map(r => r[1]), backgroundColor: '#60a5fa' }] }, options: barY });
+            
+            if(redFlagChartObj) redFlagChartObj.destroy(); 
+            redFlagChartObj = new Chart(document.getElementById('redFlagChart'), { type: 'bar', data: { labels: sTop5(reasons).map(r => r[0]), datasets: [{ data: sTop5(reasons).map(r => r[1]), backgroundColor: '#60a5fa' }] }, options: barY });
+            
             if(singleBidderChartObj) singleBidderChartObj.destroy(); singleBidderChartObj = new Chart(document.getElementById('singleBidderChart'), { type: 'doughnut', data: { labels: ['১ জন যোগ্য', 'একাধিক যোগ্য'], datasets: [{ data: [v.monopoly, data.length - v.monopoly], backgroundColor: ['#cc0000', '#1e3a8a'], borderWidth:0 }] }, options: pieOpts });
             if(riskValuePieChartObj) riskValuePieChartObj.destroy(); riskValuePieChartObj = new Chart(document.getElementById('riskValuePieChart'), { type: 'pie', data: { labels: ['HIGH (৳)', 'MEDIUM (৳)', 'LOW (৳)'], datasets: [{ data: [hv, mv, lv], backgroundColor: ['#cc0000', '#60a5fa', '#1e3a8a'], borderWidth:0 }] }, options: pieOpts });
         }
@@ -669,6 +681,7 @@
             return null;
         }
 
+        // FAST PDF TEXT EXTRACTION (NO HEAVY OCR)
         async function extractTextFromPDF(pdfUrl) {
             try {
                 const pdf = await pdfjsLib.getDocument(pdfUrl).promise; let text = '';
@@ -785,6 +798,8 @@
             if(!t) return;
 
             currentTenderIdInModal = tenderId;
+            
+            // 1. OPEN MODAL IMMEDIATELY
             document.getElementById('inspectorModal').style.display = 'flex';
             document.getElementById('mergeActionContainer').innerHTML = '';
             document.getElementById('pdfViewerContainer').style.display = 'none';
@@ -803,6 +818,8 @@
             else document.getElementById('riskMeterFill').style.background = "#10b981";
 
             document.getElementById('pdfMetaBox').innerHTML = "Extracting Data...";
+            
+            // SHOW FAST LOADING STATE
             document.getElementById('verifyTableBody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:#38bdf8; padding: 40px; font-size:16px; font-weight:bold;">⚡ PDF স্ক্যান হচ্ছে... (0.5 Second)</td></tr>`;
             document.getElementById('pdfActionButtons').innerHTML = '';
 
@@ -814,6 +831,7 @@
                 const tenderIdStr = String(t.Tender_Proposal_ID);
                 const isZeroValue = exactDbVal === "0";
 
+                // 2. RUN EXTRACTION IN BACKGROUND WITHOUT BLOCKING UI
                 setTimeout(async () => {
                     let { verifyItems, finalMeta, ruleViolationsFoundInPDF } = await processPdfFilesForData(t, pdfFiles, exactDbVal, tenderIdStr, isZeroValue);
 
@@ -894,7 +912,7 @@
                 }, 50);
 
             } else {
-                document.getElementById('verifyTableBody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">⚠️ No original PDF attached to this record.</td></tr>`;
+                document.getElementById('verifyTableBody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">⚠️ No PDF found in Database (JSON). Please check file names.</td></tr>`;
             }
         }
 
@@ -921,6 +939,7 @@
                 t.PDF_Verified = true;
                 t._findings = getDynamicFindings(t);
                 
+                // LIVE UPDATE
                 triggerFilter(); 
                 
                 document.getElementById('mergeActionContainer').innerHTML = `<span style="color:#10b981; font-weight:bold; font-size:15px; background:rgba(16,185,129,0.1); padding: 6px 12px; border-radius: 4px; border: 1px solid #10b981;">✅ Updated & Merged!</span>`;

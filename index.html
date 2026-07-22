@@ -161,6 +161,7 @@
             <div class="card alert-card"><h2 id="totalValue">৳০</h2><p>উচ্চ-ঝুঁকিপূর্ণ চুক্তিমূল্য</p></div>
         </div>
 
+        <!-- 9 FULL CHARTS -->
         <div class="chart-grid">
             <div class="chart-box"><h3>দুর্নীতির ধরন (Macro-analysis)</h3><div class="chart-container"><canvas id="violationChart"></canvas></div></div>
             <div class="chart-box"><h3>টেন্ডার ড্রপ-আউট (Bid-Rigging)</h3><div class="chart-container"><canvas id="dropoutChart"></canvas></div></div>
@@ -276,7 +277,7 @@
             
             <div class="comparison-grid">
                 <div class="comp-col comp-db">
-                    <h4>🏛️ Official Database Claim</h4>
+                    <h4>🏛️ Official Database (Claim)</h4>
                     <p style="margin:0; font-family:-apple-system, sans-serif; font-size:14px; line-height:1.8;">
                         <strong>Contract Value:</strong> <span id="insVal" class="highlight-red"></span><br>
                         <strong>Document Price:</strong> <span id="insPrice" class="highlight-red"></span><br>
@@ -294,7 +295,7 @@
                     </div>
                 </div>
                 <div class="comp-col comp-pdf" id="pdfScanResultCol">
-                    <h4>📄 Original PDF Evidence</h4>
+                    <h4>📄 PDF Evidence (Source of Truth)</h4>
                     <div id="directPdfBtnContainer"></div>
                 </div>
             </div>
@@ -312,7 +313,6 @@
         </div>
     </div>
 
-    <!-- MAIN JAVASCRIPT ENGINE -->
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -451,6 +451,7 @@
             try {
                 if (window.location.protocol === 'file:') {
                     document.getElementById('tableBody').innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--netra-red); padding:30px; font-size:16px; font-weight:bold;">⚠️ Security Blocked: You must run this using VS Code 'Live Server' or XAMPP.</td></tr>`;
+                    document.getElementById('serverAlert').innerHTML = `<strong style="color:#fca5a5;">⚠️ ERROR: Please open using Live Server.</strong>`;
                     return;
                 }
 
@@ -467,6 +468,7 @@
                         return t;
                     });
                     
+                    // DEFAULT SORT BY HIGH RISK FIRST
                     const riskOrder = { "HIGH": 1, "MEDIUM": 2, "LOW": 3 };
                     globalData.sort((a, b) => (riskOrder[a.Risk_Level] || 4) - (riskOrder[b.Risk_Level] || 4));
 
@@ -695,25 +697,37 @@
             if(!searchVal || searchVal === "-") return null;
             let cleanVal, regex;
             
-            if (type === 'price') {
+            if (type === 'price' || type === 'doc_price') {
                 cleanVal = searchVal.replace(/[^\d\.]/g, '');
                 let intVal = cleanVal.includes('.') ? cleanVal.split('.')[0] : cleanVal;
                 let pattern = intVal.split('').join('[\\s\\,\\.\\r\\n]*');
+                
+                if (type === 'doc_price') {
+                    let contextRegex = new RegExp(`Document\\s*Price\\s*\\(In\\s*BDT\\)\\s*:\\s*${pattern}`, 'gi');
+                    let match = text.match(contextRegex);
+                    if (match && match[0]) return match[0];
+                    
+                    contextRegex = new RegExp(`(Price|BDT)[^\\d]{0,20}${pattern}`, 'gi');
+                    match = text.match(contextRegex);
+                    if (match && match[0]) return match[0];
+                }
+                
                 regex = new RegExp(`.{0,40}${pattern}.{0,40}`, 'gi');
+                let match = text.match(regex);
+                if (match && match[0]) return match[0];
             } else if (type === 'date') {
                 cleanVal = searchVal.split(' ')[0].trim();
                 let dateParts = cleanVal.split(/[-\/\s,]+/);
                 if(dateParts.length < 3) return null;
                 let pattern = dateParts.map(p => p.split('').join('[\\s]*')).join('[\\-\\s\\/\\,\\r\\n]*');
                 regex = new RegExp(`.{0,40}${pattern}.{0,40}`, 'gi');
+                let match = text.match(regex);
+                if (match && match[0]) return match[0];
             } else {
                 let pattern = searchVal.split('').join('[\\s\\r\\n]*');
                 regex = new RegExp(`.{0,40}${pattern}.{0,40}`, 'gi');
-            }
-            
-            let match = text.match(regex);
-            if (match && match[0]) {
-                return match[0];
+                let match = text.match(regex);
+                if (match && match[0]) return match[0];
             }
             return null;
         }
@@ -812,7 +826,7 @@
                 const tenderIdStr = String(t.Tender_Proposal_ID);
                 const isZeroValue = exactDbVal === "0";
 
-                pdfCol.innerHTML = `<h4>📄 Original PDF Evidence</h4><div style="margin-top:20px; color:var(--neon-blue); font-weight:bold;">⏳ Scanning ${pdfFiles.length} attached document(s)...</div>`;
+                pdfCol.innerHTML = `<h4>📄 PDF Evidence (Source of Truth)</h4><div style="margin-top:20px; color:var(--neon-blue); font-weight:bold;">⏳ Scanning ${pdfFiles.length} attached document(s)...</div>`;
 
                 let verificationItems = [
                     { key: "Tender ID", val: tenderIdStr, found: false, type: "exact" }
@@ -824,7 +838,7 @@
                     verificationItems.push({ key: "Contract Value", val: "0", found: true, partial: false, type: "skip", note: "৳0 (Skipped)" });
                 }
 
-                if (t.Document_Price_BDT) verificationItems.push({ key: "Document Price", val: String(t.Document_Price_BDT).trim(), found: false, type: "price" });
+                if (t.Document_Price_BDT) verificationItems.push({ key: "Document Price", val: String(t.Document_Price_BDT).trim(), found: false, type: "doc_price" });
                 if (t.Advertised_Date) verificationItems.push({ key: "Publish Date", val: String(t.Advertised_Date).trim(), found: false, type: "date" });
                 if (t.Closing_Date) verificationItems.push({ key: "Closing Date", val: String(t.Closing_Date).trim(), found: false, type: "date" });
                 if (t.Pre_Tender_Meeting_Start || t.Pre_Tender_Meeting_Start_Date) verificationItems.push({ key: "Meeting Start Date", val: String(t.Pre_Tender_Meeting_Start || t.Pre_Tender_Meeting_Start_Date).trim(), found: false, type: "date" });
@@ -848,7 +862,9 @@
                             if (m) {
                                 item.found = true;
                                 let hl = `<mark style="background:#10b981; color:#fff; font-weight:bold;">${m}</mark>`;
-                                if (item.type === 'price' && !m.includes(item.val.split('.')[0])) hl = `<mark style="background:#f59e0b; color:#000; font-weight:bold;">${m}</mark>`; 
+                                if ((item.type === 'price' || item.type === 'doc_price') && !m.includes(item.val.split('.')[0])) {
+                                    hl = `<mark style="background:#f59e0b; color:#000; font-weight:bold;">${m}</mark>`; 
+                                }
                                 highlightSnippets.push(`<strong>[${item.key}]</strong> ...${hl}...`);
                             }
                         });
@@ -880,8 +896,10 @@
                             matchStatusHtml += `<div class="scan-item" style="color: #38bdf8; font-weight: bold;">ℹ️ ${item.key}: ${item.note}</div>`;
                         } else if (item.found) {
                             matchStatusHtml += `<div class="scan-item" style="color: #10b981; font-weight: bold;">✅ ${item.key} Verified from PDF.</div>`;
+                        } else if (item.partial) {
+                            matchStatusHtml += `<div class="scan-item" style="color: #f59e0b; font-weight: bold;">⚠️ ${item.key} Partial Match (Check Snips).</div>`;
                         } else if (item.type !== 'rule') {
-                            matchStatusHtml += `<div class="scan-item" style="color: #dc2626; font-weight: bold;">❌ ${item.key} NOT Found in PDF!</div>`;
+                            matchStatusHtml += `<div class="scan-item" style="color: #dc2626; font-weight: bold;">❌ ${item.key} NOT Found in PDF! (Database manipulation suspected)</div>`;
                         }
                     });
 
@@ -916,7 +934,7 @@
                 });
 
                 pdfCol.innerHTML = `
-                    <h4>📄 Original PDF Evidence</h4>
+                    <h4>📄 PDF Evidence (Source of Truth)</h4>
                     <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-dark); border-radius: 4px; padding: 10px; margin-bottom: 10px;">
                         ${matchStatusHtml}
                     </div>
@@ -924,7 +942,7 @@
                     <div style="text-align: center; border-top: 1px dashed #334155; padding-top: 10px;">${buttonsHtml}</div>
                 `;
             } else {
-                pdfCol.innerHTML = `<h4>📄 Original PDF Evidence</h4><div style="color:var(--text-muted); margin-top:20px;">⚠️ No original PDF attached to this record.</div>`;
+                pdfCol.innerHTML = `<h4>📄 PDF Evidence (Source of Truth)</h4><div style="color:var(--text-muted); margin-top:20px;">⚠️ No original PDF attached to this record.</div>`;
             }
 
             document.getElementById('inspectorModal').style.display = 'flex';

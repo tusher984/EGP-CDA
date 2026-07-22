@@ -9,7 +9,6 @@
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     
@@ -86,11 +85,6 @@
         .btn-verify { font-family: inherit; background-color: rgba(56, 189, 248, 0.1); color: var(--neon-blue); border: 1px solid var(--neon-blue); padding: 4px 10px; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 5px; transition: 0.2s; width: 100%;}
         .btn-verify:hover { background-color: var(--neon-blue); color: #fff;}
 
-        /* Background Scanner Badge */
-        #bgScanBadge { position: fixed; bottom: 20px; right: 20px; background: rgba(15, 23, 42, 0.95); border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 10px 15px; border-radius: 8px; font-size: 13px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 9999; display: none; backdrop-filter: blur(5px); font-family: monospace; }
-        .scan-spinner { display: inline-block; animation: spin 1.5s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(5px); align-items: center; justify-content: center; }
         .modal-content { background-color: var(--dark-card); border: 1px solid var(--border-dark); border-top: 4px solid var(--neon-blue); border-radius: 8px; width: 95%; max-width: 1200px; max-height: 90vh; overflow-y: auto; padding: 25px; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.7); }
         .close-btn { position: absolute; right: 20px; top: 15px; color: var(--text-muted); font-size: 28px; font-weight: bold; cursor: pointer; z-index: 10;}
@@ -125,9 +119,6 @@
 </head>
 <body>
 
-    <!-- BACKGROUND SCANNER BADGE -->
-    <div id="bgScanBadge"><span class="scan-spinner">⚙️</span> Initializing Scanner...</div>
-
     <div class="container">
         
         <header>
@@ -135,10 +126,6 @@
             <p>উন্নয়ন কর্তৃপক্ষ এবং সরকারি প্রকিউরমেন্টের ডিজিটাল ইনভেস্টিগেশন</p>
             <div class="header-buttons">
                 <button class="btn-home" onclick="resetDashboard()" title="রিসেট">🏠 হোম / সব ফিল্টার রিসেট</button>
-                
-                <label for="jsonUpload" class="btn-nexus" style="cursor: pointer; display: inline-block;">📂 Load Custom JSON</label>
-                <input type="file" id="jsonUpload" accept=".json" style="display: none;" onchange="loadCustomJSON(event)">
-                
                 <button class="btn-nexus" onclick="openNetworkMap()">🕸️ সিন্ডিকেট নেটওয়ার্ক ম্যাপ (Live)</button>
             </div>
         </header>
@@ -266,10 +253,11 @@
                 </div>
                 <div style="flex:1; border-left: 1px solid var(--border-dark); padding-left: 15px; text-align: left;">
                     <div style="font-weight: 700; color: var(--text-light); margin-bottom: 5px;">PDF Hidden Metadata Tracker</div>
-                    <div id="pdfMetaBox" style="font-size: 13px; color: var(--text-muted);">Waiting for PDF Scan...</div>
+                    <div id="pdfMetaBox" style="font-size: 13px; color: var(--text-muted);">Scanning PDF fast...</div>
                 </div>
             </div>
 
+            <!-- INVESTIGATION ANALYTICS BOX -->
             <div id="investigationBox" class="investigation-box" style="display:none;"></div>
 
             <!-- ACTION BUTTONS: Documents & Merge -->
@@ -312,6 +300,7 @@
         </div>
     </div>
 
+    <!-- MAIN JAVASCRIPT ENGINE -->
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -320,24 +309,31 @@
         let currentFilteredData = [];
         let activeRuleKey = null; 
         let currentTenderIdInModal = null;
-        
-        // Background Scanner Variables
-        let bgScanQueue = [];
-        let bgTotal = 0;
-        let bgCompleted = 0;
-        let isBgScanning = false;
+        let currentVerificationItems = [];
         
         let violationChartObj = null, syndicateChartObj = null, dropoutChartObj = null;
         let timelineChartObj = null, riskPieChartObj = null, agencyChartObj = null;
         let redFlagChartObj = null, singleBidderChartObj = null, riskValuePieChartObj = null;
-        let currentPage = 1; const rowsPerPage = 50; let searchDebounceTimer = null;
+
+        Chart.defaults.color = '#94a3b8'; 
+        Chart.defaults.borderColor = '#1e3a5f';
+        Chart.defaults.font.family = "'Li Ador', 'Hind Siliguri', sans-serif";
+
+        let currentPage = 1;
+        const rowsPerPage = 50;
+        let searchDebounceTimer = null;
 
         const RULE_TITLES = {
-            owner: "e-PG3 ITT 5.14 – Beneficial Ownership Disclosure", split: "PPA 2006 Section 17 – Artificial Contract Splitting",
-            cpv: "EU CPV Regulation / e-GP Metadata Manipulation", tailored: "PPR 2008 Rule 98 – Restrictive Qualification Criteria",
-            monopoly: "e-PG3 ITT 50.6 – Lack of Effective Competition", outlier: "World Bank ALB Guideline – Abnormally Low/High Bids",
-            meeting: "PPR Schedule 2 – Pre-Tender Meeting Manipulation", rigging: "Competition Act 2012 / Bid Rigging Guidelines"
+            owner: "e-PG3 ITT 5.14 – Beneficial Ownership Disclosure",
+            split: "PPA 2006 Section 17 – Artificial Contract Splitting",
+            cpv: "EU CPV Regulation / e-GP Metadata Manipulation",
+            tailored: "PPR 2008 Rule 98 – Restrictive Qualification Criteria",
+            monopoly: "e-PG3 ITT 50.6 – Lack of Effective Competition",
+            outlier: "World Bank ALB Guideline – Abnormally Low/High Bids",
+            meeting: "PPR Schedule 2 – Pre-Tender Meeting Manipulation",
+            rigging: "Competition Act 2012 / Bid Rigging Guidelines"
         };
+
         const RULE_DETAILS = {
             owner: { title: "e-PG3 ITT 5.14 – Beneficial Ownership Disclosure", enacted: "২০০৬ (PPA)", purpose: "প্রকৃত মালিকের নাম প্রকাশ বাধ্যতামূলক। স্বার্থের সংঘাত ঠেকাতে এই রুল তৈরি হয়েছে।", penalty: "টেন্ডার বাতিল ও কালোতালিকাভুক্তি।" },
             split: { title: "PPA 2006 Section 17 – Artificial Contract Splitting", enacted: "২০০৬ (PPA)", purpose: "উচ্চতর অনুমোদন এড়াতে মেগা-প্রজেক্টকে ছোট লটে ভাগ করা অবৈধ।", penalty: "বিভাগীয় ব্যবস্থা এবং টেন্ডার বাতিল।" },
@@ -349,15 +345,43 @@
             rigging: { title: "Competition Act 2012 / Bid Rigging", enacted: "২০১২ (প্রতিযোগিতা আইন)", purpose: "শিডিউল কিনে জমা না দেওয়া সিন্ডিকেশনের প্রমাণ।", penalty: "জরিমানা ও ডিবরমেন্ট।" }
         };
 
-        async function generateHash(text) { try { if (!crypto || !crypto.subtle) return "HASH_UNAVAILABLE"; const msgBuffer = new TextEncoder().encode(text); const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer); const hashArray = Array.from(new Uint8Array(hashBuffer)); return hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); } catch (e) { return "HASH_ERROR"; } }
+        async function generateHash(text) {
+            try {
+                if (!crypto || !crypto.subtle) return "HASH_UNAVAILABLE_IN_LOCAL_NETWORK";
+                const msgBuffer = new TextEncoder().encode(text);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            } catch (e) {
+                return "HASH_ERROR_OR_INSECURE_CONTEXT";
+            }
+        }
+
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
         window.onclick = function(e) { if (e.target.classList.contains('modal')) e.target.style.display = "none"; }
-        function showRuleModal(ruleKey) { const data = RULE_DETAILS[ruleKey]; if(data) { document.getElementById('modalTitle').innerText = data.title; document.getElementById('modalEnacted').innerText = data.enacted; document.getElementById('modalDesc').innerText = data.purpose; document.getElementById('modalPenalty').innerText = data.penalty; document.getElementById('ruleModal').style.display = 'flex'; } }
+        
+        function showRuleModal(ruleKey) {
+            const data = RULE_DETAILS[ruleKey];
+            if(data) {
+                document.getElementById('modalTitle').innerText = data.title;
+                document.getElementById('modalEnacted').innerText = data.enacted;
+                document.getElementById('modalDesc').innerText = data.purpose;
+                document.getElementById('modalPenalty').innerText = data.penalty;
+                document.getElementById('ruleModal').style.display = 'flex';
+            }
+        }
 
         const safeStr = (val) => (val ? String(val).toLowerCase() : "");
         const safeNum = (val) => parseFloat(String(val).replace(/,/g, '')) || 0;
         function extractCleanAgencyName(str) { return str ? str.replace(/Procuring Entity.*/i, '').trim() : "Unknown Agency"; }
-        function formatCurrency(amount) { const v = safeNum(amount); if (v === 0) return '-'; if (v >= 10000000) return (v / 10000000).toFixed(2) + ' Cr'; if (v >= 100000) return (v / 100000).toFixed(2) + ' L'; return v.toLocaleString('en-IN'); }
+        function formatCurrency(amount) {
+            const v = safeNum(amount);
+            if (v === 0) return '-';
+            if (v >= 10000000) return (v / 10000000).toFixed(2) + ' Cr';
+            if (v >= 100000) return (v / 100000).toFixed(2) + ' L';
+            return v.toLocaleString('en-IN');
+        }
+
         function getPdfFilesList(t) {
             let files = [];
             if (t.Source_Files_Merged && t.Source_Files_Merged !== "undefined" && t.Source_Files_Merged !== "-") files = String(t.Source_Files_Merged).split(/\||,|;/).map(f=>f.trim()).filter(f=>f.toLowerCase().endsWith('.pdf'));
@@ -366,7 +390,8 @@
         }
 
         function analyzeEligibilityAI(text, reasonsArray = []) {
-            if (!text) return false; let score = 0, t = safeStr(text);
+            if (!text) return false;
+            let score = 0, t = safeStr(text);
             if (/\d+\.[1-9]\d+\s*(crore|lac|lakh)/i.test(t)) { score += 50; reasonsArray.push("অস্বাভাবিক দশমিক সংখ্যার অভিজ্ঞতা।"); }
             if (/(office|branch office|industry)\s+(must be|should be)?\s*(situated|located)?\s*(in|within)\s+(chattogram|dhaka|khulna|rajshahi|sylhet|barisal|rangpur)/i.test(t)) { score += 50; reasonsArray.push("ভৌগোলিক লকিং।"); }
             if (/\b(rajuk|cda|kda|pwd|lged|petrobangla)\b/i.test(t)) { score += 20; reasonsArray.push("নির্দিষ্ট সংস্থার নাম (Authority Locking)।"); }
@@ -421,68 +446,14 @@
             
             if(riskScore >= 60) t.Risk_Level = "HIGH"; else if(riskScore >= 30) t.Risk_Level = "MEDIUM"; else t.Risk_Level = "LOW";
 
-            return { html, rulesHtml, score: riskScore, keys: { tailored: uniqueRules.includes('tailored') } };
+            return { html, rulesHtml, score: riskScore, keys: { tailored: uniqueRules.includes('tailored'), meeting: uniqueRules.includes('meeting') } };
         }
 
-        // --- PDF EXTRACTION ---
-        async function extractTextFromPDF(pdfUrl) {
-            try {
-                const pdf = await pdfjsLib.getDocument(pdfUrl).promise; let text = '';
-                for (let i = 1; i <= pdf.numPages; i++) { const page = await pdf.getPage(i); const content = await page.getTextContent(); text += content.items.map(item => item.str).join(' ') + '\n'; }
-                if (text.trim().length < 50 && window.Tesseract) {
-                    const page = await pdf.getPage(1); const viewport = page.getViewport({ scale: 1.5 }); const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d'); canvas.height = viewport.height; canvas.width = viewport.width;
-                    await page.render({ canvasContext: ctx, viewport: viewport }).promise; const { data } = await Tesseract.recognize(canvas, 'eng+ben'); text = data.text;
-                }
-                const meta = await pdf.getMetadata(); return { text: text.toLowerCase(), meta: meta.info };
-            } catch (error) { return null; }
-        }
-
-        // --- BACKGROUND SCANNER LOGIC ---
-        function startBackgroundScanner() {
-            bgScanQueue = globalData.filter(t => getPdfFilesList(t).length > 0 && !t._bgScannedText);
-            bgTotal = bgScanQueue.length;
-            bgCompleted = 0;
-            if(bgTotal > 0 && !isBgScanning) {
-                isBgScanning = true;
-                document.getElementById('bgScanBadge').style.display = 'block';
-                processBgQueue();
-            }
-        }
-
-        async function processBgQueue() {
-            if(bgScanQueue.length === 0) {
-                isBgScanning = false;
-                document.getElementById('bgScanBadge').innerHTML = "✅ PDF Pre-Scan Complete!";
-                setTimeout(() => { document.getElementById('bgScanBadge').style.display = 'none'; }, 3000);
-                return;
-            }
-
-            let t = bgScanQueue.shift();
-            let pdfs = getPdfFilesList(t);
-            t._bgScannedText = [];
-
-            try {
-                for(let f of pdfs) {
-                    let res = await extractTextFromPDF(`downloaded_pdfs/${f}`);
-                    t._bgScannedText.push({ file: f, text: res ? res.text.replace(/[\r\n]+/g, ' ') : "", meta: res ? res.meta : null });
-                }
-            } catch(e) {}
-
-            bgCompleted++;
-            document.getElementById('bgScanBadge').innerHTML = `<span class="scan-spinner">⚙️</span> Background AI Scanner: ${bgCompleted} / ${bgTotal} PDFs`;
-
-            // Yield to browser to keep UI fast
-            setTimeout(processBgQueue, 50);
-        }
-
-
-        // --- INITIALIZATION ---
         function processAndRenderData(dataArray) {
             globalData = dataArray.map(t => { t._findings = getDynamicFindings(t); t._searchStr = Object.values(t).map(v => safeStr(v)).join(' '); return t; });
             const riskOrder = { "HIGH": 1, "MEDIUM": 2, "LOW": 3 };
             globalData.sort((a, b) => (riskOrder[a.Risk_Level] || 4) - (riskOrder[b.Risk_Level] || 4));
             triggerFilter();
-            startBackgroundScanner(); // Kick off background scan!
         }
 
         async function init() {
@@ -491,31 +462,37 @@
                 const res = await fetch(defaultJsonFileName);
                 if (res.ok) { const data = await res.json(); let dataArray = Array.isArray(data) ? data : (data.Merged_Database || []); processAndRenderData(dataArray); }
                 else { document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color: #94a3b8; padding:30px; font-size:16px;">📂 ${defaultJsonFileName} পাওয়া যায়নি। "Load Custom JSON" বাটন থেকে ফাইল সিলেক্ট করুন।</td></tr>`; }
-            } catch (err) { document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color: #94a3b8; padding:30px; font-size:16px;">📂 "Load Custom JSON" বাটন থেকে ফাইল সিলেক্ট করুন।</td></tr>`; }
-        }
-
-        function loadCustomJSON(event) {
-            const file = event.target.files[0]; if (!file) return;
-            document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color: #38bdf8; padding:30px; font-size:16px; font-weight:bold;">⏳ ডেটা লোড হচ্ছে... দয়া করে অপেক্ষা করুন।</td></tr>`;
-            const reader = new FileReader();
-            reader.onload = function(e) { try { const data = JSON.parse(e.target.result); let dataArray = Array.isArray(data) ? data : (data.Merged_Database || []); processAndRenderData(dataArray); } catch (err) { document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--netra-red); padding:30px; font-size:16px;">⚠️ Error parsing JSON: ${err.message}</td></tr>`; } };
-            reader.readAsText(file);
+            } catch (err) { document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color: #94a3b8; padding:30px; font-size:16px;">📂 ${defaultJsonFileName} পাওয়া যায়নি। "Load Custom JSON" বাটন থেকে ফাইল সিলেক্ট করুন।</td></tr>`; }
         }
 
         function debouncedFilter() { clearTimeout(searchDebounceTimer); searchDebounceTimer = setTimeout(() => { triggerFilter(); }, 300); }
+
         function triggerFilter() {
             const term = document.getElementById('searchInput').value.toLowerCase(); const risk = document.getElementById('riskFilter').value;
             currentFilteredData = globalData.filter(t => { if (risk !== 'ALL' && t.Risk_Level !== risk) return false; if (term && !t._searchStr.includes(term)) return false; if (activeRuleKey && t._findings.keys[activeRuleKey] !== true) return false; return true; });
             updateSummaries(currentFilteredData); updateDynamicCharts(currentFilteredData); currentPage = 1; renderTablePage();
         }
 
-        function resetDashboard() { document.getElementById('searchInput').value = ''; document.getElementById('riskFilter').value = 'ALL'; activeRuleKey = null; document.querySelectorAll('.evidence-item').forEach(el => el.classList.remove('active-rule')); document.getElementById('filterBanner').style.display = 'none'; triggerFilter(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-        function filterByRule(ruleKey, element) { document.querySelectorAll('.evidence-item').forEach(el => el.classList.remove('active-rule')); if (activeRuleKey === ruleKey) { resetRuleFilter(); return; } activeRuleKey = ruleKey; element.classList.add('active-rule'); document.getElementById('bannerText').innerText = `ফিল্টার অ্যাক্টিভ: "${element.querySelector('strong').innerText.split('<')[0].trim()}"`; document.getElementById('filterBanner').style.display = 'flex'; triggerFilter(); document.getElementById('filterBanner').scrollIntoView({ behavior: 'smooth' }); }
+        function resetDashboard() {
+            document.getElementById('searchInput').value = ''; document.getElementById('riskFilter').value = 'ALL'; activeRuleKey = null;
+            document.querySelectorAll('.evidence-item').forEach(el => el.classList.remove('active-rule'));
+            document.getElementById('filterBanner').style.display = 'none'; triggerFilter(); window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function filterByRule(ruleKey, element) {
+            document.querySelectorAll('.evidence-item').forEach(el => el.classList.remove('active-rule'));
+            if (activeRuleKey === ruleKey) { resetRuleFilter(); return; }
+            activeRuleKey = ruleKey; element.classList.add('active-rule');
+            document.getElementById('bannerText').innerText = `ফিল্টার অ্যাক্টিভ: "${element.querySelector('strong').innerText.split('<')[0].trim()}"`;
+            document.getElementById('filterBanner').style.display = 'flex'; triggerFilter(); document.getElementById('filterBanner').scrollIntoView({ behavior: 'smooth' });
+        }
+
         function resetRuleFilter() { activeRuleKey = null; document.querySelectorAll('.evidence-item').forEach(el => el.classList.remove('active-rule')); document.getElementById('filterBanner').style.display = 'none'; triggerFilter(); }
 
         function renderTablePage() {
             const tbody = document.getElementById('tableBody'); const totalRows = currentFilteredData.length; const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
             if(currentPage < 1) currentPage = 1; if(currentPage > totalPages) currentPage = totalPages;
+
             document.getElementById('totalRowsLabel').innerText = totalRows.toLocaleString(); document.getElementById('currentPageLabel').innerText = currentPage; document.getElementById('totalPagesLabel').innerText = totalPages;
             document.getElementById('paginationControls').style.display = totalRows > 0 ? 'flex' : 'none';
             document.getElementById('prevPageBtn').disabled = currentPage === 1; document.getElementById('nextPageBtn').disabled = currentPage === totalPages;
@@ -527,6 +504,7 @@
                 let riskClass = t.Risk_Level === 'HIGH' ? 'risk-high' : (t.Risk_Level === 'MEDIUM' ? 'risk-medium' : 'risk-low');
                 let verifyBtn = `<button class="btn-verify" onclick="showDataInspector('${t.Tender_Proposal_ID}')">🔍 প্রমাণ যাচাই</button>`;
                 let mergeBadge = t.PDF_Verified === true ? `<div style="margin-top:4px; font-size:10px; color:#10b981; font-weight:bold;">✅ VERIFIED</div>` : '';
+
                 return `<tr>
                     <td style="font-family: monospace; font-weight: bold; color: var(--neon-blue);">${t.Tender_Proposal_ID} ${mergeBadge}</td>
                     <td style="color: #cbd5e1;">${extractCleanAgencyName(t.Organization_Agency)}</td>
@@ -551,7 +529,7 @@
 
         function updateDynamicCharts(data) {
             let v = { owner:0, split:0, cpv:0, tailored:0, monopoly:0, outlier:0, meeting:0, rigging:0 };
-            const sups = {}, dates = {}, ags = {}; let tSold=0, tRecv=0, tResp=0, hc=0, mc=0, lc=0, hv=0, mv=0, lv=0;
+            const sups = {}, dates = {}, ags = {}, reasons = {}; let tSold=0, tRecv=0, tResp=0, hc=0, mc=0, lc=0, hv=0, mv=0, lv=0;
             
             data.forEach(t => {
                 if(t._findings && t._findings.keys) { const k = t._findings.keys; if (k.owner) v.owner++; if (k.split) v.split++; if (k.cpv) v.cpv++; if (k.tailored) v.tailored++; if (k.monopoly) v.monopoly++; if (k.outlier) v.outlier++; if (k.meeting) v.meeting++; if (k.rigging) v.rigging++; }
@@ -576,6 +554,7 @@
             const pieOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: {color: '#f8fafc', font:{family: "'Li Ador', 'Hind Siliguri', sans-serif"}} } } };
             if(riskPieChartObj) riskPieChartObj.destroy(); riskPieChartObj = new Chart(document.getElementById('riskPieChart'), { type: 'doughnut', data: { labels: ['HIGH', 'MEDIUM', 'LOW'], datasets: [{ data: [hc, mc, lc], backgroundColor: ['#cc0000', '#60a5fa', '#1e3a8a'], borderWidth:0 }] }, options: pieOpts });
             if(agencyChartObj) agencyChartObj.destroy(); agencyChartObj = new Chart(document.getElementById('agencyChart'), { type: 'bar', data: { labels: sTop5(ags).map(s => s[0].substring(0,20)), datasets: [{ data: sTop5(ags).map(s => s[1]), backgroundColor: '#1e3a8a' }] }, options: barY });
+            if(redFlagChartObj) redFlagChartObj.destroy(); redFlagChartObj = new Chart(document.getElementById('redFlagChart'), { type: 'bar', data: { labels: sTop5(reasons).map(r => r[0]), datasets: [{ data: sTop5(reasons).map(r => r[1]), backgroundColor: '#60a5fa' }] }, options: barY });
             if(singleBidderChartObj) singleBidderChartObj.destroy(); singleBidderChartObj = new Chart(document.getElementById('singleBidderChart'), { type: 'doughnut', data: { labels: ['১ জন যোগ্য', 'একাধিক যোগ্য'], datasets: [{ data: [v.monopoly, data.length - v.monopoly], backgroundColor: ['#cc0000', '#1e3a8a'], borderWidth:0 }] }, options: pieOpts });
             if(riskValuePieChartObj) riskValuePieChartObj.destroy(); riskValuePieChartObj = new Chart(document.getElementById('riskValuePieChart'), { type: 'pie', data: { labels: ['HIGH (৳)', 'MEDIUM (৳)', 'LOW (৳)'], datasets: [{ data: [hv, mv, lv], backgroundColor: ['#cc0000', '#60a5fa', '#1e3a8a'], borderWidth:0 }] }, options: pieOpts });
         }
@@ -626,6 +605,19 @@
             return null;
         }
 
+        // --- SUPER FAST NATIVE PDF TEXT EXTRACTION (NO OCR) ---
+        async function extractTextFromPDF(pdfUrl) {
+            try {
+                const pdf = await pdfjsLib.getDocument(pdfUrl).promise; let text = '';
+                for (let i = 1; i <= pdf.numPages; i++) { 
+                    const page = await pdf.getPage(i); 
+                    const content = await page.getTextContent(); 
+                    text += content.items.map(item => item.str).join(' ') + '\n'; 
+                }
+                const meta = await pdf.getMetadata(); return { text: text.toLowerCase(), meta: meta.info };
+            } catch (error) { return null; }
+        }
+
         function showPdfInModal(filename, keyword) {
             const container = document.getElementById('pdfViewerContainer');
             const pdfUrl = `downloaded_pdfs/${filename}#search=${encodeURIComponent(keyword)}`;
@@ -667,7 +659,8 @@
             </tr>`;
         }
 
-        async function processPdfFilesForData(t, pdfFiles, exactDbVal, tenderIdStr, isZeroValue) {
+        // ASYNC PDF PROCESSOR (Non-blocking)
+        async function runPDFExtraction(t, pdfFiles, exactDbVal, tenderIdStr, isZeroValue, intDbVal) {
             let verifyItems = [
                 { key: "Tender ID", id: "fin_id", val: tenderIdStr, type: "exact", matches: [] },
                 { key: "Contract Value", id: "fin_val", val: exactDbVal, type: isZeroValue ? "skip" : "price", matches: [] },
@@ -684,28 +677,22 @@
             let finalMeta = null;
             let ruleViolationsFoundInPDF = [];
 
-            // Use pre-scanned text if available, otherwise fetch live
-            let docsToProcess = [];
-            if(t._bgScannedText) {
-                docsToProcess = t._bgScannedText;
-            } else {
-                for (let f of pdfFiles) {
-                    let res = await extractTextFromPDF(`downloaded_pdfs/${f}`);
-                    docsToProcess.push({ file: f, text: res ? res.text.replace(/[\r\n]+/g, ' ') : "", meta: res ? res.meta : null });
-                }
-            }
-
-            for (let doc of docsToProcess) {
-                if (doc.text && doc.text.length > 50) {
-                    finalMeta = doc.meta;
+            for (let i = 0; i < pdfFiles.length; i++) {
+                let docName = pdfFiles[i];
+                const pdfResult = await extractTextFromPDF(`downloaded_pdfs/${docName}`);
+                
+                if (pdfResult && pdfResult.text && pdfResult.text.length > 50) {
+                    finalMeta = pdfResult.meta;
+                    const livePdfText = pdfResult.text.replace(/[\r\n]+/g, ' '); 
+                    
                     verifyItems.forEach(item => {
                         if (item.type === 'skip') return;
-                        let m = findInPDF(doc.text, item.val, item.type);
+                        let m = findInPDF(livePdfText, item.val, item.type);
                         if (m) {
                             let isPart = false;
                             if ((item.type === 'price' || item.type === 'doc_price') && !m.includes(item.val.split('.')[0])) isPart = true;
-                            if (!item.matches.some(x => x.text === m && x.doc === doc.file)) {
-                                item.matches.push({ doc: doc.file, text: m, isPartial: isPart });
+                            if (!item.matches.some(x => x.text === m && x.doc === docName)) {
+                                item.matches.push({ doc: docName, text: m, isPartial: isPart });
                             }
                         }
                     });
@@ -713,18 +700,85 @@
                     if (t._findings && t._findings.keys) {
                         if (t._findings.keys.tailored) {
                             let tailoredRegex = /\b(rajuk|cda|kda|pwd|lged|petrobangla)\b|\d+\.[1-9]\d+\s*(crore|lac|lakh)|(office|branch office|industry)\s+(must be|should be)?\s*(situated|located)?\s*(in|within)\s+(chattogram|dhaka|khulna|rajshahi|sylhet|barisal|rangpur)/i;
-                            let ruleMatch = doc.text.match(new RegExp(`.{0,40}(${tailoredRegex.source}).{0,40}`, 'gi'));
-                            if(ruleMatch && ruleMatch[0] && !ruleViolationsFoundInPDF.some(r => r.key === 'Tailored Criteria Evidence' && r.doc === doc.file)) {
-                                ruleViolationsFoundInPDF.push({ doc: doc.file, key: 'Tailored Criteria Evidence', match: ruleMatch[0].replace(tailoredRegex, `<mark style="background:#ef4444; color:#fff; font-weight:bold;">$&</mark>`) });
+                            let ruleMatch = livePdfText.match(new RegExp(`.{0,40}(${tailoredRegex.source}).{0,40}`, 'gi'));
+                            if(ruleMatch && ruleMatch[0] && !ruleViolationsFoundInPDF.some(r => r.key === 'Tailored Criteria Evidence' && r.doc === docName)) {
+                                ruleViolationsFoundInPDF.push({ doc: docName, key: 'Tailored Criteria Evidence', match: ruleMatch[0].replace(tailoredRegex, `<mark style="background:#ef4444; color:#fff; font-weight:bold;">$&</mark>`) });
                             }
                         }
-                        if (/cancel|re-tender|court|stay order/i.test(doc.text) && !ruleViolationsFoundInPDF.some(r => r.key === 'Legal / Stay Order' && r.doc === doc.file)) {
-                            ruleViolationsFoundInPDF.push({ doc: doc.file, key: 'Legal / Stay Order', match: "Found text related to cancel/court/re-tender" });
+                        if (/cancel|re-tender|court|stay order/i.test(livePdfText) && !ruleViolationsFoundInPDF.some(r => r.key === 'Legal / Stay Order' && r.doc === docName)) {
+                            ruleViolationsFoundInPDF.push({ doc: docName, key: 'Legal / Stay Order', match: "Found text related to cancel/court/re-tender" });
                         }
                     }
                 }
             }
-            return { verifyItems, finalMeta, ruleViolationsFoundInPDF };
+
+            // Update UI with results
+            if(finalMeta) document.getElementById('pdfMetaBox').innerHTML = `Created: <span class="meta-tag">${finalMeta.CreationDate ? finalMeta.CreationDate.substring(2,10) : 'Hidden'}</span><br>Creator: <span class="meta-tag">${finalMeta.Creator || 'Unknown'}</span><br>Producer: <span class="meta-tag">${finalMeta.Producer || 'Unknown'}</span>`;
+            else document.getElementById('pdfMetaBox').innerHTML = `<span style="color:var(--netra-red)">No Metadata Found / PDFs Unreadable</span>`;
+
+            let rowsHtml = verifyItems.map(item => buildVerificationRow(item)).join('');
+            
+            rowsHtml += `<tr><td style="font-weight:bold;">Sold / Recv / Resp</td><td style="color:#94a3b8;">${t.Tenders_Sold||0} / ${t.Tenders_Received||0} / ${t.Responsive_Tenders||0}</td><td><span style="color:#94a3b8; font-size:11px;">*Check PDF manually</span></td>
+                <td>
+                    <input type="text" id="fin_sold" class="edit-input" style="width:28%; display:inline;" value="${t.Tenders_Sold||0}"> / 
+                    <input type="text" id="fin_recv" class="edit-input" style="width:28%; display:inline;" value="${t.Tenders_Received||0}"> / 
+                    <input type="text" id="fin_resp" class="edit-input" style="width:28%; display:inline;" value="${t.Responsive_Tenders||0}">
+                </td></tr>`;
+            
+            let rawExp = t.Eligibility_of_Tenderer || t.Extracted_Specific_Experience || t.Qualification_Criteria || "";
+            rowsHtml += `<tr><td style="font-weight:bold;">Eligibility Criteria</td><td style="color:#94a3b8; font-size:11px;">${rawExp.substring(0,80)}...</td><td><span style="color:#94a3b8; font-size:11px;">*Edit below if needed</span></td>
+                <td><textarea id="fin_exp" class="edit-textarea">${rawExp}</textarea></td></tr>`;
+
+            document.getElementById('verifyTableBody').innerHTML = rowsHtml;
+
+            let buttonsHtml = '';
+            pdfFiles.forEach((file, i) => {
+                let lower = file.toLowerCase(); 
+                let searchKeyword = tenderIdStr; 
+                let label = "📄 " + file;
+                if (lower.includes('notice') || i===0) { label = "📄 Tender Notice (" + file + ")"; }
+                if (lower.includes('noa') || lower.includes('award') || i === 1) {
+                    label = "📄 Contract Award (" + file + ")";
+                    searchKeyword = !isZeroValue ? exactDbVal.split('.')[0] : tenderIdStr;
+                }
+                let btnClass = (i === 1 || lower.includes('noa')) ? "btn-highlight btn-highlight-alt" : "btn-highlight";
+                buttonsHtml += `<button class="${btnClass}" onclick="showPdfInModal('${file}', '${searchKeyword}')" style="margin-right:5px; padding: 6px 12px; font-size:13px;">${label}</button>`;
+            });
+            document.getElementById('pdfActionButtons').innerHTML = buttonsHtml;
+
+            if (t.PDF_Verified) document.getElementById('mergeActionContainer').innerHTML = `<span style="color:#10b981; font-weight:bold; font-size:15px; background:rgba(16,185,129,0.1); padding: 6px 12px; border-radius: 4px; border: 1px solid #10b981;">✅ Verified & Merged</span>`;
+            else document.getElementById('mergeActionContainer').innerHTML = `<button class="btn-merge" onclick="mergePDFDataToDB()">💾 Verify & Update Database</button>`;
+
+            let invHtml = "";
+            let pDate = new Date(t.Advertised_Date); let cDate = new Date(t.Closing_Date || t.Tender_Valid_Up_To);
+            if(!isNaN(pDate) && !isNaN(cDate)) {
+                let d = Math.ceil((cDate - pDate) / 86400000);
+                if(d <= 14) invHtml += `<div class="inv-item"><strong style="color:var(--netra-red);">🚨 Rush Tender:</strong> Only ${d} days given to submit bid.</div>`;
+                else invHtml += `<div class="inv-item"><strong style="color:#10b981;">✅ Timeline:</strong> ${d} days given to submit.</div>`;
+            }
+            
+            let mS = new Date(t.Pre_Tender_Meeting_Start || t.Pre_Tender_Meeting_Start_Date); let mE = new Date(t.Pre_Tender_Meeting_End || t.Pre_Tender_Meeting_End_Date);
+            if(!isNaN(mS) && !isNaN(mE)) {
+                let h = (mE - mS) / 3600000;
+                if(h < 24) invHtml += `<div class="inv-item"><strong style="color:var(--netra-red);">🚨 Meeting Rigging:</strong> Pre-tender meeting was open for less than 24 hours (${h.toFixed(1)} hrs).</div>`;
+            }
+            
+            let nDate = new Date(t.Notification_of_Award_Date); let sDate = new Date(t.Contract_Signing_Date);
+            if(!isNaN(nDate) && !isNaN(sDate)) {
+                let d = Math.ceil((sDate - nDate) / 86400000);
+                if(d <= 3) invHtml += `<div class="inv-item"><strong style="color:var(--netra-red);">🚨 Lightning Execution:</strong> Contract signed in just ${d} days after NOA.</div>`;
+            }
+
+            if(ruleViolationsFoundInPDF.length > 0) {
+                ruleViolationsFoundInPDF.forEach(r => {
+                    invHtml += `<div class="inv-item"><strong style="color:var(--netra-red);">🚨 ${r.key} (${r.doc}):</strong> ...${r.match}...</div>`;
+                });
+            }
+
+            if(invHtml) {
+                document.getElementById('investigationBox').innerHTML = `<div style="font-weight:bold; margin-bottom:5px; color:#fff;">🕵️ Full Investigation Analytics:</div>${invHtml}`;
+                document.getElementById('investigationBox').style.display = 'block';
+            }
         }
 
         async function showDataInspector(tenderId) {
@@ -732,6 +786,8 @@
             if(!t) return;
 
             currentTenderIdInModal = tenderId;
+            
+            // 1. OPEN MODAL IMMEDIATELY
             document.getElementById('inspectorModal').style.display = 'flex';
             document.getElementById('mergeActionContainer').innerHTML = '';
             document.getElementById('pdfViewerContainer').style.display = 'none';
@@ -749,89 +805,24 @@
             else if (safeScore >= 40) document.getElementById('riskMeterFill').style.background = "#f59e0b";
             else document.getElementById('riskMeterFill').style.background = "#10b981";
 
-            document.getElementById('pdfMetaBox').innerHTML = "Extracting & Matching PDF data...";
-            document.getElementById('verifyTableBody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:#38bdf8; padding: 40px; font-size:16px; font-weight:bold;">⏳ PDF স্ক্যান হচ্ছে... দয়া করে অপেক্ষা করুন।</td></tr>`;
+            document.getElementById('pdfMetaBox').innerHTML = "Extracting Data...";
+            
+            // SHOW FAST LOADING STATE
+            document.getElementById('verifyTableBody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:#38bdf8; padding: 40px; font-size:16px; font-weight:bold;">⚡ PDF স্ক্যান হচ্ছে... (1 Second)</td></tr>`;
             document.getElementById('pdfActionButtons').innerHTML = '';
 
             let pdfFiles = getPdfFilesList(t);
             
             if (pdfFiles.length > 0) {
                 const exactDbVal = safeNum(t.Contract_Value_BDT).toString();
+                const intDbVal = exactDbVal.includes('.') ? exactDbVal.split('.')[0] : exactDbVal;
                 const tenderIdStr = String(t.Tender_Proposal_ID);
                 const isZeroValue = exactDbVal === "0";
 
-                let { verifyItems, finalMeta, ruleViolationsFoundInPDF } = await processPdfFilesForData(t, pdfFiles, exactDbVal, tenderIdStr, isZeroValue);
-
-                if(finalMeta) document.getElementById('pdfMetaBox').innerHTML = `Created: <span class="meta-tag">${finalMeta.CreationDate ? finalMeta.CreationDate.substring(2,10) : 'Hidden'}</span><br>Creator: <span class="meta-tag">${finalMeta.Creator || 'Unknown'}</span><br>Producer: <span class="meta-tag">${finalMeta.Producer || 'Unknown'}</span>`;
-                else document.getElementById('pdfMetaBox').innerHTML = `<span style="color:var(--netra-red)">No Metadata Found / PDFs Unreadable</span>`;
-
-                let rowsHtml = verifyItems.map(item => buildVerificationRow(item)).join('');
-                
-                rowsHtml += `<tr><td style="font-weight:bold;">Sold / Recv / Resp</td><td style="color:#94a3b8;">${t.Tenders_Sold||0} / ${t.Tenders_Received||0} / ${t.Responsive_Tenders||0}</td><td><span style="color:#94a3b8; font-size:11px;">*Check PDF manually</span></td>
-                    <td>
-                        <input type="text" id="fin_sold" class="edit-input" style="width:28%; display:inline;" value="${t.Tenders_Sold||0}"> / 
-                        <input type="text" id="fin_recv" class="edit-input" style="width:28%; display:inline;" value="${t.Tenders_Received||0}"> / 
-                        <input type="text" id="fin_resp" class="edit-input" style="width:28%; display:inline;" value="${t.Responsive_Tenders||0}">
-                    </td></tr>`;
-                
-                let rawExp = t.Eligibility_of_Tenderer || t.Extracted_Specific_Experience || t.Qualification_Criteria || "";
-                rowsHtml += `<tr><td style="font-weight:bold;">Eligibility Criteria</td><td style="color:#94a3b8; font-size:11px;">${rawExp.substring(0,80)}...</td><td><span style="color:#94a3b8; font-size:11px;">*Edit below if needed</span></td>
-                    <td><textarea id="fin_exp" class="edit-textarea">${rawExp}</textarea></td></tr>`;
-
-                document.getElementById('verifyTableBody').innerHTML = rowsHtml;
-
-                let buttonsHtml = '';
-                pdfFiles.forEach((file, i) => {
-                    let lower = file.toLowerCase(); 
-                    let searchKeyword = tenderIdStr; // Default highlight: Tender ID
-                    let label = "📄 " + file;
-                    
-                    if (lower.includes('notice') || i===0) { 
-                        label = "📄 Tender Notice (" + file + ")"; 
-                    }
-                    if (lower.includes('noa') || lower.includes('award') || i === 1) {
-                        label = "📄 Contract Award (" + file + ")";
-                        searchKeyword = !isZeroValue ? exactDbVal.split('.')[0] : tenderIdStr; // Highlight Value in NOA
-                    }
-                    
-                    let btnClass = (i === 1 || lower.includes('noa')) ? "btn-highlight btn-highlight-alt" : "btn-highlight";
-                    buttonsHtml += `<button class="${btnClass}" onclick="showPdfInModal('${file}', '${searchKeyword}')" style="margin-right:5px; padding: 6px 12px; font-size:13px;">${label}</button>`;
-                });
-                document.getElementById('pdfActionButtons').innerHTML = buttonsHtml;
-
-                if (t.PDF_Verified) document.getElementById('mergeActionContainer').innerHTML = `<span style="color:#10b981; font-weight:bold; font-size:15px; background:rgba(16,185,129,0.1); padding: 6px 12px; border-radius: 4px; border: 1px solid #10b981;">✅ Verified & Merged</span>`;
-                else document.getElementById('mergeActionContainer').innerHTML = `<button class="btn-merge" onclick="mergePDFDataToDB()">💾 Verify & Update Database</button>`;
-
-                let invHtml = "";
-                let pDate = new Date(t.Advertised_Date); let cDate = new Date(t.Closing_Date || t.Tender_Valid_Up_To);
-                if(!isNaN(pDate) && !isNaN(cDate)) {
-                    let d = Math.ceil((cDate - pDate) / 86400000);
-                    if(d <= 14) invHtml += `<div class="inv-item"><strong style="color:var(--netra-red);">🚨 Rush Tender:</strong> Only ${d} days given to submit bid.</div>`;
-                    else invHtml += `<div class="inv-item"><strong style="color:#10b981;">✅ Timeline:</strong> ${d} days given to submit.</div>`;
-                }
-                
-                let mS = new Date(t.Pre_Tender_Meeting_Start || t.Pre_Tender_Meeting_Start_Date); let mE = new Date(t.Pre_Tender_Meeting_End || t.Pre_Tender_Meeting_End_Date);
-                if(!isNaN(mS) && !isNaN(mE)) {
-                    let h = (mE - mS) / 3600000;
-                    if(h < 24) invHtml += `<div class="inv-item"><strong style="color:var(--netra-red);">🚨 Meeting Rigging:</strong> Pre-tender meeting was open for less than 24 hours (${h.toFixed(1)} hrs).</div>`;
-                }
-                
-                let nDate = new Date(t.Notification_of_Award_Date); let sDate = new Date(t.Contract_Signing_Date);
-                if(!isNaN(nDate) && !isNaN(sDate)) {
-                    let d = Math.ceil((sDate - nDate) / 86400000);
-                    if(d <= 3) invHtml += `<div class="inv-item"><strong style="color:var(--netra-red);">🚨 Lightning Execution:</strong> Contract signed in just ${d} days after NOA.</div>`;
-                }
-
-                if(ruleViolationsFoundInPDF.length > 0) {
-                    ruleViolationsFoundInPDF.forEach(r => {
-                        invHtml += `<div class="inv-item"><strong style="color:var(--netra-red);">🚨 ${r.key} (${r.doc}):</strong> ...${r.match}...</div>`;
-                    });
-                }
-
-                if(invHtml) {
-                    document.getElementById('investigationBox').innerHTML = `<div style="font-weight:bold; margin-bottom:5px; color:#fff;">🕵️ Full Investigation Analytics:</div>${invHtml}`;
-                    document.getElementById('investigationBox').style.display = 'block';
-                }
+                // 2. RUN EXTRACTION IN BACKGROUND WITHOUT BLOCKING UI
+                setTimeout(() => {
+                    runPDFExtraction(t, pdfFiles, exactDbVal, tenderIdStr, isZeroValue, intDbVal);
+                }, 50);
 
             } else {
                 document.getElementById('verifyTableBody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">⚠️ No original PDF attached to this record.</td></tr>`;
@@ -860,6 +851,8 @@
 
                 t.PDF_Verified = true;
                 t._findings = getDynamicFindings(t);
+                
+                // LIVE UPDATE
                 triggerFilter(); 
                 
                 document.getElementById('mergeActionContainer').innerHTML = `<span style="color:#10b981; font-weight:bold; font-size:15px; background:rgba(16,185,129,0.1); padding: 6px 12px; border-radius: 4px; border: 1px solid #10b981;">✅ Updated & Merged!</span>`;
@@ -871,26 +864,6 @@
                 else if (safeScore >= 40) document.getElementById('riskMeterFill').style.background = "#f59e0b";
                 else document.getElementById('riskMeterFill').style.background = "#10b981";
             }
-        }
-
-        function downloadUpdatedJSON() {
-            if(!globalData.length) return alert("No data available to export.");
-            let exportData = globalData.map(t => { 
-                let cleanT = { ...t }; 
-                delete cleanT._findings; 
-                delete cleanT._searchStr; 
-                delete cleanT._bgScannedText; 
-                return cleanT; 
-            });
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 4));
-            const dlAnchorElem = document.createElement('a'); dlAnchorElem.setAttribute("href", dataStr); dlAnchorElem.setAttribute("download", "eGP_Verified_Database.json"); dlAnchorElem.click();
-        }
-
-        function downloadCSV() {
-            if(!currentFilteredData.length) return alert("No data available to export.");
-            let csv = "\uFEFFTender_ID,Agency,Supplier,Risk,Value_BDT,PDF_Verified\n";
-            currentFilteredData.forEach(r => { csv += `${r.Tender_Proposal_ID},"${extractCleanAgencyName(r.Organization_Agency).replace(/"/g, '""')}","${(r.Supplier_Name||"").replace(/"/g, '""')}",${r.Risk_Level || "N/A"},${safeNum(r.Contract_Value_BDT)},${r.PDF_Verified ? "Yes" : "No"}\n`; });
-            const link = document.createElement("a"); link.href = encodeURI("data:text/csv;charset=utf-8," + csv); link.download = "eGP_Forensic_Audit_Data.csv"; link.click();
         }
 
         window.addEventListener('load', init);

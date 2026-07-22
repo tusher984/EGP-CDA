@@ -59,8 +59,8 @@
 
         .ledger-section { background: var(--dark-card); border: 1px solid var(--border-dark); padding: 20px; border-radius: 8px; }
         .tools-bar { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; background: rgba(255,255,255,0.01); padding: 15px; border-radius: 6px; border: 1px solid var(--border-dark); align-items: center;}
-        .tools-bar input, .tools-bar select { font-family: inherit; font-weight: 500; padding: 8px 12px; border: 1px solid var(--border-dark); border-radius: 4px; font-size: 14px; outline: none; flex: 1; min-width: 150px; background: var(--dark-bg); color: white;}
-        .tools-bar input:focus, .tools-bar select:focus { border-color: var(--neon-blue); }
+        .tools-bar input[type="text"], .tools-bar select { font-family: inherit; font-weight: 500; padding: 8px 12px; border: 1px solid var(--border-dark); border-radius: 4px; font-size: 14px; outline: none; flex: 1; min-width: 150px; background: var(--dark-bg); color: white;}
+        .tools-bar input[type="text"]:focus, .tools-bar select:focus { border-color: var(--neon-blue); }
         .btn-clear { font-family: inherit; padding: 8px 15px; border: 1px solid var(--neon-blue); border-radius: 4px; font-size: 14px; cursor: pointer; color: var(--neon-blue); background: transparent; transition: 0.2s; }
         .btn-download { font-family: inherit; padding: 8px 15px; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; color: white; background-color: #1e40af; }
         .btn-json { font-family: inherit; padding: 8px 15px; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; color: #fff; background-color: #0284c7; font-weight: bold; transition: 0.2s;}
@@ -83,7 +83,6 @@
         .risk-high { background-color: var(--netra-red); }
         .risk-medium { background-color: #d97706; }
         .risk-low { background-color: #059669; }
-        .doc-link { color: var(--neon-blue); text-decoration: underline; font-size: 12px; display: inline-block; margin-right: 8px; margin-bottom: 5px; background: rgba(56,189,248,0.1); padding: 2px 6px; border-radius: 3px;}
         .btn-verify { font-family: inherit; background-color: rgba(56, 189, 248, 0.1); color: var(--neon-blue); border: 1px solid var(--neon-blue); padding: 4px 10px; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 5px; transition: 0.2s;}
 
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(5px); align-items: center; justify-content: center; }
@@ -128,6 +127,11 @@
             <p>উন্নয়ন কর্তৃপক্ষ এবং সরকারি প্রকিউরমেন্টের ডিজিটাল ইনভেস্টিগেশন</p>
             <div class="header-buttons">
                 <button class="btn-home" onclick="resetDashboard()" title="রিসেট">🏠 হোম / সব ফিল্টার রিসেট</button>
+                
+                <!-- DYNAMIC FILE UPLOAD BUTTON -->
+                <label for="jsonUpload" class="btn-nexus" style="cursor: pointer; display: inline-block;">📂 Load JSON Database</label>
+                <input type="file" id="jsonUpload" accept=".json" style="display: none;" onchange="loadCustomJSON(event)">
+                
                 <button class="btn-nexus" onclick="openNetworkMap()">🕸️ সিন্ডিকেট নেটওয়ার্ক ম্যাপ (Live)</button>
             </div>
         </header>
@@ -195,8 +199,7 @@
                     </thead>
                     <tbody id="tableBody">
                         <tr><td colspan="7" style="text-align: center; padding: 30px;">
-                            <span style="color:#38bdf8; font-size:16px;">⏳ Initializing Local Data Engine...</span><br>
-                            <span style="color:#fca5a5; font-size:13px;">(Note: You MUST open this file using VS Code 'Live Server' or XAMPP.)</span>
+                            <span style="color:#38bdf8; font-size:16px;">📂 উপরের "Load JSON Database" বাটন থেকে আপনার ডেটাবেস ফাইলটি সিলেক্ট করুন...</span>
                         </td></tr>
                     </tbody>
                 </table>
@@ -307,7 +310,6 @@
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-        const jsonFileName = 'Procurement_Database.json';
         let globalData = [];
         let currentFilteredData = [];
         let activeRuleKey = null; 
@@ -446,29 +448,34 @@
             return { html, csv, rulesHtml, score: riskScore, keys: { owner: uniqueRules.includes('owner'), split: uniqueRules.includes('split'), cpv: uniqueRules.includes('cpv'), tailored: uniqueRules.includes('tailored'), monopoly: uniqueRules.includes('monopoly'), outlier: uniqueRules.includes('outlier'), meeting: uniqueRules.includes('meeting'), rigging: uniqueRules.includes('rigging') } };
         }
 
-        async function init() {
-            try {
-                if (window.location.protocol === 'file:') {
-                    document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--netra-red); padding:30px; font-size:16px; font-weight:bold;">⚠️ Security Blocked: You must run this using VS Code 'Live Server' or XAMPP.</td></tr>`;
-                    return;
-                }
-                const res = await fetch(jsonFileName);
-                if (!res.ok) throw new Error("JSON file not found or corrupted.");
-                const data = await res.json();
-                let dataArray = Array.isArray(data) ? data : (data.Merged_Database || []);
-                
-                setTimeout(() => {
+        // --- NEW: DYNAMIC JSON LOADER ---
+        function loadCustomJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color: #38bdf8; padding:30px; font-size:16px; font-weight:bold;">⏳ ডেটা লোড হচ্ছে... দয়া করে অপেক্ষা করুন।</td></tr>`;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let dataArray = Array.isArray(data) ? data : (data.Merged_Database || []);
+                    
                     globalData = dataArray.map(t => {
                         t._findings = getDynamicFindings(t);
                         t._searchStr = Object.values(t).map(v => safeStr(v)).join(' ');
                         return t;
                     });
+                    
                     const riskOrder = { "HIGH": 1, "MEDIUM": 2, "LOW": 3 };
                     globalData.sort((a, b) => (riskOrder[a.Risk_Level] || 4) - (riskOrder[b.Risk_Level] || 4));
+                    
                     triggerFilter();
-                }, 100);
-
-            } catch (err) { document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--netra-red); padding:30px; font-size:16px;">⚠️ Error: ${err.message}</td></tr>`; }
+                } catch (err) {
+                    document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--netra-red); padding:30px; font-size:16px;">⚠️ Error parsing JSON: ${err.message}</td></tr>`;
+                }
+            };
+            reader.readAsText(file);
         }
 
         function debouncedFilter() { clearTimeout(searchDebounceTimer); searchDebounceTimer = setTimeout(() => { triggerFilter(); }, 300); }
@@ -519,11 +526,6 @@
             const pageData = currentFilteredData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
             tbody.innerHTML = pageData.map(t => {
                 let riskClass = t.Risk_Level === 'HIGH' ? 'risk-high' : (t.Risk_Level === 'MEDIUM' ? 'risk-medium' : 'risk-low');
-                
-                let pdfFiles = [];
-                if (t.Source_Files_Merged) pdfFiles = String(t.Source_Files_Merged).split(/\||,|;/).map(f => f.trim()).filter(f => f.toLowerCase().endsWith('.pdf'));
-                else if(t.Source_File) pdfFiles = [String(t.Source_File).trim()];
-                
                 let verifyBtn = `<button class="btn-verify" onclick="showDataInspector('${t.Tender_Proposal_ID}')">🔍 প্রমাণ যাচাই</button>`;
                 let mergeBadge = t.PDF_Verified === true ? `<div style="margin-top:4px; font-size:10px; color:#10b981; font-weight:bold;">✅ VERIFIED</div>` : '';
 
@@ -656,7 +658,6 @@
 
         function setFinalValue(inputId, val) { 
             document.getElementById(inputId).value = val;
-            // Highlight visual feedback
             document.getElementById(inputId).style.boxShadow = "0 0 8px #10b981";
             setTimeout(() => document.getElementById(inputId).style.boxShadow = "none", 1000);
         }
@@ -670,18 +671,15 @@
                     let cleanText = m.text.replace(/^\[.*?\]\s*/, '').trim();
                     if(cleanText.startsWith('...')) cleanText = cleanText.substring(3);
                     if(cleanText.endsWith('...')) cleanText = cleanText.substring(0, cleanText.length-3);
-                    
                     let color = m.isPartial ? '#f59e0b' : '#10b981';
                     let safeArg = cleanText.replace(/'/g, "\\'").replace(/"/g, "&quot;");
-                    
                     return `<div class="inv-item" style="border-left: 2px solid ${color}; padding-left: 8px; background: rgba(255,255,255,0.02);">
                         <span style="color:${color}; font-weight:bold;">${cleanText}</span><br>
-                        <span style="color:#94a3b8; font-size:10px;">Found in: ${m.doc}</span>
+                        <span style="color:#94a3b8; font-size:10px;">Doc: ${m.doc}</span>
                         <button class="btn-use-pdf" onclick="setFinalValue('${item.id}', '${safeArg}')" title="Fill this data into the final input">[Pick]</button>
                     </div>`;
                 }).join('');
             }
-
             return `<tr>
                 <td style="font-weight:bold;">${item.key}</td>
                 <td style="color:#94a3b8;">${item.val || 'N/A'}</td>
@@ -695,11 +693,19 @@
             if(!t) return;
 
             currentTenderIdInModal = tenderId;
+            
+            // SHOW MODAL IMMEDIATELY
+            document.getElementById('inspectorModal').style.display = 'flex';
             document.getElementById('mergeActionContainer').innerHTML = '';
             document.getElementById('pdfViewerContainer').style.display = 'none';
             document.getElementById('investigationBox').style.display = 'none';
             document.getElementById('timestampData').innerText = new Date().toISOString();
             document.getElementById('footprintID').innerText = t.Tender_Proposal_ID;
+            document.getElementById('pdfMetaBox').innerHTML = "Extracting & Matching PDF data...";
+            
+            // SHOW LOADING STATE
+            document.getElementById('verifyTableBody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:#38bdf8; padding: 40px; font-size:16px; font-weight:bold;">⏳ PDF স্ক্যান হচ্ছে... দয়া করে অপেক্ষা করুন।</td></tr>`;
+            document.getElementById('pdfActionButtons').innerHTML = '';
 
             const hashVal = await generateHash(JSON.stringify(t));
             document.getElementById('hashData').innerText = hashVal;
@@ -707,16 +713,17 @@
             let safeScore = t._findings && t._findings.score ? t._findings.score : 0;
             document.getElementById('riskScoreText').innerText = safeScore + "%";
             document.getElementById('riskMeterFill').style.width = safeScore + "%";
-            
             if (safeScore >= 80) document.getElementById('riskMeterFill').style.background = "#ef4444";
             else if (safeScore >= 40) document.getElementById('riskMeterFill').style.background = "#f59e0b";
             else document.getElementById('riskMeterFill').style.background = "#10b981";
 
-            document.getElementById('pdfMetaBox').innerHTML = "Extracting & Matching PDF data...";
-            document.getElementById('verifyTableBody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:#38bdf8; padding: 20px;">Scanning all PDFs... Please wait.</td></tr>`;
-            document.getElementById('pdfActionButtons').innerHTML = '';
-
-            const pdfFiles = t.Source_Files_Merged ? String(t.Source_Files_Merged).split(/\||,|;/).map(f=>f.trim()).filter(f=>f.toLowerCase().endsWith('.pdf')) : (t.Source_File ? [String(t.Source_File).trim()] : []);
+            let pdfFiles = [];
+            if (t.Source_Files_Merged && t.Source_Files_Merged !== "undefined" && t.Source_Files_Merged !== "-") {
+                pdfFiles = String(t.Source_Files_Merged).split(/\||,|;/).map(f=>f.trim()).filter(f=>f.toLowerCase().endsWith('.pdf'));
+            } else if (t.Source_File && t.Source_File !== "undefined" && t.Source_File !== "-") {
+                let f = String(t.Source_File).trim();
+                if(f.toLowerCase().endsWith('.pdf')) pdfFiles.push(f);
+            }
             
             if (pdfFiles.length > 0) {
                 const exactDbVal = safeNum(t.Contract_Value_BDT).toString();
@@ -753,15 +760,12 @@
                             if (m) {
                                 let isPart = false;
                                 if ((item.type === 'price' || item.type === 'doc_price') && !m.includes(item.val.split('.')[0])) isPart = true;
-                                
-                                // Only push if this exact text isn't already logged for this doc
                                 if (!item.matches.some(x => x.text === m && x.doc === docName)) {
                                     item.matches.push({ doc: docName, text: m, isPartial: isPart });
                                 }
                             }
                         });
 
-                        // Deep scan for rule breaking info in ALL docs
                         if (t._findings && t._findings.keys) {
                             if (t._findings.keys.tailored) {
                                 let tailoredRegex = /\b(rajuk|cda|kda|pwd|lged|petrobangla)\b|\d+\.[1-9]\d+\s*(crore|lac|lakh)|(office|branch office|industry)\s+(must be|should be)?\s*(situated|located)?\s*(in|within)\s+(chattogram|dhaka|khulna|rajshahi|sylhet|barisal|rangpur)/i;
@@ -780,7 +784,6 @@
                 if(finalMeta) document.getElementById('pdfMetaBox').innerHTML = `Created: <span class="meta-tag">${finalMeta.CreationDate ? finalMeta.CreationDate.substring(2,10) : 'Hidden'}</span><br>Creator: <span class="meta-tag">${finalMeta.Creator || 'Unknown'}</span><br>Producer: <span class="meta-tag">${finalMeta.Producer || 'Unknown'}</span>`;
                 else document.getElementById('pdfMetaBox').innerHTML = `<span style="color:var(--netra-red)">No Metadata Found / PDFs Unreadable</span>`;
 
-                // Build Table
                 let rowsHtml = verifyItems.map(item => buildVerificationRow(item)).join('');
                 
                 rowsHtml += `<tr><td style="font-weight:bold;">Sold / Recv / Resp</td><td style="color:#94a3b8;">${t.Tenders_Sold||0} / ${t.Tenders_Received||0} / ${t.Responsive_Tenders||0}</td><td><span style="color:#94a3b8; font-size:11px;">*Check PDF manually</span></td>
@@ -796,29 +799,17 @@
 
                 document.getElementById('verifyTableBody').innerHTML = rowsHtml;
 
-                // PDF Action Buttons
                 let buttonsHtml = '';
                 pdfFiles.forEach((file, i) => {
-                    let lower = file.toLowerCase(); 
                     let searchKeyword = tenderIdStr; 
-                    let label = "📄 " + file;
-                    if (lower.includes('notice') || i===0) {
-                        label = "📄 Tender Notice (" + file + ")";
-                    }
-                    if (lower.includes('noa') || lower.includes('award') || i === 1) {
-                        label = "📄 Contract Award (" + file + ")";
-                        searchKeyword = !isZeroValue ? exactDbVal.split('.')[0] : tenderIdStr;
-                    }
-                    let btnClass = (i === 1 || lower.includes('noa')) ? "btn-highlight btn-highlight-alt" : "btn-highlight";
-                    buttonsHtml += `<button class="${btnClass}" onclick="showPdfInModal('${file}', '${searchKeyword}')" style="margin-right:5px; padding: 6px 12px; font-size:13px;">${label}</button>`;
+                    let btnClass = (i === 1 || file.toLowerCase().includes('noa')) ? "btn-highlight btn-highlight-alt" : "btn-highlight";
+                    buttonsHtml += `<button class="${btnClass}" onclick="showPdfInModal('${file}', '${searchKeyword}')" style="margin-right:5px; padding: 6px 12px; font-size:13px;">📄 ${file}</button>`;
                 });
                 document.getElementById('pdfActionButtons').innerHTML = buttonsHtml;
 
-                // Merge Button
                 if (t.PDF_Verified) document.getElementById('mergeActionContainer').innerHTML = `<span style="color:#10b981; font-weight:bold; font-size:15px; background:rgba(16,185,129,0.1); padding: 6px 12px; border-radius: 4px; border: 1px solid #10b981;">✅ Verified & Merged</span>`;
                 else document.getElementById('mergeActionContainer').innerHTML = `<button class="btn-merge" onclick="mergePDFDataToDB()">💾 Verify & Update Database</button>`;
 
-                // Investigation Analytics
                 let invHtml = "";
                 let pDate = new Date(t.Advertised_Date); let cDate = new Date(t.Closing_Date || t.Tender_Valid_Up_To);
                 if(!isNaN(pDate) && !isNaN(cDate)) {
@@ -853,26 +844,18 @@
             } else {
                 document.getElementById('verifyTableBody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">⚠️ No original PDF attached to this record.</td></tr>`;
             }
-
-            document.getElementById('inspectorModal').style.display = 'flex';
         }
 
         function mergePDFDataToDB() {
             if(!currentTenderIdInModal) return;
             let t = globalData.find(x => x.Tender_Proposal_ID == currentTenderIdInModal);
             if(t) {
-                // Update DB Object
                 t.Contract_Value_BDT = document.getElementById('fin_val').value;
                 t.Document_Price_BDT = document.getElementById('fin_doc_price').value;
                 t.Advertised_Date = document.getElementById('fin_pub').value;
                 t.Closing_Date = document.getElementById('fin_close').value;
-                
-                if(t.Pre_Tender_Meeting_Start !== undefined) t.Pre_Tender_Meeting_Start = document.getElementById('fin_mstart').value;
-                else t.Pre_Tender_Meeting_Start_Date = document.getElementById('fin_mstart').value;
-                
-                if(t.Pre_Tender_Meeting_End !== undefined) t.Pre_Tender_Meeting_End = document.getElementById('fin_mend').value;
-                else t.Pre_Tender_Meeting_End_Date = document.getElementById('fin_mend').value;
-                
+                t.Pre_Tender_Meeting_Start = document.getElementById('fin_mstart').value;
+                t.Pre_Tender_Meeting_End = document.getElementById('fin_mend').value;
                 t.Notification_of_Award_Date = document.getElementById('fin_noa').value;
                 t.Contract_Signing_Date = document.getElementById('fin_sign').value;
                 t.CPV_Code = document.getElementById('fin_cpv').value;
@@ -884,19 +867,19 @@
                 else t.Qualification_Criteria = document.getElementById('fin_exp').value;
 
                 t.PDF_Verified = true;
-                
-                // Real-time Update System
                 t._findings = getDynamicFindings(t);
                 triggerFilter(); 
                 
                 document.getElementById('mergeActionContainer').innerHTML = `<span style="color:#10b981; font-weight:bold; font-size:15px; background:rgba(16,185,129,0.1); padding: 6px 12px; border-radius: 4px; border: 1px solid #10b981;">✅ Updated & Merged!</span>`;
                 
-                // Refresh modal to show updated analytics based on new inputs
-                showDataInspector(currentTenderIdInModal);
+                let safeScore = t._findings.score || 0;
+                document.getElementById('riskScoreText').innerText = safeScore + "%";
+                document.getElementById('riskMeterFill').style.width = safeScore + "%";
+                if (safeScore >= 80) document.getElementById('riskMeterFill').style.background = "#ef4444";
+                else if (safeScore >= 40) document.getElementById('riskMeterFill').style.background = "#f59e0b";
+                else document.getElementById('riskMeterFill').style.background = "#10b981";
             }
         }
-
-        window.addEventListener('load', init);
     </script>
 </body>
 </html>

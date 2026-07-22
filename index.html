@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>e-GP Syndicate Tracker | Massive Data Lab</title>
     
-    <!-- Google Fonts Fallback for Bengali -->
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- External Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -16,7 +14,6 @@
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     
     <style>
-        /* Li Ador Custom Font Setup */
         @font-face { font-family: 'Li Ador'; src: url('fonts/LiAdorNoirritMultiweight/LiAdorNoirrit-Light.ttf') format('truetype'); font-weight: 300; font-style: normal; font-display: swap; }
         @font-face { font-family: 'Li Ador'; src: url('fonts/LiAdorNoirritMultiweight/LiAdorNoirrit-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
         @font-face { font-family: 'Li Ador'; src: url('fonts/LiAdorNoirritMultiweight/LiAdorNoirrit-Medium.ttf') format('truetype'); font-weight: 500; font-style: normal; font-display: swap; }
@@ -31,8 +28,13 @@
         
         header { background-color: var(--dark-card); padding: 30px 20px; margin-bottom: 25px; text-align: center; border-bottom: 4px solid var(--netra-red); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);}
         header h1 { margin: 0; font-size: 32px; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px;}
-        header p { margin: 8px 0 0 0; font-size: 16px; color: var(--text-muted); font-weight: 500;}
-        .transparency-note { background: rgba(56, 189, 248, 0.1); color: var(--neon-blue); padding: 10px 15px; margin-top: 15px; border-radius: 5px; font-size: 14px; border: 1px solid rgba(56, 189, 248, 0.3); display: flex; justify-content: space-between; align-items: center;}
+        header p { margin: 8px 0 15px 0; font-size: 16px; color: var(--text-muted); font-weight: 500;}
+        
+        .header-buttons { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+        .btn-home { font-family: inherit; padding: 8px 20px; border: none; border-radius: 4px; font-size: 16px; font-weight: 700; cursor: pointer; color: white; background-color: #059669; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        .btn-home:hover { background: #047857; transform: translateY(-1px); }
+        .btn-nexus { padding: 8px 20px; font-size: 16px; border: none; border-radius: 4px; cursor: pointer; color: white; background-color: #7e22ce; font-family: inherit; font-weight: bold; transition: 0.3s; box-shadow: 0 4px 15px rgba(126, 34, 206, 0.4);}
+        .btn-nexus:hover { background-color: #6b21a8; transform: translateY(-2px);}
 
         .evidence-section { background: var(--dark-card); border: 1px solid var(--border-dark); padding: 25px; margin-bottom: 25px; border-radius: 8px; border-left: 5px solid var(--netra-red); }
         .evidence-section h3 { margin: 0 0 15px 0; font-size: 20px; color: var(--neon-blue); border-bottom: 1px solid var(--border-dark); padding-bottom: 10px;}
@@ -56,16 +58,12 @@
         .chart-container { position: relative; height: 220px; width: 100%; flex-grow: 1; } 
 
         .ledger-section { background: var(--dark-card); border: 1px solid var(--border-dark); padding: 20px; border-radius: 8px; }
-        .tools-bar { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; background: rgba(255,255,255,0.01); padding: 15px; border-radius: 6px; border: 1px solid var(--border-dark);}
+        .tools-bar { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; background: rgba(255,255,255,0.01); padding: 15px; border-radius: 6px; border: 1px solid var(--border-dark); align-items: center;}
         .tools-bar input, .tools-bar select { font-family: inherit; font-weight: 500; padding: 8px 12px; border: 1px solid var(--border-dark); border-radius: 4px; font-size: 14px; outline: none; flex: 1; min-width: 150px; background: var(--dark-bg); color: white;}
         .tools-bar input:focus, .tools-bar select:focus { border-color: var(--neon-blue); }
         .btn-clear { font-family: inherit; padding: 8px 15px; border: 1px solid var(--neon-blue); border-radius: 4px; font-size: 14px; cursor: pointer; color: var(--neon-blue); background: transparent; transition: 0.2s; }
         .btn-download { font-family: inherit; padding: 8px 15px; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; color: white; background-color: #1e40af; }
-        .btn-home { font-family: inherit; padding: 6px 12px; border: none; border-radius: 4px; font-size: 18px; cursor: pointer; color: white; background-color: #059669; transition: 0.2s; display: flex; align-items: center; justify-content: center;}
-        .btn-home:hover { background: #047857; transform: translateY(-1px); }
-        .top-action-bar { text-align: center; margin-bottom: 25px; display: flex; justify-content: center; gap: 15px;}
-        .btn-nexus { padding: 10px 25px; font-size: 16px; border: none; border-radius: 4px; cursor: pointer; color: white; background-color: #7e22ce; font-family: inherit; font-weight: bold; transition: 0.3s; box-shadow: 0 4px 15px rgba(126, 34, 206, 0.4);}
-        .btn-nexus:hover { background-color: #6b21a8; transform: translateY(-2px);}
+        
         .btn-highlight { font-family: inherit; padding: 8px 15px; border: 2px solid var(--netra-red); border-radius: 4px; font-size: 15px; font-weight: 700; cursor: pointer; color: white; background-color: #990000; transition: 0.3s; margin-top: 10px;}
         .btn-highlight-alt { border-color: #0ea5e9; background-color: #0284c7; }
 
@@ -92,7 +90,7 @@
         .raw-data-box { background: #080c14; border: 1px dashed #334155; padding: 15px; border-radius: 5px; color: #cbd5e1; font-size: 14px; line-height: 1.6; margin-bottom: 15px; word-wrap: break-word;}
         .raw-data-box strong { color: var(--neon-blue); font-family: inherit; font-weight: 700; }
         .highlight-red { color: #fca5a5; font-weight: bold; background: rgba(220, 38, 38, 0.2); padding: 0 4px; border-radius:3px;}
-        .explanation-box { background: rgba(56, 189, 248, 0.05); border-left: 4px solid var(--neon-blue); padding: 15px; font-size: 15px; color: #f8fafc; line-height: 1.6; margin-bottom: 15px; font-weight: 500;}
+        .clickable-rule { cursor: pointer; color: var(--neon-blue); text-decoration: underline; text-decoration-style: dashed; }
         
         .meter-container { background: rgba(255,255,255,0.02); border: 1px solid var(--border-dark); border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 15px; display: flex; justify-content: space-around; align-items: center;}
         .risk-gauge { width: 150px; height: 15px; background: #334155; border-radius: 10px; overflow: hidden; margin: 10px auto; position: relative;}
@@ -111,6 +109,9 @@
         .hash-string { background: #000; padding: 3px 6px; border-radius: 3px; color: #10b981; font-weight: bold; word-break: break-all; }
         #networkGraph { width: 100%; height: 70vh; background: #080c14; border: 1px solid var(--border-dark); border-radius: 8px; }
 
+        .scan-item { margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.1); }
+        .scan-item:last-child { border-bottom: none; }
+
         @media print {
             body * { visibility: hidden; }
             #inspectorModal, #inspectorModal * { visibility: visible; }
@@ -120,7 +121,7 @@
             .comp-col h4 { color: black !important; border-bottom-color: black !important; }
             .modal-title { color: black !important; }
             .docket-header { border-bottom: 2px solid #000; }
-            .close-btn, .btn-highlight, .tools-bar, header, .evidence-section, #pdfViewerContainer, .action-buttons, .top-action-bar { display: none !important; }
+            .close-btn, .btn-highlight, .tools-bar, header, .evidence-section, #pdfViewerContainer, .action-buttons { display: none !important; }
             .highlight-red { background: transparent !important; color: #dc2626 !important; font-weight: bold; border-bottom: 2px solid #dc2626; }
             .hash-string, .meta-tag { background: transparent !important; color: black !important; border: 1px dashed black; }
             .modal-content::before { content: "CERTIFIED FORENSIC EVIDENCE"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 40px; color: rgba(0,0,0,0.1); font-weight: bold; pointer-events: none; z-index: -1; }
@@ -134,18 +135,11 @@
         <header>
             <h1>e-GP Syndicate Tracker: Data Lab</h1>
             <p>উন্নয়ন কর্তৃপক্ষ এবং সরকারি প্রকিউরমেন্টের ডিজিটাল ইনভেস্টিগেশন</p>
-            <div class="transparency-note" id="serverAlert">
-                <span style="text-align: left; padding-right: 15px; font-weight: 500;">
-                    <strong>স্বচ্ছতা গ্যারান্টি:</strong> এই সিস্টেমটি সম্পূর্ণ ওপেন-সোর্স এবং ই-জিপি পোর্টাল থেকে প্রাপ্ত উন্মুক্ত ডেটা গাণিতিক বিশ্লেষণের মাধ্যমে তৈরি।
-                </span>
-                <button class="btn-home" onclick="resetDashboard()" title="রিসেট">🏠</button>
+            <div class="header-buttons">
+                <button class="btn-home" onclick="resetDashboard()" title="রিসেট">🏠 হোম / সব ফিল্টার রিসেট</button>
+                <button class="btn-nexus" onclick="openNetworkMap()">🕸️ সিন্ডিকেট নেটওয়ার্ক ম্যাপ (Live)</button>
             </div>
         </header>
-
-        <div class="top-action-bar">
-            <button class="btn-home" style="padding: 10px 25px; font-size: 16px;" onclick="resetDashboard()">🏠 হোম পেইজ / সব ফিল্টার রিসেট</button>
-            <button class="btn-nexus" onclick="openNetworkMap()">🕸️ সিন্ডিকেট নেটওয়ার্ক ম্যাপ (Live)</button>
-        </div>
 
         <div class="evidence-section">
             <h3>e-GP Forensic Audit Rulebook & Engine ম্যাট্রিক্স</h3>
@@ -187,6 +181,7 @@
                 <span id="bannerText" style="color: var(--neon-blue); font-weight: bold;"></span>
                 <button class="btn-clear" onclick="resetRuleFilter()">ফিল্টার সরান (Show All)</button>
             </div>
+            
             <div class="tools-bar">
                 <input type="text" id="searchInput" placeholder="ঠিকাদার, সংস্থা বা ID খুঁজুন..." onkeyup="debouncedFilter()">
                 <select id="riskFilter" onchange="triggerFilter()">
@@ -197,6 +192,7 @@
                 </select>
                 <button class="btn-download" onclick="downloadCSV()">CSV এক্সপোর্ট</button>
             </div>
+            
             <div class="table-responsive">
                 <table class="main-table" id="tenderTable">
                     <thead>
@@ -359,7 +355,6 @@
             rigging: { title: "Competition Act 2012 / Bid Rigging", enacted: "২০১২ (প্রতিযোগিতা আইন)", purpose: "শিডিউল কিনে জমা না দেওয়া সিন্ডিকেশনের প্রমাণ।", penalty: "জরিমানা ও ডিবরমেন্ট।" }
         };
 
-        // Crypto Hash
         async function generateHash(text) {
             try {
                 if (!crypto || !crypto.subtle) return "HASH_UNAVAILABLE_IN_LOCAL_NETWORK";
@@ -388,7 +383,6 @@
             return v.toLocaleString('en-IN');
         }
 
-        // HEURISTIC ENGINE
         function analyzeEligibilityAI(text, reasonsArray = []) {
             if (!text) return false;
             let score = 0, t = safeStr(text);
@@ -446,7 +440,6 @@
             return { html, csv, rulesHtml, score: riskScore, keys: { owner: uniqueRules.includes('owner'), split: uniqueRules.includes('split'), cpv: uniqueRules.includes('cpv'), tailored: uniqueRules.includes('tailored'), monopoly: uniqueRules.includes('monopoly'), outlier: uniqueRules.includes('outlier'), meeting: uniqueRules.includes('meeting'), rigging: uniqueRules.includes('rigging') } };
         }
 
-        // INITIALIZATION
         async function init() {
             try {
                 if (window.location.protocol === 'file:') {
@@ -467,6 +460,11 @@
                         t._searchStr = Object.values(t).map(v => safeStr(v)).join(' ');
                         return t;
                     });
+                    
+                    // DEFAULT SORT BY HIGH RISK FIRST
+                    const riskOrder = { "HIGH": 1, "MEDIUM": 2, "LOW": 3 };
+                    globalData.sort((a, b) => (riskOrder[a.Risk_Level] || 4) - (riskOrder[b.Risk_Level] || 4));
+
                     triggerFilter();
                 }, 100);
 
@@ -525,7 +523,6 @@
             triggerFilter();
         }
 
-        // RENDERING
         function renderTablePage() {
             const tbody = document.getElementById('tableBody');
             const totalRows = currentFilteredData.length;
@@ -689,7 +686,7 @@
             new vis.Network(container, { nodes, edges }, { physics: { stabilization: true, barnesHut: { gravitationalConstant: -2000 } } });
         }
 
-        // --- SMART PDF EXTRACTION & COMPARISON ---
+        // --- COMPREHENSIVE PDF EXTRACTION & COMPARISON ---
         async function extractTextFromPDF(pdfUrl) {
             try {
                 const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
@@ -787,55 +784,79 @@
             if (pdfFiles.length > 0) {
                 const exactDbVal = safeNum(t.Contract_Value_BDT).toString();
                 const intDbVal = exactDbVal.includes('.') ? exactDbVal.split('.')[0] : exactDbVal;
+                const tenderIdStr = String(t.Tender_Proposal_ID);
+                const isZeroValue = exactDbVal === "0";
 
-                pdfCol.innerHTML = `<h4>📄 Live PDF Scan Result</h4><div style="margin-top:20px; color:var(--neon-blue); font-weight:bold;">⏳ Scanning ${pdfFiles.length} attached document(s)...</div>`;
+                pdfCol.innerHTML = `<h4>📄 Live PDF Scan Result</h4><div style="margin-top:20px; color:var(--neon-blue); font-weight:bold;">⏳ Scanning ${pdfFiles.length} attached document(s) for Tender ID & Value...</div>`;
 
-                let isMatch = false;
-                let isPartial = false;
-                let highlightSnippet = "";
-                let matchStatusHtml = "";
+                let valMatch = false, valPartial = false, idMatch = false;
+                let highlightSnippets = [];
                 let finalMeta = null;
+                let additionalFlags = [];
 
-                if (exactDbVal === "0") {
-                    matchStatusHtml = `<div style="background: rgba(56, 189, 248, 0.1); color: var(--neon-blue); padding: 10px; border: 1px solid var(--neon-blue); border-radius: 4px; font-weight: bold; margin-bottom: 10px;">ℹ️ চুক্তিমূল্য ৳০। এটি শুধুমাত্র একটি টেন্ডার নোটিশ হওয়ায় টাকার অঙ্কের স্ক্যানিং স্কিপ করা হয়েছে।</div>`;
-                    const pdfResult = await extractTextFromPDF(`downloaded_pdfs/${pdfFiles[0]}`);
-                    if (pdfResult) finalMeta = pdfResult.meta;
-                } else {
-                    for (let i = 0; i < pdfFiles.length; i++) {
-                        const pdfResult = await extractTextFromPDF(`downloaded_pdfs/${pdfFiles[i]}`);
-                        if (pdfResult && pdfResult.text) {
-                            finalMeta = pdfResult.meta;
-                            const livePdfText = pdfResult.text.replace(/[\r\n]+/g, ' '); 
-                            
+                for (let i = 0; i < pdfFiles.length; i++) {
+                    const pdfResult = await extractTextFromPDF(`downloaded_pdfs/${pdfFiles[i]}`);
+                    if (pdfResult && pdfResult.text) {
+                        finalMeta = pdfResult.meta;
+                        const livePdfText = pdfResult.text.replace(/[\r\n]+/g, ' '); 
+                        
+                        // Check Tender ID
+                        if (livePdfText.includes(tenderIdStr)) {
+                            idMatch = true;
+                            let idRegex = new RegExp(`.{0,30}${tenderIdStr}.{0,30}`, 'gi');
+                            let idM = livePdfText.match(idRegex);
+                            if(idM && idM[0]) highlightSnippets.push(`<strong>[ID]</strong> ` + idM[0].replace(new RegExp(tenderIdStr, 'gi'), `<mark style="background:#eab308;font-weight:bold;">$&</mark>`));
+                        }
+
+                        // Check Red Flags
+                        if (/cancel|re-tender|court|stay order/i.test(livePdfText)) {
+                            additionalFlags.push("Possible Legal/Cancel issue mentioned in text.");
+                        }
+
+                        // Check Value
+                        if (!isZeroValue && !valMatch) {
                             let flexiPattern = exactDbVal.split('').map(char => char === '.' ? '[\\.\\s\\,\\n\\r]*' : char).join('[\\s\\,\\n\\r]*'); 
-                            const regex = new RegExp(`.{0,60}${flexiPattern}.{0,60}`, 'gi'); 
+                            const regex = new RegExp(`.{0,40}${flexiPattern}.{0,40}`, 'gi'); 
                             const match = livePdfText.match(regex);
 
                             if (match && match[0]) {
-                                isMatch = true;
-                                highlightSnippet = match[0].replace(new RegExp(`(${flexiPattern})`, 'gi'), `<mark style="background: #eab308; color: #000; font-weight: bold;">$&</mark>`);
-                                break; 
+                                valMatch = true;
+                                highlightSnippets.push(`<strong>[Value]</strong> ` + match[0].replace(new RegExp(`(${flexiPattern})`, 'gi'), `<mark style="background:#10b981; color:#fff; font-weight:bold;">$&</mark>`));
                             } else if (exactDbVal.includes('.')) {
                                 let intPattern = intDbVal.split('').join('[\\s\\,\\n\\r]*');
-                                const regexInt = new RegExp(`.{0,60}${intPattern}.{0,60}`, 'gi');
+                                const regexInt = new RegExp(`.{0,40}${intPattern}.{0,40}`, 'gi');
                                 const matchInt = livePdfText.match(regexInt);
                                 if(matchInt && matchInt[0]) {
-                                    isPartial = true;
-                                    highlightSnippet = matchInt[0].replace(new RegExp(`(${intPattern})`, 'gi'), `<mark style="background: #eab308; color: #000; font-weight: bold;">$&</mark>`);
+                                    valPartial = true;
+                                    highlightSnippets.push(`<strong>[Value (Partial)]</strong> ` + matchInt[0].replace(new RegExp(`(${intPattern})`, 'gi'), `<mark style="background:#f59e0b; color:#000; font-weight:bold;">$&</mark>`));
                                 }
                             }
                         }
                     }
-
-                    if (isMatch) {
-                        matchStatusHtml = `<div style="background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 10px; border: 1px solid #10b981; border-radius: 4px; font-weight: bold; margin-bottom: 10px;">✅ VERIFIED: চুক্তিমূল্য (৳${exactDbVal}) স্ক্যান করা নথির সাথে হুবহু মিলেছে!</div>`;
-                    } else if (isPartial) {
-                        matchStatusHtml = `<div style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; padding: 10px; border: 1px solid #f59e0b; border-radius: 4px; font-weight: bold; margin-bottom: 10px;">⚠️ PARTIAL MATCH: শুধুমাত্র মূল টাকার অঙ্কটি (৳${intDbVal}) মিলেছে। দশমিকের পরের অংশে গড়মিল বা স্ক্যানিং ত্রুটি।</div>`;
-                    } else {
-                        matchStatusHtml = `<div style="background: rgba(220, 38, 38, 0.1); color: #dc2626; padding: 10px; border: 1px solid #dc2626; border-radius: 4px; font-weight: bold; margin-bottom: 10px;">❌ MISMATCH DETECTED: চুক্তিমূল্য (৳${exactDbVal}) যুক্ত থাকা কোনো পিডিএফেই পাওয়া যায়নি! ডেটা টেম্পারিংয়ের আশঙ্কা।</div>`;
-                    }
                 }
 
+                let matchStatusHtml = "";
+                
+                // ID Status
+                if(idMatch) matchStatusHtml += `<div class="scan-item" style="color: #10b981; font-weight: bold;">✅ Tender ID (${tenderIdStr}) Found.</div>`;
+                else matchStatusHtml += `<div class="scan-item" style="color: #dc2626; font-weight: bold;">❌ Tender ID (${tenderIdStr}) NOT Found!</div>`;
+
+                // Value Status
+                if (isZeroValue) {
+                    matchStatusHtml += `<div class="scan-item" style="color: #38bdf8; font-weight: bold;">ℹ️ Contract Value is ৳0 (Skipped value scan).</div>`;
+                } else if (valMatch) {
+                    matchStatusHtml += `<div class="scan-item" style="color: #10b981; font-weight: bold;">✅ Contract Value (৳${exactDbVal}) Verified.</div>`;
+                } else if (valPartial) {
+                    matchStatusHtml += `<div class="scan-item" style="color: #f59e0b; font-weight: bold;">⚠️ Value Partial Match: Only integer (৳${intDbVal}) found.</div>`;
+                } else {
+                    matchStatusHtml += `<div class="scan-item" style="color: #dc2626; font-weight: bold;">❌ Contract Value (৳${exactDbVal}) Mismatch! Tampering risk.</div>`;
+                }
+
+                if(additionalFlags.length > 0) {
+                    matchStatusHtml += `<div class="scan-item" style="color: #dc2626; font-size:12px;">🚨 Flags: ${additionalFlags[0]}</div>`;
+                }
+
+                // Metadata update
                 if(finalMeta) {
                     document.getElementById('pdfMetaBox').innerHTML = `
                         Created: <span class="meta-tag">${finalMeta.CreationDate ? finalMeta.CreationDate.substring(2,10) : 'Hidden'}</span><br>
@@ -856,13 +877,15 @@
                     else if (i === 1) label = "📄 NOA / Award";
                     
                     let btnClass = (i === 1 || lower.includes('noa')) ? "btn-highlight btn-highlight-alt" : "btn-highlight";
-                    buttonsHtml += `<button class="${btnClass}" style="margin: 5px;" onclick="showPdfInModal('${file}', '${exactDbVal === "0" ? "" : intDbVal}')">${label}</button>`;
+                    buttonsHtml += `<button class="${btnClass}" style="margin: 5px;" onclick="showPdfInModal('${file}', '${tenderIdStr}')">${label}</button>`;
                 });
 
                 pdfCol.innerHTML = `
                     <h4>📄 Live PDF Scan Result</h4>
-                    ${matchStatusHtml}
-                    ${highlightSnippet ? `<div style="font-family: monospace; font-size: 13px; color: #fff; background: #000; padding: 10px; border-left: 3px solid #eab308; margin-bottom: 15px; border-radius: 4px;">"...${highlightSnippet}..."</div>` : ''}
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-dark); border-radius: 4px; padding: 10px; margin-bottom: 10px;">
+                        ${matchStatusHtml}
+                    </div>
+                    ${highlightSnippets.length > 0 ? `<div style="font-family: monospace; font-size: 13px; color: #cbd5e1; background: #000; padding: 10px; border-left: 3px solid #38bdf8; margin-bottom: 15px; border-radius: 4px; max-height:100px; overflow-y:auto;">${highlightSnippets.join('<br><br>')}</div>` : ''}
                     <div style="text-align: center; border-top: 1px dashed #334155; padding-top: 10px;">${buttonsHtml}</div>
                 `;
             } else {

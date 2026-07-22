@@ -34,6 +34,8 @@
         .btn-home:hover { background: #047857; transform: translateY(-1px); }
         .btn-nexus { padding: 8px 20px; font-size: 16px; border: none; border-radius: 4px; cursor: pointer; color: white; background-color: #7e22ce; font-family: inherit; font-weight: bold; transition: 0.3s; box-shadow: 0 4px 15px rgba(126, 34, 206, 0.4);}
         .btn-nexus:hover { background-color: #6b21a8; transform: translateY(-2px);}
+        .btn-folder { padding: 8px 20px; font-size: 16px; border: none; border-radius: 4px; cursor: pointer; color: white; background-color: #ea580c; font-family: inherit; font-weight: bold; transition: 0.3s; box-shadow: 0 4px 15px rgba(234, 88, 12, 0.4);}
+        .btn-folder:hover { background-color: #c2410c; transform: translateY(-2px);}
 
         .evidence-section { background: var(--dark-card); border: 1px solid var(--border-dark); padding: 25px; margin-bottom: 25px; border-radius: 8px; border-left: 5px solid var(--netra-red); }
         .evidence-section h3 { margin: 0 0 15px 0; font-size: 20px; color: var(--neon-blue); border-bottom: 1px solid var(--border-dark); padding-bottom: 10px;}
@@ -126,8 +128,13 @@
             <p>উন্নয়ন কর্তৃপক্ষ এবং সরকারি প্রকিউরমেন্টের ডিজিটাল ইনভেস্টিগেশন</p>
             <div class="header-buttons">
                 <button class="btn-home" onclick="resetDashboard()" title="রিসেট">🏠 হোম / সব ফিল্টার রিসেট</button>
+                
+                <label for="pdfFolderUpload" class="btn-folder" title="আপনার লোকাল ফোল্ডার সিলেক্ট করুন, টেন্ডার আইডি দিয়ে পিডিএফ অটো-ম্যাচ হবে">📁 Select PDF Folder</label>
+                <input type="file" id="pdfFolderUpload" webkitdirectory directory multiple style="display: none;" onchange="loadPDFFolder(event)">
+                
                 <label for="jsonUpload" class="btn-nexus" style="cursor: pointer; display: inline-block;">📂 Load Custom JSON</label>
                 <input type="file" id="jsonUpload" accept=".json" style="display: none;" onchange="loadCustomJSON(event)">
+                
                 <button class="btn-nexus" onclick="openNetworkMap()">🕸️ সিন্ডিকেট নেটওয়ার্ক ম্যাপ</button>
             </div>
         </header>
@@ -301,7 +308,6 @@
         </div>
     </div>
 
-    <!-- MAIN JAVASCRIPT ENGINE -->
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -311,8 +317,11 @@
         let activeRuleKey = null; 
         let currentTenderIdInModal = null;
         
+        let localPDFFiles = []; 
+
         let violationChartObj = null, syndicateChartObj = null, dropoutChartObj = null;
         let timelineChartObj = null, riskPieChartObj = null, agencyChartObj = null;
+        let redFlagChartObj = null, singleBidderChartObj = null, riskValuePieChartObj = null;
 
         Chart.defaults.color = '#94a3b8'; 
         Chart.defaults.borderColor = '#1e3a5f';
@@ -381,7 +390,17 @@
             return v.toLocaleString('en-IN');
         }
 
+        function loadPDFFolder(event) {
+            localPDFFiles = Array.from(event.target.files).filter(f => f.name.toLowerCase().endsWith('.pdf'));
+            alert(`✅ ${localPDFFiles.length} PDFs loaded successfully! \n\nNow whenever you click "🔍 প্রমাণ যাচাই", the system will automatically find and match PDFs containing the Tender ID from this folder!`);
+        }
+
         function getPdfFilesList(t) {
+            let idStr = String(t.Tender_Proposal_ID);
+            if (localPDFFiles.length > 0) {
+                let matches = localPDFFiles.filter(f => f.name.includes(idStr));
+                if(matches.length > 0) return matches;
+            }
             let files = [];
             if (t.Source_Files_Merged && t.Source_Files_Merged !== "undefined" && t.Source_Files_Merged !== "-") {
                 files = String(t.Source_Files_Merged).split(/\||,|;/).map(f=>f.trim()).filter(f=>f.toLowerCase().endsWith('.pdf'));
@@ -462,9 +481,6 @@
             triggerFilter();
         }
 
-        // ==========================================
-        // NEW ERROR HANDLING FOR GITHUB PAGES
-        // ==========================================
         async function init() {
             try {
                 if (window.location.protocol === 'file:') {
@@ -653,7 +669,6 @@
             return null;
         }
 
-        // FAST PDF TEXT EXTRACTION (NO HEAVY OCR)
         async function extractTextFromPDF(pdfUrl) {
             try {
                 const pdf = await pdfjsLib.getDocument(pdfUrl).promise; let text = '';
@@ -666,12 +681,11 @@
             } catch (error) { return null; }
         }
 
-        function showPdfInModal(filename, keyword) {
+        function showPdfInModalUrl(url, keyword) {
             const container = document.getElementById('pdfViewerContainer');
-            // Host URL path for GitHub pages
-            const pdfUrl = `downloaded_pdfs/${filename}#search=${encodeURIComponent(keyword)}`;
-            document.getElementById('pdfIframe').src = pdfUrl; 
-            document.getElementById('pdfFallbackLink').href = pdfUrl;
+            const targetUrl = url + `#search=${encodeURIComponent(keyword)}`;
+            document.getElementById('pdfIframe').src = targetUrl; 
+            document.getElementById('pdfFallbackLink').href = targetUrl;
             container.style.display = 'block'; 
             setTimeout(() => container.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
         }
@@ -726,8 +740,10 @@
             let ruleViolationsFoundInPDF = [];
 
             for (let i = 0; i < pdfFiles.length; i++) {
-                let docName = pdfFiles[i];
-                let fileUrl = `downloaded_pdfs/${docName}`;
+                let fileObj = pdfFiles[i];
+                let isLocalFile = typeof fileObj !== 'string';
+                let docName = isLocalFile ? fileObj.name : fileObj;
+                let fileUrl = isLocalFile ? URL.createObjectURL(fileObj) : `downloaded_pdfs/${docName}`;
 
                 const pdfResult = await extractTextFromPDF(fileUrl);
                 
@@ -769,8 +785,6 @@
             if(!t) return;
 
             currentTenderIdInModal = tenderId;
-            
-            // 1. OPEN MODAL IMMEDIATELY
             document.getElementById('inspectorModal').style.display = 'flex';
             document.getElementById('mergeActionContainer').innerHTML = '';
             document.getElementById('pdfViewerContainer').style.display = 'none';
@@ -789,8 +803,6 @@
             else document.getElementById('riskMeterFill').style.background = "#10b981";
 
             document.getElementById('pdfMetaBox').innerHTML = "Extracting Data...";
-            
-            // SHOW FAST LOADING STATE
             document.getElementById('verifyTableBody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:#38bdf8; padding: 40px; font-size:16px; font-weight:bold;">⚡ PDF স্ক্যান হচ্ছে... (0.5 Second)</td></tr>`;
             document.getElementById('pdfActionButtons').innerHTML = '';
 
@@ -802,7 +814,6 @@
                 const tenderIdStr = String(t.Tender_Proposal_ID);
                 const isZeroValue = exactDbVal === "0";
 
-                // 2. RUN EXTRACTION IN BACKGROUND WITHOUT BLOCKING UI
                 setTimeout(async () => {
                     let { verifyItems, finalMeta, ruleViolationsFoundInPDF } = await processPdfFilesForData(t, pdfFiles, exactDbVal, tenderIdStr, isZeroValue);
 
@@ -825,21 +836,25 @@
                     document.getElementById('verifyTableBody').innerHTML = rowsHtml;
 
                     let buttonsHtml = '';
-                    pdfFiles.forEach((docName, i) => {
+                    pdfFiles.forEach((fileObj, i) => {
+                        let isLocalFile = typeof fileObj !== 'string';
+                        let docName = isLocalFile ? fileObj.name : fileObj;
                         let lower = docName.toLowerCase(); 
                         let searchKeyword = tenderIdStr; 
                         let label = "📄 " + docName;
                         
                         if (lower.includes('notice') || i===0) { 
-                            label = "📄 Tender Notice (" + docName + ")"; 
+                            label = "📄 Tender Notice"; 
                         }
                         if (lower.includes('noa') || lower.includes('award') || i === 1) {
-                            label = "📄 Contract Award Notice (" + docName + ")";
+                            label = "📄 Contract Award Notice";
                             searchKeyword = !isZeroValue ? intDbVal : tenderIdStr;
                         }
                         
                         let btnClass = (i === 1 || lower.includes('noa')) ? "btn-highlight btn-highlight-alt" : "btn-highlight";
-                        buttonsHtml += `<button class="${btnClass}" onclick="showPdfInModal('${docName}', '${searchKeyword}')" style="margin-right:5px; padding: 6px 12px; font-size:13px;">${label}</button>`;
+                        let fileUrl = isLocalFile ? URL.createObjectURL(fileObj) : `downloaded_pdfs/${docName}`;
+                        
+                        buttonsHtml += `<button class="${btnClass}" onclick="showPdfInModalUrl('${fileUrl}', '${searchKeyword}')" style="margin-right:5px; padding: 6px 12px; font-size:13px;">${label}</button>`;
                     });
                     document.getElementById('pdfActionButtons').innerHTML = buttonsHtml;
 
@@ -879,7 +894,7 @@
                 }, 50);
 
             } else {
-                document.getElementById('verifyTableBody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">⚠️ No PDF found in Database (JSON). Please check file names.</td></tr>`;
+                document.getElementById('verifyTableBody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">⚠️ No original PDF attached to this record.</td></tr>`;
             }
         }
 
@@ -906,7 +921,6 @@
                 t.PDF_Verified = true;
                 t._findings = getDynamicFindings(t);
                 
-                // LIVE UPDATE
                 triggerFilter(); 
                 
                 document.getElementById('mergeActionContainer').innerHTML = `<span style="color:#10b981; font-weight:bold; font-size:15px; background:rgba(16,185,129,0.1); padding: 6px 12px; border-radius: 4px; border: 1px solid #10b981;">✅ Updated & Merged!</span>`;
